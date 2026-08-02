@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PersonaForge, Decode Yourself</title>
+<meta name="description" content="PersonaForge: an adaptive, scenario-based personality test with a noir aesthetic. 100%% client-side, no accounts, works offline." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =========================================================================
+   PERSONAFORGE, DESIGN SYSTEM (NOIR)
+   Near black and white, one restrained red accent, film grain, a vignette,
+   and slow venetian-blind light bars behind the hero. Sharper corners than
+   a typical soft-glass app, closer to a printed case file than a game UI.
+   ========================================================================= */
+
+:root{
+  --bg: #050505;
+  --bg-alt: #0A0A0A;
+  --surface: rgba(255,255,255,0.035);
+  --surface-strong: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.11);
+  --border-strong: rgba(255,255,255,0.22);
+  --text: #EDEAE3;
+  --text-muted: #9A968D;
+  --text-dim: #5C584F;
+  --accent: #B3242B;
+  --accent-soft: #D9635B;
+  --silver: #C9C6BC;
+  --good: #7A9A7E;
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --shadow-soft: 0 24px 60px -20px rgba(0,0,0,0.75);
+  --ease: cubic-bezier(.22,1,.36,1);
+  --font-display: 'Space Grotesk', 'Arial Narrow', sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+html{ scroll-behavior: smooth; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* film grain, fixed, cheap, no image asset */
+body::before{
+  content:''; position:fixed; inset:-100px; z-index: 2000; pointer-events:none;
+  opacity: 0.05; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+/* vignette */
+body::after{
+  content:''; position:fixed; inset:0; z-index: 1999; pointer-events:none;
+  background: radial-gradient(120% 90% at 50% 20%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%);
+}
+
+::selection{ background: var(--accent); color:#0A0505; }
+
+a{ color: inherit; }
+button{ font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline: 1px solid var(--silver); outline-offset: 3px;
+}
+
+h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; }
+
+.container{ max-width: 880px; margin: 0 auto; padding: 0 22px; position:relative; z-index:1; }
+.screen{ min-height: 100vh; display:flex; flex-direction:column; padding: 32px 0 64px; }
+
+/* ---------- Venetian blind light bars (decorative, aria-hidden) ---------- */
+#embers{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:0.5; }
+.blind-bar{
+  position:absolute; left:-10%; width:120%; height:14px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05) 40%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.05) 60%, transparent);
+  transform: rotate(-3deg);
+  animation: drift 22s ease-in-out infinite;
+}
+@keyframes drift{ 0%,100%{ transform: rotate(-3deg) translateX(0); } 50%{ transform: rotate(-3deg) translateX(2%); } }
+
+/* ---------- Surfaces ---------- */
+.glass{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding: 13px 26px; border-radius: var(--radius-sm); font-weight: 600; font-size: 14.5px;
+  letter-spacing: 0.01em;
+  transition: transform .2s var(--ease), box-shadow .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  border: 1px solid transparent;
+}
+.btn-primary{
+  background: var(--text); color: #0A0808;
+  box-shadow: 0 10px 30px -12px rgba(0,0,0,0.7);
+}
+.btn-primary:hover{ transform: translateY(-1px); background: #FFFDF8; }
+.btn-primary:active{ transform: translateY(0) scale(.98); }
+.btn-ghost{
+  background: var(--surface); border:1px solid var(--border); color: var(--text);
+}
+.btn-ghost:hover{ background: var(--surface-strong); border-color: var(--border-strong); }
+.btn-accent{ background: var(--accent); color:#FBEAE9; }
+.btn-accent:hover{ background: var(--accent-soft); transform: translateY(-1px); }
+.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none !important; }
+
+.eyebrow{
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-dim); display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{ content:''; width:5px; height:5px; background: var(--accent); }
+.eyebrow.accent{ color: var(--accent-soft); }
+
+/* ---------- Landing ---------- */
+.landing{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; justify-content:center; flex:1; gap: 26px; padding-top: 6vh; }
+.logo-mark{ font-family: var(--font-mono); font-size: 13px; letter-spacing:0.3em; color: var(--text-dim); text-transform:uppercase; }
+.landing h1{
+  font-size: clamp(46px, 9vw, 94px); line-height: 0.95; letter-spacing: -0.02em;
+  color: var(--text);
+  animation: revealIn 1s var(--ease) both;
+}
+.landing h1 span{ color: var(--accent); }
+@keyframes revealIn{
+  0%{ filter: blur(10px); opacity:0; transform: translateY(10px); }
+  100%{ filter: blur(0); opacity:1; transform:none; }
+}
+.landing .tagline{ font-size: 17px; color: var(--text-muted); max-width: 460px; }
+.landing .cta-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top: 6px; }
+.landing .meta-row{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top: 30px; color: var(--text-dim); font-size:12.5px; font-family: var(--font-mono); }
+
+.quick-compare{ margin-top: 34px; width:100%; max-width: 480px; padding: 18px 20px; text-align:left; }
+.quick-compare label{ font-size:12.5px; color: var(--text-muted); display:block; margin-bottom:8px; }
+.quick-compare .row{ display:flex; gap:10px; }
+.quick-compare input{
+  flex:1; background: rgba(255,255,255,0.02); border:1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); padding: 11px 13px; font-family: var(--font-mono); font-size:13px;
+}
+
+/* ---------- Name capture ---------- */
+.name-screen{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:22px; text-align:center; padding-top:8vh; }
+.name-screen h2{ font-size: clamp(26px,4vw,36px); max-width:480px; }
+.name-screen p{ color: var(--text-muted); max-width: 420px; }
+.name-input{
+  width: 100%; max-width: 380px; background: transparent; border:none; border-bottom: 2px solid var(--border-strong);
+  color: var(--text); font-family: var(--font-display); font-size: 28px; text-align:center; padding: 10px 6px;
+  transition: border-color .2s;
+}
+.name-input:focus{ outline:none; border-color: var(--accent); }
+.name-input::placeholder{ color: var(--text-dim); }
+
+/* ---------- Quiz ---------- */
+.quiz-top{ position: sticky; top:0; z-index: 5; padding: 18px 0 10px; backdrop-filter: blur(14px); background: linear-gradient(to bottom, rgba(5,5,5,0.92), rgba(5,5,5,0)); }
+.progress-track{ height:3px; background: rgba(255,255,255,0.08); overflow:hidden; }
+.progress-fill{ height:100%; background: var(--text); transition: width .5s var(--ease); }
+.progress-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12.5px; color: var(--text-muted); font-family: var(--font-mono); }
+.encourage{ color: var(--accent-soft); font-family: var(--font-mono); font-size: 12px; min-height: 16px; }
+
+.question-card{ margin-top: 26px; padding: 38px clamp(20px,4vw,44px); animation: cardIn .45s var(--ease) both; }
+@keyframes cardIn{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform:none; } }
+.question-card.leaving{ animation: cardOut .28s var(--ease) forwards; }
+@keyframes cardOut{ to{ opacity:0; transform: translateY(-10px); } }
+.quiz-nav-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+.nav-btn{ font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); display:flex; align-items:center; gap:6px; }
+.nav-btn:hover:not(:disabled){ color: var(--text); }
+.nav-btn:disabled{ opacity:.3; cursor:default; }
+.q-num{ font-family: var(--font-mono); color: var(--text-dim); font-size:12.5px; margin-bottom: 14px; }
+.q-text{ font-size: clamp(21px, 3.4vw, 27px); font-family: var(--font-display); line-height:1.3; margin-bottom: 30px; font-weight:500; }
+.options{ display:flex; flex-direction:column; gap: 10px; }
+.option{
+  text-align:left; padding: 17px 19px; border-radius: var(--radius-sm);
+  border:1px solid var(--border); background: rgba(255,255,255,0.015);
+  font-size: 15px; transition: border-color .2s var(--ease), background .2s var(--ease), transform .15s var(--ease);
+  display:flex; align-items:center; gap:14px;
+}
+.option:hover{ border-color: var(--border-strong); background: rgba(255,255,255,0.04); transform: translateX(2px); }
+.option .opt-key{ font-family: var(--font-mono); color: var(--text-dim); font-size:12px; width:18px; flex-shrink:0; }
+.option.selected{ border-color: var(--accent); background: rgba(179,36,43,0.1); }
+.option.selected .opt-key{ color: var(--accent-soft); }
+.continue-row{ margin-top:18px; display:flex; justify-content:flex-end; }
+
+/* ---------- Calculating overlay ---------- */
+.calc-overlay{
+  position:fixed; inset:0; z-index:50; background: rgba(5,5,5,0.85); backdrop-filter: blur(4px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  animation: fadeIn .2s var(--ease) both;
+}
+@keyframes fadeIn{ from{ opacity:0;} to{ opacity:1; } }
+.calc-bars{ display:flex; gap:5px; }
+.calc-bars span{ width:3px; height:22px; background: var(--text); animation: bounce 0.9s ease-in-out infinite; }
+.calc-bars span:nth-child(2){ animation-delay: .12s; }
+.calc-bars span:nth-child(3){ animation-delay: .24s; }
+.calc-bars span:nth-child(4){ animation-delay: .36s; }
+@keyframes bounce{ 0%,100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
+.calc-line{ font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; letter-spacing: 0.03em; }
+
+/* ---------- Loading / forging transition ---------- */
+.forging{ display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap: 20px; text-align:center; }
+.forging .calc-bars span{ background: var(--accent); }
+.forging h2{ font-size:20px; font-weight: 500; }
+.forging p{ font-family: var(--font-mono); color: var(--text-muted); font-size:13px; }
+
+/* ---------- Result page ---------- */
+.result-hero{ position:relative; z-index:1; padding-top: 20px; }
+.name-tag{ text-align:center; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+
+.ingot{
+  position: relative; margin: 26px auto 10px; max-width: 520px; padding: 46px 34px 38px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01));
+  box-shadow: var(--shadow-soft);
+  text-align:center; overflow:hidden;
+  animation: ingotReveal .8s var(--ease) both;
+}
+@keyframes ingotReveal{ from{ opacity:0; transform: translateY(14px);} to{ opacity:1; transform:none; } }
+.ingot::before{ content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--accent); }
+.ingot-icon{ font-size: 46px; filter: grayscale(1) contrast(1.3); opacity: 0.92; }
+.archetype-eyebrow{ font-family: var(--font-mono); font-size:11px; letter-spacing:0.2em; color: var(--text-dim); text-transform:uppercase; margin-top:16px; }
+.ingot-name{ font-size: clamp(34px,6.5vw,52px); margin-top:8px; letter-spacing: -0.01em; line-height:1.05; }
+.ingot-title{ color: var(--text-muted); font-size:15px; margin-top:8px; font-style: italic; }
+.ingot-desc{ margin-top:20px; font-size:15px; color:var(--text); line-height:1.65; }
+.ingot-sub{ margin-top:16px; font-size:13.5px; color: var(--text-muted); line-height:1.6; border-top:1px solid var(--border); padding-top:16px; }
+.ingot-code{
+  margin-top: 24px; font-family: var(--font-mono); font-size:13px;
+  color: var(--silver); background: rgba(0,0,0,0.35); border:1px dashed var(--border-strong);
+  padding: 11px 14px; word-break: break-all; letter-spacing: 0.03em;
+}
+
+.section{ margin-top: 46px; }
+.section-title{ font-size: 19px; margin-bottom: 16px; display:flex; flex-direction:column; gap:6px; font-weight:500; }
+
+.grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.grid-4{ display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+@media (max-width: 640px){ .grid-2, .grid-3, .grid-4{ grid-template-columns: 1fr 1fr; } }
+
+.card{ padding: 18px; border-radius: var(--radius-md); }
+.card h4{ font-size:13px; color: var(--text-muted); font-weight:600; margin-bottom:8px; text-transform: uppercase; letter-spacing:0.04em; }
+.card p{ font-size: 14.5px; }
+.tag-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.tag{ font-size:12.5px; padding:5px 11px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.04); border:1px solid var(--border); }
+
+.stat-tile{ padding: 15px; border-radius: var(--radius-md); text-align:center; }
+.stat-tile .stat-val{ font-family: var(--font-display); font-size: 24px; color: var(--text); }
+.stat-tile .stat-label{ font-size: 10.5px; color: var(--text-muted); margin-top:3px; text-transform:uppercase; letter-spacing:.05em; }
+.stat-bar-track{ height:4px; background: rgba(255,255,255,.08); margin-top:9px; overflow:hidden; }
+.stat-bar-fill{ height:100%; background: var(--accent); width:0; transition: width 1s var(--ease); }
+
+.career-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; border-radius: var(--radius-md); margin-bottom:8px; }
+.career-row .fit-badge{ font-size:11px; font-family: var(--font-mono); padding:4px 9px; border-radius: var(--radius-sm); white-space:nowrap; }
+.fit-excellent{ background: rgba(122,154,126,0.15); color:#9CC0A0; }
+.fit-good{ background: rgba(201,198,188,0.12); color: var(--silver); }
+.fit-avoid{ background: rgba(179,36,43,0.14); color:#DE8B87; }
+.careers-toggle{ text-align:center; margin-top:8px; }
+.careers-toggle button{ font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); text-decoration: underline; text-underline-offset:3px; }
+
+.relationship-row{ display:flex; align-items:center; gap:14px; padding: 11px 0; }
+.relationship-row .r-label{ width: 130px; font-size:13.5px; flex-shrink:0; }
+.relationship-row .stat-bar-track{ flex:1; margin-top:0; }
+.relationship-row .r-score{ width:34px; text-align:right; font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); }
+
+canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
+.radar-legend{ text-align:center; font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); margin-top:10px; }
+
+.export-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 18px; justify-content:center; }
+
+/* full ranking (bottom of results) */
+.rank-row{ display:flex; align-items:center; gap:12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.rank-row:last-child{ border-bottom:none; }
+.rank-row .rank-num{ font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); width:22px; }
+.rank-row .rank-icon{ width:22px; text-align:center; filter: grayscale(1); opacity:.85; }
+.rank-row .rank-name{ flex:1; font-size:13.5px; }
+.rank-row.primary .rank-name{ color: var(--text); font-weight:700; }
+.rank-row.primary{ background: rgba(179,36,43,0.06); margin: 0 -14px; padding: 9px 14px; border-bottom-color: transparent; }
+.rank-row .rank-bar-track{ width:90px; height:3px; background: rgba(255,255,255,.08); }
+.rank-row .rank-bar-fill{ height:100%; background: var(--silver); }
+.rank-row.primary .rank-bar-fill{ background: var(--accent); }
+
+/* ---------- Inline compare widget (on result page, near top) ---------- */
+.compare-widget{ margin-top: 30px; padding: 20px; }
+.compare-widget h4{ font-size:14px; margin-bottom:4px; }
+.compare-widget p.hint{ font-size:13px; color: var(--text-muted); margin-bottom:14px; }
+.compare-widget .row{ display:flex; gap:10px; flex-wrap:wrap; }
+.compare-widget input{
+  flex:1; min-width:220px; background: rgba(255,255,255,0.02); border:1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); padding: 12px 13px; font-family: var(--font-mono); font-size:13px;
+}
+
+/* ---------- Compare page ---------- */
+.compare-inputs{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px){ .compare-inputs{ grid-template-columns: 1fr; } }
+.compare-inputs textarea{
+  width:100%; min-height:90px; background: rgba(255,255,255,0.02); border:1px solid var(--border);
+  border-radius: var(--radius-md); color: var(--text); padding: 14px; font-family: var(--font-mono); font-size:13px; resize:vertical;
+}
+.compare-inputs label{ font-size:13px; color: var(--text-muted); display:block; margin-bottom:8px; }
+
+.footer-nav{ position:relative; z-index:1; display:flex; justify-content:center; gap:18px; margin-top:56px; flex-wrap:wrap; }
+.footer-nav button{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
+.footer-nav button:hover{ color: var(--text-muted); }
+
+.top-bar{ position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; padding: 6px 0 20px; }
+.brand-mini{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:600; letter-spacing:-0.01em; }
+.brand-mini .dot{ width:6px; height:6px; background: var(--accent); border-radius:50%; }
+.icon-btn{ width:36px; height:36px; border-radius: var(--radius-sm); display:flex; align-items:center; justify-content:center; background: var(--surface); border:1px solid var(--border); font-size:13px; }
+.icon-btn:hover{ border-color: var(--border-strong); }
+
+.hidden{ display:none !important; }
+.center-note{ text-align:center; color: var(--text-muted); font-size:13.5px; margin-top: 20px; }
+
+/* print / PDF export */
+@media print{
+  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget{ display:none !important; }
+  body::before, body::after{ display:none !important; }
+  body{ background: #050505; color:#EDEAE3; }
+}
+
+</style>
+</head>
+<body>
+<div id="embers" aria-hidden="true"></div>
+<div id="app"></div>
+
+<script>
+/* =========================================================================
+   PERSONAFORGE, DATA MODULE
+   20 hidden dimensions, an adaptive question bank (10 clusters), 30 original
+   archetypes, and career/relationship reference tables.
+   ========================================================================= */
+
+const DIMENSIONS = [
+  "confidence","logic","creativity","humor","adaptability","curiosity",
+  "empathy","leadership","patience","drive","risk","trust","kindness",
+  "discipline","socialEnergy","selfAwareness","planning","resilience",
+  "optimism","independence"
+];
+
+function emptyDims(){
+  const d = {};
+  DIMENSIONS.forEach(k => d[k] = 0);
+  return d;
+}
+
+/* ---- Question bank -----------------------------------------------------
+   10 clusters x 6 questions = 60 authored scenarios. Every question has
+   exactly 3 answers, each nudging 3-5 dimensions by -2..+2.
+   The adaptive engine (see engine.js) guarantees the first 4 of every
+   cluster (40 baseline questions), then fills the remaining 10 slots from
+   the 2-3 clusters the person is trending strongest in, for 50 total.
+   This structure is built to scale: add more objects to any cluster array
+   and raise BASELINE_PER_CLUSTER / TOTAL_QUESTIONS in engine.js to reach
+   the full 150/50 spec without changing any other code.
+------------------------------------------------------------------------- */
+
+const QUESTION_BANK = {
+
+  social: [
+    { id:"soc1", text:"You walk into a party where you know exactly one person, and they've just vanished to find a drink.", options:[
+      { text:"Start a conversation with the nearest stranger", d:{socialEnergy:2,confidence:2,risk:1} },
+      { text:"Find a snack table and look busy until your friend returns", d:{socialEnergy:-1,patience:1,independence:1} },
+      { text:"Scan the room for someone who also looks a bit lost", d:{empathy:2,socialEnergy:1,curiosity:1} } ]},
+    { id:"soc2", text:"A group chat is planning a trip and the conversation has 200 unread messages.", options:[
+      { text:"Read everything, then propose a clear plan", d:{planning:2,leadership:1,logic:1} },
+      { text:"Skim it and go with whatever the majority wants", d:{adaptability:2,independence:-1,socialEnergy:1} },
+      { text:"Mute it and ask one friend for the short version later", d:{independence:2,patience:1,socialEnergy:-1} } ]},
+    { id:"soc3", text:"You're invisible for exactly one day and no one will ever know what you did.", options:[
+      { text:"Sit in on a meeting or class you're curious about", d:{curiosity:2,independence:1} },
+      { text:"Spend it helping people in small, secret ways", d:{kindness:2,empathy:2} },
+      { text:"Use it to finally get a full day of total peace and quiet", d:{independence:2,patience:1,socialEnergy:-2} } ]},
+    { id:"soc4", text:"Your friend group is splitting into two dinner plans and both are asking you to pick a side.", options:[
+      { text:"Pick the louder, bigger group for the extra energy", d:{socialEnergy:2,risk:1} },
+      { text:"Pick the smaller group, better conversation", d:{empathy:1,socialEnergy:-1,trust:1} },
+      { text:"Suggest merging both plans into one", d:{leadership:2,adaptability:1} } ]},
+    { id:"soc5", text:"You accidentally become mildly famous overnight for something small and harmless.", options:[
+      { text:"Lean into it and enjoy the attention", d:{confidence:2,humor:1,socialEnergy:1} },
+      { text:"Politely ride it out and wait for it to fade", d:{patience:2,independence:1} },
+      { text:"Use the platform to talk about something you actually care about", d:{leadership:2,drive:1} } ]},
+    { id:"soc6", text:"You're the only person at a gathering who doesn't know the inside joke everyone's laughing at.", options:[
+      { text:"Ask directly what's so funny", d:{confidence:2,curiosity:1} },
+      { text:"Laugh along and figure it out later", d:{adaptability:2,socialEnergy:1} },
+      { text:"Quietly enjoy watching everyone else enjoy it", d:{empathy:1,patience:1,socialEnergy:-1} } ]},
+  ],
+
+  analytical: [
+    { id:"ana1", text:"You're handed a puzzle box with no instructions and told it opens a small prize inside.", options:[
+      { text:"Study it carefully before touching anything", d:{logic:2,patience:2,planning:1} },
+      { text:"Start twisting and pressing everything at once", d:{risk:2,adaptability:1,drive:1} },
+      { text:"Look up if anyone else has solved one like it", d:{curiosity:2,logic:1} } ]},
+    { id:"ana2", text:"Two plans for the weekend look equally good on paper, but you can only pick one.", options:[
+      { text:"Make a pros-and-cons list before deciding", d:{logic:2,planning:2} },
+      { text:"Go with your gut instinct immediately", d:{risk:1,confidence:1,adaptability:1} },
+      { text:"Ask someone else to break the tie", d:{trust:1,socialEnergy:1,independence:-1} } ]},
+    { id:"ana3", text:"A machine at work or school starts making a strange noise that no one else seems to notice.", options:[
+      { text:"Investigate exactly what's causing it", d:{curiosity:2,logic:2} },
+      { text:"Report it and let someone qualified handle it", d:{discipline:1,trust:1,planning:1} },
+      { text:"Assume it's fine unless it gets worse", d:{adaptability:1,optimism:1,discipline:-1} } ]},
+    { id:"ana4", text:"You find a long, complicated contract you're expected to sign by tomorrow.", options:[
+      { text:"Read every line, even if it takes all night", d:{discipline:2,logic:2,patience:1} },
+      { text:"Skim for anything alarming, then decide", d:{adaptability:1,risk:1,logic:1} },
+      { text:"Ask someone you trust to look it over with you", d:{trust:2,empathy:1} } ]},
+    { id:"ana5", text:"Your favorite theory about how something works turns out to be wrong.", options:[
+      { text:"Update your thinking immediately, no ego about it", d:{selfAwareness:2,logic:1,adaptability:1} },
+      { text:"Look for the exception that might still prove you right", d:{drive:1,logic:1,confidence:1} },
+      { text:"Feel a little embarrassed but move on quickly", d:{resilience:1,selfAwareness:1} } ]},
+    { id:"ana6", text:"You're debugging a problem that's been broken for hours and everyone else has given up.", options:[
+      { text:"Keep going alone until it's solved", d:{discipline:2,independence:2,drive:1} },
+      { text:"Step away, then come back with fresh eyes", d:{patience:2,selfAwareness:1,resilience:1} },
+      { text:"Call in someone with a different skill set", d:{trust:1,leadership:1,adaptability:1} } ]},
+  ],
+
+  creative: [
+    { id:"cre1", text:"You're given one blank wall and unlimited paint, but only until sunset.", options:[
+      { text:"Plan a design first, then execute precisely", d:{planning:2,creativity:1,discipline:1} },
+      { text:"Start painting and let the piece evolve as you go", d:{creativity:2,adaptability:1,risk:1} },
+      { text:"Ask others what they'd want to see on it", d:{empathy:1,socialEnergy:1,creativity:1} } ]},
+    { id:"cre2", text:"You have to explain your favorite story to someone who's never heard of it, in one minute.", options:[
+      { text:"Hit the key plot points, efficiently", d:{logic:1,discipline:1,planning:1} },
+      { text:"Focus on the feeling it gave you", d:{empathy:1,creativity:1,humor:1} },
+      { text:"Make up a wildly exaggerated version for fun", d:{humor:2,creativity:2,confidence:1} } ]},
+    { id:"cre3", text:"You're asked to design something completely impossible, no budget, no physics, no limits.", options:[
+      { text:"Design something beautiful nobody's ever seen", d:{creativity:2,confidence:1} },
+      { text:"Design something wildly useful for everyone", d:{creativity:1,kindness:1,leadership:1} },
+      { text:"Design something deeply personal, just for you", d:{selfAwareness:2,creativity:1,independence:1} } ]},
+    { id:"cre4", text:"A movie you love is getting a sequel, and you get to pitch one twist.", options:[
+      { text:"A twist that recontextualizes everything that came before", d:{logic:1,creativity:2} },
+      { text:"A twist that's emotionally devastating", d:{empathy:1,creativity:1} },
+      { text:"A twist that's completely absurd and hilarious", d:{humor:2,creativity:1,risk:1} } ]},
+    { id:"cre5", text:"You've got fifteen unstructured minutes and nothing you're supposed to be doing.", options:[
+      { text:"Doodle, write, or build something just to make it", d:{creativity:2,independence:1} },
+      { text:"Text a few people to see what they're up to", d:{socialEnergy:2,curiosity:1} },
+      { text:"Just sit and let your mind wander", d:{patience:1,selfAwareness:2} } ]},
+    { id:"cre6", text:"You're told a rule you've always followed was actually always optional.", options:[
+      { text:"Immediately start bending it your way", d:{creativity:1,risk:1,independence:1} },
+      { text:"Keep following it, it worked fine either way", d:{discipline:2,patience:1} },
+      { text:"Investigate why the rule existed in the first place", d:{curiosity:2,logic:1} } ]},
+  ],
+
+  impulsive: [
+    { id:"imp1", text:"You're trapped in an elevator with your biggest rival for an unknown amount of time.", options:[
+      { text:"Break the silence and try to clear the air", d:{confidence:2,empathy:1,leadership:1} },
+      { text:"Stay quiet and wait it out", d:{patience:2,independence:1} },
+      { text:"Use the time to needle them a little", d:{humor:1,risk:1,confidence:1} } ]},
+    { id:"imp2", text:"You find a door in a building you've visited a hundred times that you swear you've never seen before.", options:[
+      { text:"Open it immediately", d:{risk:2,curiosity:2} },
+      { text:"Ask a staff member what's behind it first", d:{planning:1,trust:1,curiosity:1} },
+      { text:"Leave it alone, some doors aren't yours to open", d:{patience:1,discipline:1,risk:-1} } ]},
+    { id:"imp3", text:"A stranger offers you a genuinely great opportunity, but you have to decide in the next sixty seconds.", options:[
+      { text:"Say yes, you can figure out details later", d:{risk:2,confidence:1,optimism:1} },
+      { text:"Ask one sharp clarifying question first", d:{logic:1,confidence:1} },
+      { text:"Say no, good opportunities don't need a countdown", d:{discipline:1,trust:-1,patience:1} } ]},
+    { id:"imp4", text:"You're mid-plan when a much more exciting, completely different opportunity shows up.", options:[
+      { text:"Drop the plan and chase the new thing", d:{adaptability:2,risk:2,drive:1} },
+      { text:"Finish what you started first", d:{discipline:2,planning:1} },
+      { text:"Try to find a way to do both", d:{creativity:1,drive:1,adaptability:1} } ]},
+    { id:"imp5", text:"You wake up with a genuinely wild idea you're sure could work.", options:[
+      { text:"Start acting on it before the excitement fades", d:{risk:2,drive:2,confidence:1} },
+      { text:"Write it down and sleep on it", d:{patience:1,planning:2} },
+      { text:"Pitch it to someone else first to test the reaction", d:{socialEnergy:1,trust:1,confidence:1} } ]},
+    { id:"imp6", text:"A once-in-a-lifetime trip appears with almost no notice and a real cost to your plans.", options:[
+      { text:"Go, you can rearrange the rest", d:{risk:2,adaptability:2,optimism:1} },
+      { text:"Weigh it seriously against what you'd give up", d:{planning:2,logic:1} },
+      { text:"Pass, stability matters more to you right now", d:{discipline:1,patience:1,risk:-1} } ]},
+  ],
+
+  empathic: [
+    { id:"emp1", text:"Your best friend admits they lied to protect someone you both care about.", options:[
+      { text:"Understand it, even if you wouldn't have done the same", d:{empathy:2,trust:1,patience:1} },
+      { text:"Push them to come clean to the person involved", d:{discipline:1,leadership:1,logic:1} },
+      { text:"Feel a little hurt that they didn't tell you first", d:{selfAwareness:1,empathy:1,trust:-1} } ]},
+    { id:"emp2", text:"A coworker takes credit for an idea that was mostly yours, in front of everyone.", options:[
+      { text:"Speak up and correct the record on the spot", d:{confidence:2,leadership:1} },
+      { text:"Let it go publicly, but address it privately later", d:{patience:1,discipline:1,empathy:1} },
+      { text:"Let it slide entirely, it's not worth the conflict", d:{patience:1,independence:1,trust:-1} } ]},
+    { id:"emp3", text:"Someone close to you is clearly struggling but insists they're fine.", options:[
+      { text:"Gently keep checking in until they open up", d:{empathy:2,patience:2} },
+      { text:"Respect their space and let them come to you", d:{patience:1,trust:1,independence:1} },
+      { text:"Do something small and kind without making it a big deal", d:{kindness:2,empathy:1} } ]},
+    { id:"emp4", text:"You overhear two friends arguing about something involving you, but they don't know you heard.", options:[
+      { text:"Bring it up honestly so it doesn't fester", d:{confidence:1,trust:1,leadership:1} },
+      { text:"Let it play out and see if it resolves itself", d:{patience:2,independence:1} },
+      { text:"Try to smooth things over without mentioning what you heard", d:{empathy:2,adaptability:1} } ]},
+    { id:"emp5", text:"A stranger is visibly overwhelmed in public and clearly needs help.", options:[
+      { text:"Step in directly and ask if they're okay", d:{empathy:2,confidence:1,kindness:1} },
+      { text:"Quietly find someone better equipped to help", d:{planning:1,empathy:1,humility:0} },
+      { text:"Give them space, assuming they'd rather handle it alone", d:{patience:1,independence:1} } ]},
+    { id:"emp6", text:"You have to deliver honest, difficult feedback to someone who's trying their best.", options:[
+      { text:"Say it clearly and directly, kindness through honesty", d:{confidence:1,discipline:1,kindness:1} },
+      { text:"Soften it heavily so it doesn't hurt", d:{empathy:2,kindness:1} },
+      { text:"Delay it until you're sure exactly how to phrase it", d:{patience:1,planning:1,empathy:1} } ]},
+  ],
+
+  leadership: [
+    { id:"lea1", text:"Your boss offers you double pay in exchange for taking credit away from a teammate.", options:[
+      { text:"Refuse immediately, no negotiation", d:{trust:2,kindness:1,discipline:1} },
+      { text:"Push back and propose a version that's fair to both", d:{leadership:2,logic:1} },
+      { text:"Take a beat to think it through before responding", d:{patience:1,selfAwareness:1,logic:1} } ]},
+    { id:"lea2", text:"A group project is falling apart and no one has stepped up to organize it.", options:[
+      { text:"Take charge and assign clear next steps", d:{leadership:2,planning:1,confidence:1} },
+      { text:"Quietly start doing the coordinating work yourself", d:{discipline:1,independence:1,leadership:1} },
+      { text:"Wait to see if someone else naturally takes the lead", d:{patience:1,adaptability:1,leadership:-1} } ]},
+    { id:"lea3", text:"Two teammates are in a disagreement that's slowing everything down.", options:[
+      { text:"Mediate directly and push for a decision", d:{leadership:2,empathy:1} },
+      { text:"Let them work it out without your input", d:{independence:1,patience:1,trust:1} },
+      { text:"Propose a compromise that gives both something", d:{creativity:1,leadership:1,empathy:1} } ]},
+    { id:"lea4", text:"You're suddenly the most experienced person in the room on a topic everyone's relying on.", options:[
+      { text:"Step up and guide the group confidently", d:{leadership:2,confidence:2} },
+      { text:"Share what you know but let others weigh in equally", d:{empathy:1,leadership:1,humor:0} },
+      { text:"Feel the pressure but push through anyway", d:{resilience:1,confidence:1,leadership:1} } ]},
+    { id:"lea5", text:"A plan you championed is starting to visibly fail in front of everyone.", options:[
+      { text:"Own it publicly and pivot fast", d:{leadership:2,resilience:2,selfAwareness:1} },
+      { text:"Defend the plan while quietly adjusting it", d:{confidence:1,discipline:1} },
+      { text:"Ask the group for honest input on what to change", d:{empathy:1,leadership:1,trust:1} } ]},
+    { id:"lea6", text:"You're offered a leadership role you don't feel fully ready for.", options:[
+      { text:"Take it, you'll grow into it", d:{confidence:2,risk:1,drive:1} },
+      { text:"Take it, but ask for support along the way", d:{selfAwareness:1,trust:1,leadership:1} },
+      { text:"Turn it down until you feel genuinely ready", d:{patience:1,selfAwareness:1,confidence:-1} } ]},
+  ],
+
+  philosophical: [
+    { id:"phi1", text:"You could know the exact date of your death, but never anything else about the future.", options:[
+      { text:"Yes, you'd plan your life around it", d:{planning:2,logic:1,drive:1} },
+      { text:"No, not knowing is part of what makes life feel open", d:{optimism:1,independence:1} },
+      { text:"You'd want to know, but you're not sure you could handle it", d:{selfAwareness:2,empathy:1} } ]},
+    { id:"phi2", text:"A machine could make you perfectly happy forever, but it's not real, would you plug in?", options:[
+      { text:"No, a real, imperfect life matters more than manufactured happiness", d:{selfAwareness:2,resilience:1} },
+      { text:"Yes, happiness is happiness, real or not", d:{optimism:1,risk:1} },
+      { text:"You'd want to try it briefly, then decide", d:{curiosity:2,adaptability:1} } ]},
+    { id:"phi3", text:"You find out a core belief you've held for years was built on a mistake.", options:[
+      { text:"Let it go immediately and rebuild from scratch", d:{selfAwareness:2,adaptability:1} },
+      { text:"Sit with it for a while before changing anything", d:{patience:2,logic:1} },
+      { text:"Keep the parts of it that still feel true to you", d:{independence:1,selfAwareness:1,confidence:1} } ]},
+    { id:"phi4", text:"Would you rather always know the truth, or always be comfortable?", options:[
+      { text:"Truth, every time, even when it's painful", d:{logic:2,resilience:1,confidence:1} },
+      { text:"Comfort, some truths aren't worth the cost", d:{empathy:1,patience:1,optimism:1} },
+      { text:"Depends entirely on who else it affects", d:{empathy:2,selfAwareness:1} } ]},
+    { id:"phi5", text:"You're given the chance to relive one year of your life exactly as it happened.", options:[
+      { text:"Yes, you'd want to feel it all again, mistakes included", d:{optimism:2,resilience:1} },
+      { text:"No, you'd rather move only forward", d:{drive:1,independence:1} },
+      { text:"Only if you could change one small thing", d:{selfAwareness:1,logic:1} } ]},
+    { id:"phi6", text:"Is it better to be feared, respected, or liked, if you could only pick one?", options:[
+      { text:"Respected, it lasts longer than the other two", d:{leadership:2,discipline:1} },
+      { text:"Liked, connection matters more than status", d:{empathy:1,kindness:1,socialEnergy:1} },
+      { text:"None of those matter as much as being understood", d:{selfAwareness:2,independence:1} } ]},
+  ],
+
+  playful: [
+    { id:"pla1", text:"You're given a fake stopwatch that can pause real time for exactly sixty seconds, once.", options:[
+      { text:"Save it for a genuine emergency", d:{planning:2,discipline:1} },
+      { text:"Use it immediately just to see what happens", d:{curiosity:2,risk:2} },
+      { text:"Use it to do something small and delightful for someone else", d:{kindness:2,creativity:1} } ]},
+    { id:"pla2", text:"You can instantly become fluent in one skill, but everyone will know you cheated to get it.", options:[
+      { text:"Don't care, take the skill anyway", d:{confidence:2,risk:1} },
+      { text:"Skip it, earning things matters to your identity", d:{discipline:2,selfAwareness:1} },
+      { text:"Take it, but only tell people who'd understand", d:{trust:1,selfAwareness:1,humor:1} } ]},
+    { id:"pla3", text:"Everyone at a gathering is asked to share an embarrassing story about themselves.", options:[
+      { text:"Go all in with your best one", d:{confidence:2,humor:2,socialEnergy:1} },
+      { text:"Share something mild and safe", d:{patience:1,socialEnergy:1} },
+      { text:"Deflect with a joke instead of a real story", d:{humor:2,independence:1} } ]},
+    { id:"pla4", text:"You get to add one universally understood rule to how the world works, purely for fun.", options:[
+      { text:"Everyone has to dance for ten seconds on their birthday", d:{humor:2,creativity:1} },
+      { text:"Everyone gets one genuinely honest compliment a day", d:{kindness:2,empathy:1} },
+      { text:"Everyone gets one free redo on their worst decision", d:{empathy:1,optimism:2} } ]},
+    { id:"pla5", text:"A game night turns unexpectedly, hilariously competitive.", options:[
+      { text:"Lean all the way into winning", d:{drive:2,confidence:1,risk:1} },
+      { text:"Play it up for laughs more than the win", d:{humor:2,socialEnergy:1} },
+      { text:"Quietly make sure everyone's still having fun", d:{empathy:2,leadership:1} } ]},
+    { id:"pla6", text:"You could have any harmless, ridiculous superpower for one day.", options:[
+      { text:"Talk to animals, just to see what they'd say", d:{curiosity:2,humor:1} },
+      { text:"Teleport anywhere, instantly", d:{independence:2,risk:1} },
+      { text:"Make anyone laugh, guaranteed", d:{humor:2,empathy:1} } ]},
+  ],
+
+  cautious: [
+    { id:"cau1", text:"A financial opportunity promises big returns but asks you to move fast with no guarantees.", options:[
+      { text:"Pass, if it's rushing you, it's a red flag", d:{discipline:2,trust:-1,logic:1} },
+      { text:"Put in a small amount to test it", d:{risk:1,logic:1,planning:1} },
+      { text:"Go all in, big rewards need big risk", d:{risk:2,confidence:1,optimism:1} } ]},
+    { id:"cau2", text:"You're offered a comfortable, stable path or an exciting, uncertain one.", options:[
+      { text:"Stable, peace of mind wins", d:{discipline:2,patience:1,planning:1} },
+      { text:"Exciting, regret scares you more than risk does", d:{risk:2,drive:2} },
+      { text:"You'd want a plan to eventually combine both", d:{planning:2,creativity:1} } ]},
+    { id:"cau3", text:"Before a big decision, you realize you don't have all the information you'd like.", options:[
+      { text:"Gather more before deciding, even if it takes time", d:{planning:2,patience:1,discipline:1} },
+      { text:"Decide anyway with what you've got", d:{risk:1,confidence:1,adaptability:1} },
+      { text:"Ask someone more experienced to weigh in", d:{trust:2,empathy:1} } ]},
+    { id:"cau4", text:"You've saved up for something you've wanted for a long time, and a tempting alternative appears.", options:[
+      { text:"Stick to the original plan", d:{discipline:2,patience:1} },
+      { text:"Switch, if the new option is genuinely better", d:{adaptability:2,logic:1} },
+      { text:"Sleep on it for a few days first", d:{patience:2,planning:1} } ]},
+    { id:"cau5", text:"You're about to try something physically or socially risky for the first time.", options:[
+      { text:"Just go for it, overthinking ruins the moment", d:{risk:2,confidence:2} },
+      { text:"Prepare thoroughly first", d:{planning:2,discipline:1} },
+      { text:"Bring someone along for support", d:{trust:1,socialEnergy:1,empathy:1} } ]},
+    { id:"cau6", text:"A rule at work or school seems outdated, but breaking it could cause real trouble.", options:[
+      { text:"Follow it anyway, not your fight today", d:{discipline:2,patience:1} },
+      { text:"Push to change it through the proper channels", d:{leadership:2,logic:1} },
+      { text:"Quietly work around it if no one's really watching", d:{risk:1,independence:1,adaptability:1} } ]},
+  ],
+
+  ambitious: [
+    { id:"amb1", text:"You're offered a huge opportunity, but it means leaving behind people and places you love.", options:[
+      { text:"Take it, this is exactly the kind of chance you chase", d:{drive:2,risk:1,independence:1} },
+      { text:"Turn it down, what you have matters more", d:{kindness:1,patience:1,drive:-1} },
+      { text:"Negotiate a version that lets you keep both", d:{creativity:1,leadership:1,planning:1} } ]},
+    { id:"amb2", text:"You could guarantee steady, comfortable success, or gamble for a shot at something extraordinary.", options:[
+      { text:"Gamble, extraordinary is worth the risk", d:{drive:2,risk:2,optimism:1} },
+      { text:"Steady success, extraordinary is overrated", d:{discipline:1,patience:1,drive:-1} },
+      { text:"Depends entirely on what you'd be gambling with", d:{logic:2,planning:1} } ]},
+    { id:"amb3", text:"You hit a huge setback on something you've worked toward for years.", options:[
+      { text:"Get back up immediately and adjust the plan", d:{resilience:2,drive:1,planning:1} },
+      { text:"Take real time to process before moving again", d:{selfAwareness:2,patience:1} },
+      { text:"Question whether it was even the right goal", d:{selfAwareness:1,logic:1,adaptability:1} } ]},
+    { id:"amb4", text:"You're far ahead of schedule on a personal goal, what now?", options:[
+      { text:"Raise the bar and push further", d:{drive:2,confidence:1} },
+      { text:"Enjoy the win before starting the next thing", d:{optimism:2,patience:1} },
+      { text:"Help someone else catch up to where you are", d:{kindness:2,leadership:1} } ]},
+    { id:"amb5", text:"Someone you respect tells you your goal is unrealistic.", options:[
+      { text:"It only makes you want it more", d:{drive:2,confidence:1,resilience:1} },
+      { text:"You take it seriously and reconsider", d:{selfAwareness:2,logic:1} },
+      { text:"You ask them exactly why, and decide from there", d:{curiosity:1,logic:1,confidence:1} } ]},
+    { id:"amb6", text:"You reach a major goal, but almost no one notices or celebrates it with you.", options:[
+      { text:"It doesn't matter, you know what you did", d:{independence:2,confidence:1,selfAwareness:1} },
+      { text:"It stings more than you'd like to admit", d:{selfAwareness:2,empathy:1} },
+      { text:"You make sure to celebrate it properly yourself", d:{optimism:2,kindness:1} } ]},
+  ],
+};
+
+/* Flatten with cluster tag attached */
+const QUESTIONS = Object.entries(QUESTION_BANK).flatMap(([cluster, qs]) =>
+  qs.map(q => ({ ...q, cluster }))
+);
+
+/* ---- 30 original archetypes ---------------------------------------- */
+/* Each archetype carries a small "signature" of {dim, weight} pairs used
+   by the matching algorithm (see engine.js: matchArchetype). */
+
+const ARCHETYPES = [
+  { id:"ember-strategist", name:"The Ember Strategist", title:"Calculated Fire", icon:"🔥",
+    colors:["#FF6B35","#2A1A12"],
+    signature:[{dim:"logic",w:2},{dim:"drive",w:2},{dim:"planning",w:1}],
+    description:"You burn slow and deliberate, turning ambition into a plan before you turn it into action. People underestimate how much fire is underneath the calm.",
+    strengths:["Strategic thinking","Focused ambition","Composure under pressure"],
+    weaknesses:["Can overplan","Slow to show emotion","Impatient with disorder"],
+    workStyle:"Methodical, goal-driven, prefers owning a clear objective end-to-end.",
+    stressResponse:"Withdraws to re-strategize rather than react.",
+    friendshipStyle:"Small circle, deeply loyal, shows up when it counts.",
+    datingStyle:"Intentional and steady; courts with actions more than words.",
+    leadershipStyle:"Leads by having the clearest plan in the room.",
+    learningStyle:"Structured, sequential, wants the 'why' before the 'how'.",
+    communicationStyle:"Direct, economical with words, precise.",
+    decisionMaking:"Weighs options carefully, then commits fully.",
+    idealEnvironments:["Quiet focused workspaces","High-stakes projects","Small dedicated teams"],
+    hobbies:["Chess and strategy games","Long-form reading","Solo training or sport"],
+    growthAdvice:"Let plans stay unfinished sometimes, not everything needs a map first.",
+    bestTeammate:"Someone spontaneous who tests the plan before it calcifies.",
+    worstTeammate:"Someone who changes direction with no rationale.",
+    quote:"Fire that isn't aimed is just a mess." },
+
+  { id:"quiet-architect", name:"The Quiet Architect", title:"Builder of Systems", icon:"🏛️",
+    colors:["#6D5BD0","#151125"],
+    signature:[{dim:"planning",w:2},{dim:"discipline",w:2},{dim:"independence",w:1}],
+    description:"You think in structures, the invisible frameworks that hold everything else up. You'd rather build the system than be the center of attention within it.",
+    strengths:["Long-term planning","Reliability","Clear-headed problem solving"],
+    weaknesses:["Resists improvisation","Can seem distant","Overinvests in process"],
+    workStyle:"Systematic, prefers ownership of process and infrastructure.",
+    stressResponse:"Retreats into organizing something, anything.",
+    friendshipStyle:"Consistent and dependable, not flashy.",
+    datingStyle:"Shows love through stability and follow-through.",
+    leadershipStyle:"Leads by designing systems others can trust.",
+    learningStyle:"Builds mental frameworks before diving into detail.",
+    communicationStyle:"Measured, considered, rarely impulsive.",
+    decisionMaking:"Slow and thorough, gets it right over getting it fast.",
+    idealEnvironments:["Structured organizations","Long-horizon projects","Independent work"],
+    hobbies:["Building/making things","Puzzles","Urban planning or architecture interests"],
+    growthAdvice:"Not every moment needs a system. Some just need presence.",
+    bestTeammate:"An energetic connector who brings the system to life.",
+    worstTeammate:"Someone allergic to structure or follow-through.",
+    quote:"Good systems are just kindness with a plan." },
+
+  { id:"wildfire", name:"The Wildfire", title:"Unstoppable Momentum", icon:"⚡",
+    colors:["#FF3D3D","#210606"],
+    signature:[{dim:"risk",w:2},{dim:"confidence",w:2},{dim:"socialEnergy",w:1}],
+    description:"You move first and figure out the rest while already in motion. Rooms get louder and faster when you walk in, that's not an accident.",
+    strengths:["Bold initiative","Magnetic energy","Fast adaptation"],
+    weaknesses:["Impulsive follow-through","Burns out fast","Skips details"],
+    workStyle:"Fast-paced, thrives on momentum and visible progress.",
+    stressResponse:"Moves faster instead of slower, sometimes to a fault.",
+    friendshipStyle:"The friend who starts the plan nobody else would suggest.",
+    datingStyle:"Intense, exciting, sometimes too fast for their own good.",
+    leadershipStyle:"Leads by example, from the front, at full speed.",
+    learningStyle:"Learns by doing, not by reading about it first.",
+    communicationStyle:"Enthusiastic, expressive, occasionally overwhelming.",
+    decisionMaking:"Fast, confident, occasionally regretted later.",
+    idealEnvironments:["High-energy teams","Startups","Anything with a deadline"],
+    hobbies:["Extreme or adventure sports","Live events","Anything competitive"],
+    growthAdvice:"Speed is a strength until it starts making your decisions for you.",
+    bestTeammate:"A grounded planner who catches what you miss.",
+    worstTeammate:"Someone equally impulsive with no one steering.",
+    quote:"Ask forgiveness, not permission." },
+
+  { id:"anchor", name:"The Anchor", title:"Unshaken Ground", icon:"⚓",
+    colors:["#3E7CB1","#0E1B24"],
+    signature:[{dim:"patience",w:2},{dim:"resilience",w:2},{dim:"trust",w:1}],
+    description:"When everything around you is moving too fast, you're the fixed point people orient themselves by. Calm isn't your mood, it's your default state.",
+    strengths:["Steadiness under pressure","Dependability","Emotional regulation"],
+    weaknesses:["Can seem unmovable","Slow to embrace change","Underexpresses needs"],
+    workStyle:"Reliable, consistent, the person others build around.",
+    stressResponse:"Stays visibly calm, even when it takes effort.",
+    friendshipStyle:"The friend everyone calls first in a crisis.",
+    datingStyle:"Grounding presence; steady rather than dramatic.",
+    leadershipStyle:"Leads by being the stable center of the storm.",
+    learningStyle:"Prefers repetition and mastery over novelty.",
+    communicationStyle:"Calm, patient, rarely raises their voice.",
+    decisionMaking:"Deliberate, rarely rushed, hard to shake once made.",
+    idealEnvironments:["Crisis-prone or high-pressure roles","Long-term commitments"],
+    hobbies:["Fishing, gardening, or slow crafts","Meditation","Reliable routines"],
+    growthAdvice:"Stability doesn't mean staying still forever, let yourself move too.",
+    bestTeammate:"A restless innovator who needs somewhere to land.",
+    worstTeammate:"Someone who mistakes your calm for indifference.",
+    quote:"Still water runs the deepest." },
+
+  { id:"cartographer", name:"The Cartographer", title:"Mapper of Ideas", icon:"🧭",
+    colors:["#3FA796","#0B211D"],
+    signature:[{dim:"curiosity",w:2},{dim:"independence",w:1},{dim:"adaptability",w:1}],
+    description:"You collect ideas, places, and people the way others collect souvenirs. What matters most to you is having seen it, understood it, mapped it for yourself.",
+    strengths:["Insatiable curiosity","Broad knowledge","Comfortable with the unknown"],
+    weaknesses:["Struggles to commit to one path","Can overcollect, underfinish","Restless"],
+    workStyle:"Exploratory, thrives on variety and new problems.",
+    stressResponse:"Seeks a change of scenery or a new project.",
+    friendshipStyle:"Brings new perspectives and unexpected stories to the group.",
+    datingStyle:"Drawn to partners who keep surprising them.",
+    leadershipStyle:"Leads by opening doors others didn't know existed.",
+    learningStyle:"Wide before deep, loves connecting unrelated ideas.",
+    communicationStyle:"Curious, full of questions, enjoys tangents.",
+    decisionMaking:"Weighs novelty heavily, sometimes over practicality.",
+    idealEnvironments:["Research","Travel-heavy roles","Cross-disciplinary teams"],
+    hobbies:["Travel","Reading widely","Learning random skills"],
+    growthAdvice:"Depth is its own kind of adventure, try finishing the map sometimes.",
+    bestTeammate:"A finisher who turns your discoveries into results.",
+    worstTeammate:"Someone who wants to stick to one narrow lane forever.",
+    quote:"Not all who wander are lost, but I am definitely also collecting data." },
+
+  { id:"alchemist", name:"The Alchemist", title:"Turns Ideas Into Gold", icon:"⚗️",
+    colors:["#C99A2E","#1F1608"],
+    signature:[{dim:"creativity",w:2},{dim:"risk",w:1},{dim:"curiosity",w:1}],
+    description:"You take things nobody else would combine and make something that works. Half experiment, half instinct, your process looks like chaos until it isn't.",
+    strengths:["Original thinking","Comfort with ambiguity","Fast iteration"],
+    weaknesses:["Inconsistent focus","Underestimates structure","Can overcomplicate"],
+    workStyle:"Experimental, prototype-first, comfortable failing fast.",
+    stressResponse:"Starts a new creative project to process the old one.",
+    friendshipStyle:"Brings unexpected ideas and energy into every plan.",
+    datingStyle:"Playful, imaginative, keeps things from getting stale.",
+    leadershipStyle:"Leads by reframing the problem entirely.",
+    learningStyle:"Learns through experimentation, not instructions.",
+    communicationStyle:"Metaphor-heavy, associative, sometimes hard to follow at speed.",
+    decisionMaking:"Follows instinct, then justifies it with logic after.",
+    idealEnvironments:["Creative studios","R&D","Anywhere novelty is rewarded"],
+    hobbies:["Art in any medium","Cooking experiments","Inventing things"],
+    growthAdvice:"Not every idea needs a sequel, some are worth finishing all the way.",
+    bestTeammate:"A grounded executor who ships what you dream up.",
+    worstTeammate:"Someone who shuts down ideas before they're tested.",
+    quote:"Most 'impossible' things are just untested." },
+
+  { id:"sentinel", name:"The Sentinel", title:"Quiet Protector", icon:"🛡️",
+    colors:["#4C7A50","#0D1A0E"],
+    signature:[{dim:"trust",w:2},{dim:"kindness",w:2},{dim:"discipline",w:1}],
+    description:"You notice who's missing from the group photo. Protecting the people around you isn't a role you were assigned, it's just what you do.",
+    strengths:["Fierce loyalty","Reliability","Notices what others miss"],
+    weaknesses:["Overextends for others","Struggles to ask for help","Avoids conflict too long"],
+    workStyle:"Supportive, dependable, quietly essential to team morale.",
+    stressResponse:"Focuses on protecting others before addressing their own needs.",
+    friendshipStyle:"The friend who remembers everything and shows up unasked.",
+    datingStyle:"Devoted, attentive, sometimes to their own detriment.",
+    leadershipStyle:"Leads by taking care of the people, not just the outcome.",
+    learningStyle:"Learns best when it helps someone else too.",
+    communicationStyle:"Warm, careful, reads the room before speaking.",
+    decisionMaking:"Considers everyone affected before deciding for themselves.",
+    idealEnvironments:["Tight-knit teams","Care-oriented roles","Long-term relationships"],
+    hobbies:["Volunteering","Cooking for others","Community organizing"],
+    growthAdvice:"Protecting yourself counts too, you're allowed to be looked after.",
+    bestTeammate:"Someone who notices and reciprocates the care you give.",
+    worstTeammate:"Someone who takes your loyalty for granted.",
+    quote:"I'd rather be needed than noticed." },
+
+  { id:"comet", name:"The Comet", title:"Bright and Fast", icon:"☄️",
+    colors:["#5AD1E0","#08202A"],
+    signature:[{dim:"drive",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
+    description:"You appear, you're spectacular, and you move on before anyone quite catches up. Ambition isn't a phase for you, it's your natural orbit.",
+    strengths:["Relentless drive","Fast execution","Inspires urgency in others"],
+    weaknesses:["Can leave things unfinished","Impatient with slow progress","Burns bright, burns out"],
+    workStyle:"Fast, ambitious, always chasing the next milestone.",
+    stressResponse:"Doubles down and works harder rather than slower.",
+    friendshipStyle:"Exciting but occasionally hard to keep up with.",
+    datingStyle:"Whirlwind romance energy, thrilling, occasionally exhausting.",
+    leadershipStyle:"Leads by setting an almost unreasonable pace.",
+    learningStyle:"Fast absorption, low patience for repetition.",
+    communicationStyle:"Energetic, forward-moving, future-focused.",
+    decisionMaking:"Quick, ambition-led, rarely looks back.",
+    idealEnvironments:["High-growth environments","Competitive fields","Deadlines"],
+    hobbies:["Racing (any kind)","Goal-tracking apps","Personal records"],
+    growthAdvice:"Not everything worth having is worth rushing toward.",
+    bestTeammate:"A steady closer who finishes what you start.",
+    worstTeammate:"Someone with no urgency at all.",
+    quote:"Rest is for after the finish line." },
+
+  { id:"hearth-keeper", name:"The Hearth Keeper", title:"Warmth in Human Form", icon:"🕯️",
+    colors:["#E6A15C","#241608"],
+    signature:[{dim:"kindness",w:2},{dim:"empathy",w:2},{dim:"patience",w:1}],
+    description:"Wherever you are becomes the place people gather. You make warmth without trying, a steady, generous presence that people build memories around.",
+    strengths:["Deep empathy","Natural nurturing instinct","Makes others feel safe"],
+    weaknesses:["Neglects own needs","Overgives","Avoids asking for support"],
+    workStyle:"Collaborative, people-first, thrives supporting others' success.",
+    stressResponse:"Takes care of everyone else before themselves.",
+    friendshipStyle:"The one who remembers birthdays and shows up with soup.",
+    datingStyle:"Nurturing, attentive, deeply loyal.",
+    leadershipStyle:"Leads by making everyone feel genuinely valued.",
+    learningStyle:"Learns best in warm, low-pressure environments.",
+    communicationStyle:"Gentle, encouraging, generous with praise.",
+    decisionMaking:"Considers everyone's wellbeing before their own preference.",
+    idealEnvironments:["Community-centered roles","Small warm teams","Home-based work"],
+    hobbies:["Hosting gatherings","Cooking/baking","Caregiving"],
+    growthAdvice:"You're allowed to receive the warmth you give so freely.",
+    bestTeammate:"Someone who checks in on you as much as you check on them.",
+    worstTeammate:"Someone who only shows up when they need something.",
+    quote:"Home is a feeling I try to give people." },
+
+  { id:"puzzle-box", name:"The Puzzle Box", title:"Layers Within Layers", icon:"🧩",
+    colors:["#8B5CF6","#160B26"],
+    signature:[{dim:"logic",w:2},{dim:"selfAwareness",w:1},{dim:"independence",w:1}],
+    description:"There's more going on beneath the surface than you show, and that's exactly how you like it. People take longer to fully understand you, and you find that fair.",
+    strengths:["Deep, private intelligence","Hard to rattle","Sees what others overlook"],
+    weaknesses:["Hard to read","Overthinks social dynamics","Slow to open up"],
+    workStyle:"Independent, thorough, prefers depth to breadth.",
+    stressResponse:"Processes internally before saying anything.",
+    friendshipStyle:"Small trusted circle, intensely loyal once earned.",
+    datingStyle:"Takes time to open up, but goes all-in once they do.",
+    leadershipStyle:"Leads through quiet competence rather than visibility.",
+    learningStyle:"Prefers to fully understand before moving on.",
+    communicationStyle:"Reserved, precise, reveals more over time.",
+    decisionMaking:"Internally exhaustive, externally quiet.",
+    idealEnvironments:["Deep-focus work","Small trusted teams","Research"],
+    hobbies:["Puzzles and riddles","Reading","Solo strategy games"],
+    growthAdvice:"Letting people see the process, not just the result, builds trust faster.",
+    bestTeammate:"Someone patient enough to earn the full picture.",
+    worstTeammate:"Someone who demands instant openness.",
+    quote:"Not everything needs to be said to be understood." },
+
+  { id:"storm-caller", name:"The Storm Caller", title:"Commands the Room", icon:"🌩️",
+    colors:["#4A5FD9","#0C1030"],
+    signature:[{dim:"leadership",w:2},{dim:"confidence",w:2},{dim:"drive",w:1}],
+    description:"When decisions need making and no one else will make them, you do. Not out of ego, because someone has to, and you've never been afraid of that weight.",
+    strengths:["Decisive leadership","Commands attention naturally","Thrives under pressure"],
+    weaknesses:["Can dominate quieter voices","Impatient with indecision","Struggles to delegate"],
+    workStyle:"Takes charge, sets direction, comfortable being accountable.",
+    stressResponse:"Takes more control, not less.",
+    friendshipStyle:"The one who organizes the group and makes things happen.",
+    datingStyle:"Bold, direct, knows what they want.",
+    leadershipStyle:"Natural, commanding, decisive under pressure.",
+    learningStyle:"Learns by leading, even before fully ready.",
+    communicationStyle:"Assertive, clear, doesn't hedge.",
+    decisionMaking:"Fast and confident, owns the outcome either way.",
+    idealEnvironments:["High-stakes leadership roles","Crisis management","Competitive teams"],
+    hobbies:["Team sports (as captain)","Debate","Organizing events"],
+    growthAdvice:"Real strength includes making room for other voices too.",
+    bestTeammate:"A thoughtful second-in-command who tempers the pace.",
+    worstTeammate:"Someone competing for the same spotlight.",
+    quote:"Someone has to call it. Might as well be me." },
+
+  { id:"lantern", name:"The Lantern", title:"Guiding Light", icon:"🏮",
+    colors:["#F4C542","#241B05"],
+    signature:[{dim:"optimism",w:2},{dim:"empathy",w:1},{dim:"leadership",w:1}],
+    description:"You have a rare gift for making dark moments feel survivable. Not through denial, through steady, genuine hope that things can still work out.",
+    strengths:["Contagious optimism","Emotionally steadying presence","Encourages others naturally"],
+    weaknesses:["Can minimize real problems","Avoids sitting with negativity","Overextends emotionally"],
+    workStyle:"Motivational, morale-focused, keeps teams hopeful under pressure.",
+    stressResponse:"Reframes the situation to find the workable path forward.",
+    friendshipStyle:"The friend who always has a reason things will be okay.",
+    datingStyle:"Encouraging, affirming, believes in their partner deeply.",
+    leadershipStyle:"Leads by keeping morale and hope alive.",
+    learningStyle:"Learns best with encouragement rather than criticism.",
+    communicationStyle:"Warm, encouraging, forward-looking.",
+    decisionMaking:"Leans toward the option that keeps hope alive.",
+    idealEnvironments:["Team environments under pressure","Mentorship roles","Community work"],
+    hobbies:["Mentoring","Journaling gratitude","Group activities"],
+    growthAdvice:"Hope and honesty about hard truths can coexist.",
+    bestTeammate:"A realist who keeps the optimism grounded.",
+    worstTeammate:"Someone who mistakes your hope for naivety and exploits it.",
+    quote:"Even the smallest light changes a room." },
+
+  { id:"undercurrent", name:"The Undercurrent", title:"Quiet Influence", icon:"🌊",
+    colors:["#2E8B9C","#081C20"],
+    signature:[{dim:"selfAwareness",w:2},{dim:"patience",w:1},{dim:"independence",w:1}],
+    description:"You rarely lead from the front, but somehow the direction of the group often traces back to something you said quietly, once, and meant completely.",
+    strengths:["Subtle influence","Emotional intelligence","Thoughtful timing"],
+    weaknesses:["Underestimates own impact","Avoids visible credit","Can be too indirect"],
+    workStyle:"Behind-the-scenes, high-impact, prefers influence over authority.",
+    stressResponse:"Observes quietly before choosing how to respond.",
+    friendshipStyle:"The quiet advisor everyone eventually comes to.",
+    datingStyle:"Subtle, thoughtful gestures over grand declarations.",
+    leadershipStyle:"Leads through influence rather than position.",
+    learningStyle:"Absorbs quietly, applies precisely.",
+    communicationStyle:"Measured, timed carefully for maximum effect.",
+    decisionMaking:"Patient, observant, acts once the moment is right.",
+    idealEnvironments:["Advisory roles","Small trusted teams","Roles with real autonomy"],
+    hobbies:["Reading people and situations","Writing","Long walks"],
+    growthAdvice:"Claiming credit isn't arrogance, it's accurate information.",
+    bestTeammate:"Someone who notices and amplifies your quiet contributions.",
+    worstTeammate:"Someone who takes credit for your influence.",
+    quote:"The tide moves the ship. No one applauds the tide." },
+
+  { id:"tinkerer", name:"The Tinkerer", title:"Hands-On Problem Solver", icon:"🔧",
+    colors:["#C2703D","#221206"],
+    signature:[{dim:"curiosity",w:1},{dim:"logic",w:1},{dim:"adaptability",w:2}],
+    description:"You understand things by taking them apart. Theory only gets you so far, you trust what you've built, broken, and fixed with your own hands.",
+    strengths:["Practical problem-solving","Resourcefulness","Learns fast by doing"],
+    weaknesses:["Impatient with pure theory","Can skip documentation","Undervalues planning"],
+    workStyle:"Hands-on, iterative, prefers building over discussing.",
+    stressResponse:"Fixes something, anything, to feel in control again.",
+    friendshipStyle:"The one who actually shows up to help you move.",
+    datingStyle:"Shows love through fixing and doing, not just saying.",
+    leadershipStyle:"Leads by example, in the trenches with the team.",
+    learningStyle:"Trial and error, hands-on from the start.",
+    communicationStyle:"Practical, straightforward, low on abstraction.",
+    decisionMaking:"Tests it in the real world rather than debating it endlessly.",
+    idealEnvironments:["Workshops and labs","Fast-iteration teams","Startups"],
+    hobbies:["Building and repairing things","DIY projects","Gaming (especially building/crafting genres)"],
+    growthAdvice:"A little planning up front saves a lot of rebuilding later.",
+    bestTeammate:"A planner who gives your instincts some structure.",
+    worstTeammate:"Someone all talk and no action.",
+    quote:"If it's broken, I'd rather open it than google it." },
+
+  { id:"mirror", name:"The Mirror", title:"Self-Aware Observer", icon:"🪞",
+    colors:["#B7B7C9","#17171F"],
+    signature:[{dim:"selfAwareness",w:2},{dim:"empathy",w:1},{dim:"curiosity",w:1}],
+    description:"You've done more self-reflection than most people do in a decade, and it shows in how calmly you handle other people's chaos. You know exactly who you are.",
+    strengths:["Deep self-knowledge","Emotional regulation","Honest with themselves"],
+    weaknesses:["Can overanalyze","Sometimes too introspective to act","Slow to trust praise"],
+    workStyle:"Reflective, thoughtful, values meaning over speed.",
+    stressResponse:"Processes internally, often through writing or reflection.",
+    friendshipStyle:"Gives genuinely insightful advice, rarely surface-level.",
+    datingStyle:"Self-aware enough to communicate needs clearly.",
+    leadershipStyle:"Leads by modeling honest self-reflection for others.",
+    learningStyle:"Learns through reflection as much as instruction.",
+    communicationStyle:"Thoughtful, honest, comfortable with vulnerability.",
+    decisionMaking:"Checks in with their own values before deciding.",
+    idealEnvironments:["Therapeutic or reflective fields","Writing","Coaching"],
+    hobbies:["Journaling","Therapy or self-development","Quiet solo time"],
+    growthAdvice:"At some point, insight has to turn into action.",
+    bestTeammate:"A doer who turns your insight into momentum.",
+    worstTeammate:"Someone who never reflects on their own impact.",
+    quote:"I'd rather know myself than be flattered by a stranger." },
+
+  { id:"ronin", name:"The Ronin", title:"Independent Wanderer", icon:"🗡️",
+    colors:["#8A1F2B","#1A0708"],
+    signature:[{dim:"independence",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
+    description:"You answer to your own code, not the crowd's. Groups are fine in small doses, but your center of gravity has always been your own judgment.",
+    strengths:["Self-reliant","Principled","Comfortable being alone"],
+    weaknesses:["Struggles to rely on others","Can seem aloof","Avoids asking for help"],
+    workStyle:"Prefers autonomy, ownership, and minimal oversight.",
+    stressResponse:"Withdraws to handle it alone, on their own terms.",
+    friendshipStyle:"Low-maintenance but fiercely genuine when it matters.",
+    datingStyle:"Needs independence respected, even while committed.",
+    leadershipStyle:"Leads by personal example rather than direction-giving.",
+    learningStyle:"Self-taught, prefers figuring it out solo.",
+    communicationStyle:"Honest, unfiltered, doesn't perform for approval.",
+    decisionMaking:"Trusts their own judgment above outside opinion.",
+    idealEnvironments:["Freelance or independent work","Small autonomous roles"],
+    hobbies:["Solo travel","Martial arts or individual sports","Reading"],
+    growthAdvice:"Letting people in isn't weakness, it's a different kind of strength.",
+    bestTeammate:"Someone who respects the need for space without taking it personally.",
+    worstTeammate:"Someone overly dependent on group consensus.",
+    quote:"I don't need permission to be who I am." },
+
+  { id:"beacon", name:"The Beacon", title:"Inspiring Communicator", icon:"🗼",
+    colors:["#E85D75","#240A12"],
+    signature:[{dim:"leadership",w:1},{dim:"humor",w:1},{dim:"socialEnergy",w:2}],
+    description:"You have a way of putting words to things other people were only feeling. Rooms brighten and conversations pick up energy when you're in them.",
+    strengths:["Natural communicator","Inspires others easily","High social energy"],
+    weaknesses:["Can talk more than listen","Overextends socially","Needs an audience sometimes"],
+    workStyle:"Thrives presenting, pitching, or rallying a group.",
+    stressResponse:"Talks it through, often out loud, with others.",
+    friendshipStyle:"The connector who introduces everyone to everyone.",
+    datingStyle:"Expressive, affectionate, communicates openly.",
+    leadershipStyle:"Leads by inspiring belief in a shared vision.",
+    learningStyle:"Learns best out loud, in discussion with others.",
+    communicationStyle:"Expressive, energetic, persuasive.",
+    decisionMaking:"Talks it out with others before finalizing.",
+    idealEnvironments:["Public-facing roles","Teams","Anything involving an audience"],
+    hobbies:["Public speaking","Performing","Hosting events"],
+    growthAdvice:"Silence can hold as much value as your next great line.",
+    bestTeammate:"A deep listener who balances your outward energy.",
+    worstTeammate:"Someone equally loud, competing for airtime.",
+    quote:"Say the thing. Someone in the room needs to hear it." },
+
+  { id:"glacier", name:"The Glacier", title:"Patient Force", icon:"🧊",
+    colors:["#7FC7D9","#0A1B20"],
+    signature:[{dim:"patience",w:2},{dim:"discipline",w:2},{dim:"resilience",w:1}],
+    description:"You move slowly, deliberately, and completely reshape the landscape without anyone noticing until it's done. Rushing has never been your language.",
+    strengths:["Unmatched patience","Consistency over time","Rarely reactive"],
+    weaknesses:["Slow to start","Can seem passive","Resists urgency even when needed"],
+    workStyle:"Long-horizon, methodical, values consistency over speed.",
+    stressResponse:"Slows down further rather than speeding up.",
+    friendshipStyle:"A steady, low-drama presence over the long run.",
+    datingStyle:"Takes things slow but builds something lasting.",
+    leadershipStyle:"Leads through sustained, quiet consistency.",
+    learningStyle:"Prefers mastery through repetition over speed.",
+    communicationStyle:"Calm, unrushed, considers every word.",
+    decisionMaking:"Deliberately slow, rarely regretted.",
+    idealEnvironments:["Long-term projects","Roles that reward consistency"],
+    hobbies:["Long-distance activities","Craftsmanship","Slow travel"],
+    growthAdvice:"Some moments genuinely need urgency, practice recognizing them.",
+    bestTeammate:"Someone with urgency to balance your steady pace.",
+    worstTeammate:"Someone who mistakes your patience for lack of care.",
+    quote:"Given enough time, I reshape anything." },
+
+  { id:"spark", name:"The Spark", title:"Instant Connector", icon:"✨",
+    colors:["#FFD23F","#2A2003"],
+    signature:[{dim:"humor",w:2},{dim:"socialEnergy",w:1},{dim:"adaptability",w:1}],
+    description:"You lower the temperature of any tense room just by being in it. Humor isn't a deflection for you, it's how you show people you actually see them.",
+    strengths:["Quick wit","Puts people at ease","Naturally likeable"],
+    weaknesses:["Uses humor to avoid depth sometimes","Can undersell serious moments","Restless"],
+    workStyle:"Collaborative, energetic, great at defusing tension.",
+    stressResponse:"Uses humor to process and cope.",
+    friendshipStyle:"The friend who makes hard days feel lighter.",
+    datingStyle:"Playful, fun, keeps the relationship light and warm.",
+    leadershipStyle:"Leads by keeping morale genuinely high.",
+    learningStyle:"Learns best when it's engaging and a little fun.",
+    communicationStyle:"Witty, warm, quick on their feet.",
+    decisionMaking:"Trusts instinct, decides fast, laughs about it later either way.",
+    idealEnvironments:["Social, dynamic teams","Anything client- or people-facing"],
+    hobbies:["Comedy and improv","Social games","Hosting friends"],
+    growthAdvice:"It's safe to let a serious moment stay serious sometimes.",
+    bestTeammate:"Someone steady who grounds the fun with follow-through.",
+    worstTeammate:"Someone who takes the humor personally.",
+    quote:"If we're not laughing, we're doing it wrong." },
+
+  { id:"vault", name:"The Vault", title:"Private and Trustworthy", icon:"🔒",
+    colors:["#5A5A6E","#111117"],
+    signature:[{dim:"trust",w:2},{dim:"discipline",w:1},{dim:"independence",w:1}],
+    description:"People tell you things they haven't told anyone else, and it never once occurs to them to worry about it. Discretion, for you, isn't effort, it's identity.",
+    strengths:["Absolute discretion","Steady reliability","Deep loyalty"],
+    weaknesses:["Overguards their own feelings too","Slow to open up","Can seem unreadable"],
+    workStyle:"Careful, confidential, trusted with sensitive responsibility.",
+    stressResponse:"Handles it privately, rarely burdens others.",
+    friendshipStyle:"The safest person to confide in, bar none.",
+    datingStyle:"Loyal and private; keeps the relationship's inner life protected.",
+    leadershipStyle:"Leads by earning quiet, total trust.",
+    learningStyle:"Learns privately, tests ideas before sharing them.",
+    communicationStyle:"Careful, deliberate, guards details until relevant.",
+    decisionMaking:"Weighs consequences for everyone involved before choosing.",
+    idealEnvironments:["High-trust roles","Small teams","Confidential work"],
+    hobbies:["Journaling privately","Collecting","One-on-one time over groups"],
+    growthAdvice:"You can be trusted with others' secrets and still share your own.",
+    bestTeammate:"Someone who earns trust patiently rather than demanding it.",
+    worstTeammate:"Someone careless with sensitive information.",
+    quote:"What you tell me stays exactly where you left it." },
+
+  { id:"pathfinder", name:"The Pathfinder", title:"First Through the Door", icon:"🧗",
+    colors:["#4E9F3D","#0D1F0A"],
+    signature:[{dim:"risk",w:2},{dim:"curiosity",w:1},{dim:"independence",w:1}],
+    description:"Uncharted territory doesn't scare you, it's the whole point. You'd rather take the unfamiliar route once than the safe one a hundred times.",
+    strengths:["Bold exploration","Comfortable with uncertainty","Resourceful under pressure"],
+    weaknesses:["Underestimates real risk sometimes","Impatient with caution","Can go it alone too often"],
+    workStyle:"Thrives pioneering new territory or untested approaches.",
+    stressResponse:"Seeks a new challenge to channel the energy.",
+    friendshipStyle:"The friend who drags everyone into the best bad idea.",
+    datingStyle:"Adventurous, spontaneous, keeps things exciting.",
+    leadershipStyle:"Leads by going first and proving it's possible.",
+    learningStyle:"Learns by throwing themselves directly into the unknown.",
+    communicationStyle:"Direct, energetic, low patience for overexplaining.",
+    decisionMaking:"Biased toward action over analysis.",
+    idealEnvironments:["Exploration-heavy roles","Startups","Travel"],
+    hobbies:["Hiking and outdoor exploration","Travel","Trying new things constantly"],
+    growthAdvice:"A little caution isn't the enemy of adventure.",
+    bestTeammate:"Someone cautious enough to catch the risks you miss.",
+    worstTeammate:"Someone equally reckless with no one watching the map.",
+    quote:"The trail isn't real until someone walks it." },
+
+  { id:"weaver", name:"The Weaver", title:"Social Connector", icon:"🧵",
+    colors:["#D46A9F","#210A18"],
+    signature:[{dim:"empathy",w:1},{dim:"socialEnergy",w:2},{dim:"trust",w:1}],
+    description:"You remember how people are connected to each other better than they do. Left alone in any group, you'll have found the common thread within minutes.",
+    strengths:["Natural relationship-building","Reads group dynamics well","Bridges people together"],
+    weaknesses:["Can overextend socially","Avoids being alone too long","Takes on others' emotions"],
+    workStyle:"Collaborative, relationship-driven, thrives cross-team.",
+    stressResponse:"Reaches out to others rather than isolating.",
+    friendshipStyle:"The one who keeps the whole friend group actually connected.",
+    datingStyle:"Warm, communicative, invests deeply in connection.",
+    leadershipStyle:"Leads by building trust between people, not just tasks.",
+    learningStyle:"Learns best collaboratively, through discussion.",
+    communicationStyle:"Warm, inclusive, actively listens.",
+    decisionMaking:"Weighs the impact on relationships heavily.",
+    idealEnvironments:["People-centered roles","Community and network-based work"],
+    hobbies:["Hosting and organizing","Networking (the genuine kind)","Group activities"],
+    growthAdvice:"Solitude can recharge you just as much as connection does.",
+    bestTeammate:"Someone independent who still values the network you build.",
+    worstTeammate:"Someone who dismisses relationship-building as unimportant.",
+    quote:"Everyone's one good introduction away from a different life." },
+
+  { id:"foundry", name:"The Foundry", title:"Disciplined Builder", icon:"⚒️",
+    colors:["#C1440E","#1E0A02"],
+    signature:[{dim:"discipline",w:2},{dim:"drive",w:1},{dim:"planning",w:1}],
+    description:"Consistency is your entire strategy. While others chase bursts of motivation, you show up, every day, and let the compounding do the rest.",
+    strengths:["Unshakeable discipline","Reliable output","Strong work ethic"],
+    weaknesses:["Rigid with routine","Struggles with spontaneity","Can be hard on themselves"],
+    workStyle:"Consistent, structured, values process as much as outcome.",
+    stressResponse:"Doubles down on routine and structure.",
+    friendshipStyle:"Dependable, shows up on time, every time.",
+    datingStyle:"Committed and consistent; actions over grand gestures.",
+    leadershipStyle:"Leads by modeling relentless consistency.",
+    learningStyle:"Repetition-based mastery, practice over theory.",
+    communicationStyle:"Straightforward, no-nonsense, dependable.",
+    decisionMaking:"Sticks to principles rather than shifting with mood.",
+    idealEnvironments:["Structured organizations","Craft-based or skill-building work"],
+    hobbies:["Fitness routines","Skill mastery (music, sport, craft)","Habit tracking"],
+    growthAdvice:"Rest isn't a break from discipline, it's part of it.",
+    bestTeammate:"Someone flexible who softens the rigidity a little.",
+    worstTeammate:"Someone inconsistent who derails the routine.",
+    quote:"Motivation is unreliable. Discipline shows up anyway." },
+
+  { id:"mirage", name:"The Mirage", title:"Creative Dreamer", icon:"🌫️",
+    colors:["#9D7FE0","#160E28"],
+    signature:[{dim:"creativity",w:2},{dim:"optimism",w:1},{dim:"independence",w:1}],
+    description:"You live half in the world everyone shares and half in the one you're building in your head. The line between them is thinner than people assume.",
+    strengths:["Rich imagination","Original perspective","Comfortable in ambiguity"],
+    weaknesses:["Can drift from practical demands","Overpromises on ideas","Struggles with routine"],
+    workStyle:"Idea-driven, thrives with creative freedom.",
+    stressResponse:"Escapes into imagination or a creative outlet.",
+    friendshipStyle:"Brings a completely different way of seeing things.",
+    datingStyle:"Romantic, imaginative, deeply expressive.",
+    leadershipStyle:"Leads by painting a vision others want to chase.",
+    learningStyle:"Learns through imagination and association.",
+    communicationStyle:"Vivid, descriptive, sometimes abstract.",
+    decisionMaking:"Follows inspiration more than convention.",
+    idealEnvironments:["Creative industries","Flexible, low-structure roles"],
+    hobbies:["Writing fiction","Art","Daydreaming with intention"],
+    growthAdvice:"Grounding one idea fully can be more powerful than chasing ten.",
+    bestTeammate:"A practical executor who brings the dream into reality.",
+    worstTeammate:"Someone who dismisses imagination as impractical.",
+    quote:"Reality is just the first draft." },
+
+  { id:"compass", name:"The Compass", title:"Principled Decider", icon:"🧭",
+    colors:["#3B8686","#0A1A1A"],
+    signature:[{dim:"logic",w:1},{dim:"trust",w:1},{dim:"selfAwareness",w:2}],
+    description:"You know exactly what you value, and it shows in every choice you make, even the small ones. People trust your decisions because they know what they're built on.",
+    strengths:["Strong personal values","Consistent integrity","Clear-headed under pressure"],
+    weaknesses:["Can be inflexible on principle","Judges quick compromise harshly","Overthinks ethics of small choices"],
+    workStyle:"Values-driven, principled, consistent regardless of pressure.",
+    stressResponse:"Returns to core values to decide what to do next.",
+    friendshipStyle:"The friend who gives advice you can actually trust.",
+    datingStyle:"Honest, values-aligned, seeks the same in a partner.",
+    leadershipStyle:"Leads by staying consistent when it's hardest to.",
+    learningStyle:"Wants to understand the ethical 'why' behind everything.",
+    communicationStyle:"Honest, direct, occasionally blunt in service of truth.",
+    decisionMaking:"Filters every choice through personal values first.",
+    idealEnvironments:["Mission-driven organizations","Ethics-heavy fields"],
+    hobbies:["Philosophy and ethics","Debate","Mentoring"],
+    growthAdvice:"Principles can flex without breaking, practice the difference.",
+    bestTeammate:"Someone pragmatic who helps values meet reality.",
+    worstTeammate:"Someone who compromises core values for convenience.",
+    quote:"I'd rather be right and alone than easy and wrong." },
+
+  { id:"firefly", name:"The Firefly", title:"Playful Spontaneity", icon:"🌟",
+    colors:["#F2C14E","#241C05"],
+    signature:[{dim:"humor",w:1},{dim:"risk",w:1},{dim:"adaptability",w:2}],
+    description:"You move through life catching the good moments as they appear, without much of a plan for the next one. Spontaneity isn't a flaw for you, it's how joy finds you.",
+    strengths:["Lives fully in the moment","Highly adaptable","Infectious playfulness"],
+    weaknesses:["Struggles with long-term follow-through","Avoids heavy commitment","Easily distracted"],
+    workStyle:"Flexible, energetic, better in bursts than long grinds.",
+    stressResponse:"Distracts and lightens the mood, for themselves and others.",
+    friendshipStyle:"Always down for the last-minute plan.",
+    datingStyle:"Fun, spontaneous, keeps things light and exciting.",
+    leadershipStyle:"Leads by keeping the group's energy alive.",
+    learningStyle:"Learns best through play and variety.",
+    communicationStyle:"Light, quick, easy to talk to.",
+    decisionMaking:"Follows what feels good in the moment.",
+    idealEnvironments:["Dynamic, varied roles","Anything social and unstructured"],
+    hobbies:["Spontaneous travel","Parties and social events","Trying new hobbies constantly"],
+    growthAdvice:"A little structure can hold your spontaneity without killing it.",
+    bestTeammate:"Someone steady who handles the follow-through.",
+    worstTeammate:"Someone equally scattered with no anchor.",
+    quote:"Plans are just suggestions I haven't broken yet." },
+
+  { id:"bastion", name:"The Bastion", title:"Resilient Under Fire", icon:"🏰",
+    colors:["#8C6A4E","#1C130A"],
+    signature:[{dim:"resilience",w:2},{dim:"discipline",w:1},{dim:"confidence",w:1}],
+    description:"Pressure doesn't break you, it reveals you. You've been through enough that very little rattles you anymore, and people can feel that steadiness nearby.",
+    strengths:["Unshakeable resilience","Handles crisis calmly","Reliable under pressure"],
+    weaknesses:["Bottles up strain","Slow to ask for support","Can normalize too much hardship"],
+    workStyle:"Steady under deadline and crisis, handles high-pressure roles well.",
+    stressResponse:"Grinds through it, often without showing the strain.",
+    friendshipStyle:"The friend who's been through it and still shows up strong.",
+    datingStyle:"Steady and protective, even during hard times.",
+    leadershipStyle:"Leads by staying composed when everything else isn't.",
+    learningStyle:"Learns through hardship and hands-on experience.",
+    communicationStyle:"Direct, unflinching, doesn't sugarcoat.",
+    decisionMaking:"Stays clear-headed even under real pressure.",
+    idealEnvironments:["Crisis response","High-pressure leadership","Long-term challenges"],
+    hobbies:["Endurance sports","Mentoring others through hardship","Strength training"],
+    growthAdvice:"Strength includes letting others carry some of the weight sometimes.",
+    bestTeammate:"Someone who notices when you're carrying too much.",
+    worstTeammate:"Someone who adds pressure without contributing support.",
+    quote:"I've survived worse than this." },
+
+  { id:"tide", name:"The Tide", title:"Adaptable Flow", icon:"🌙",
+    colors:["#4E7CA1","#0A1620"],
+    signature:[{dim:"adaptability",w:2},{dim:"optimism",w:1},{dim:"patience",w:1}],
+    description:"You don't fight the current, you find a way to move with it that still gets you where you're going. Change rarely rattles you; you've adjusted before.",
+    strengths:["Effortless adaptability","Goes with change gracefully","Rarely rigid"],
+    weaknesses:["Can lack firm direction","Avoids conflict to keep peace","Struggles to commit to one path"],
+    workStyle:"Flexible, comfortable with shifting priorities and ambiguity.",
+    stressResponse:"Adjusts expectations rather than fighting the situation.",
+    friendshipStyle:"Easygoing, low-drama, goes with the group's flow.",
+    datingStyle:"Flexible and accommodating, adapts to their partner's needs.",
+    leadershipStyle:"Leads by adjusting the plan as reality shifts.",
+    learningStyle:"Absorbs and adapts to whatever teaching style is offered.",
+    communicationStyle:"Easygoing, accommodating, non-confrontational.",
+    decisionMaking:"Stays open, adjusts as new information comes in.",
+    idealEnvironments:["Fast-changing environments","Roles requiring flexibility"],
+    hobbies:["Travel","Yoga or fluid movement practices","Anything unstructured"],
+    growthAdvice:"Sometimes holding your ground matters more than flowing around it.",
+    bestTeammate:"Someone decisive who gives your flexibility direction.",
+    worstTeammate:"Someone equally passive, with no one steering.",
+    quote:"I don't resist the current. I just choose my line through it." },
+
+  { id:"oracle", name:"The Oracle", title:"Intuitive Thinker", icon:"🔮",
+    colors:["#7A5CA3","#150C1F"],
+    signature:[{dim:"curiosity",w:1},{dim:"empathy",w:1},{dim:"selfAwareness",w:2}],
+    description:"You sense the undercurrent of a situation before anyone else names it out loud. Not psychic, just deeply attuned, to people, patterns, and meaning.",
+    strengths:["Sharp intuition","Sees patterns others miss","Comfortable with big questions"],
+    weaknesses:["Can overtrust instinct over evidence","Slow to explain their reasoning","Prone to overthinking"],
+    workStyle:"Reflective, insight-driven, prefers meaning over routine.",
+    stressResponse:"Turns inward to make sense of what's happening.",
+    friendshipStyle:"Gives advice that somehow always lands exactly right.",
+    datingStyle:"Deeply intuitive about their partner's needs.",
+    leadershipStyle:"Leads by naming what others haven't articulated yet.",
+    learningStyle:"Learns through reflection, pattern, and meaning-making.",
+    communicationStyle:"Thoughtful, sometimes cryptic, always intentional.",
+    decisionMaking:"Trusts intuition, then checks it against reason.",
+    idealEnvironments:["Reflective or advisory roles","Research into human behavior"],
+    hobbies:["Philosophy","Astrology, tarot, or similar symbolic systems","Deep conversation"],
+    growthAdvice:"Instinct is powerful, but it still benefits from a second opinion.",
+    bestTeammate:"A pragmatist who tests your intuition against reality.",
+    worstTeammate:"Someone who dismisses insight without evidence entirely.",
+    quote:"I usually know before I can explain why." },
+
+  { id:"catalyst", name:"The Catalyst", title:"Change Igniter", icon:"🌋",
+    colors:["#E0432E","#210C08"],
+    signature:[{dim:"drive",w:1},{dim:"leadership",w:1},{dim:"risk",w:2}],
+    description:"Rooms change when you enter them, not because you're loud, but because you make stagnant things feel possible to fix. You're allergic to 'that's just how it is'.",
+    strengths:["Sparks momentum in others","Comfortable disrupting the status quo","Energizing presence"],
+    weaknesses:["Impatient with slow systems","Can push change too fast","Underestimates resistance"],
+    workStyle:"Thrives initiating change, less interested in maintaining it.",
+    stressResponse:"Channels frustration into pushing for change.",
+    friendshipStyle:"The one who pushes the group out of a rut.",
+    datingStyle:"Energizing, pushes their partner to grow.",
+    leadershipStyle:"Leads by igniting momentum others couldn't start alone.",
+    learningStyle:"Learns by challenging assumptions directly.",
+    communicationStyle:"Direct, energizing, sometimes confrontational.",
+    decisionMaking:"Biased toward action and disruption over the status quo.",
+    idealEnvironments:["Change management","Early-stage ventures","Reform-minded teams"],
+    hobbies:["Activism or organizing","Debate","Starting new projects"],
+    growthAdvice:"Not every system that resists you is wrong, some just need patience.",
+    bestTeammate:"A steady maintainer who sustains the change you spark.",
+    worstTeammate:"Someone resistant to any change at all.",
+    quote:"Comfortable is usually just 'unexamined'." },
+];
+
+/* ---- Careers (fit computed from dimensions, not hardcoded per archetype) */
+const CAREERS = [
+  { name:"UX Designer", dims:["empathy","creativity","logic"] },
+  { name:"UI Designer", dims:["creativity","discipline","selfAwareness"] },
+  { name:"Product Designer", dims:["creativity","logic","leadership"] },
+  { name:"Illustrator / Artist", dims:["creativity","independence","curiosity"] },
+  { name:"Graphic Designer", dims:["creativity","discipline","curiosity"] },
+  { name:"Software Engineer", dims:["logic","discipline","patience"] },
+  { name:"Data Analyst", dims:["logic","patience","curiosity"] },
+  { name:"Architect", dims:["planning","creativity","discipline"] },
+  { name:"Civil Engineer", dims:["planning","logic","discipline"] },
+  { name:"Doctor / Clinician", dims:["empathy","discipline","resilience"] },
+  { name:"Nurse", dims:["empathy","resilience","patience"] },
+  { name:"Physical Therapist", dims:["patience","empathy","discipline"] },
+  { name:"Teacher / Educator", dims:["patience","empathy","leadership"] },
+  { name:"School Counselor", dims:["empathy","patience","selfAwareness"] },
+  { name:"Entrepreneur", dims:["risk","drive","confidence"] },
+  { name:"Small Business Owner", dims:["drive","discipline","adaptability"] },
+  { name:"Researcher / Scientist", dims:["curiosity","logic","patience"] },
+  { name:"Environmental Scientist", dims:["curiosity","planning","discipline"] },
+  { name:"Writer", dims:["creativity","independence","selfAwareness"] },
+  { name:"Journalist", dims:["curiosity","confidence","logic"] },
+  { name:"Editor", dims:["logic","discipline","creativity"] },
+  { name:"Film / Video Director", dims:["creativity","leadership","confidence"] },
+  { name:"Video Editor", dims:["creativity","patience","discipline"] },
+  { name:"Game Designer", dims:["creativity","logic","curiosity"] },
+  { name:"Musician / Performer", dims:["creativity","confidence","humor"] },
+  { name:"Psychologist / Therapist", dims:["empathy","patience","selfAwareness"] },
+  { name:"Social Worker", dims:["empathy","kindness","resilience"] },
+  { name:"Lawyer", dims:["logic","confidence","discipline"] },
+  { name:"Paralegal", dims:["discipline","logic","patience"] },
+  { name:"Chef", dims:["creativity","discipline","risk"] },
+  { name:"Pastry Chef", dims:["discipline","creativity","patience"] },
+  { name:"Marketing Strategist", dims:["creativity","socialEnergy","adaptability"] },
+  { name:"Sales Manager", dims:["confidence","socialEnergy","drive"] },
+  { name:"Human Resources Manager", dims:["empathy","leadership","discipline"] },
+  { name:"Animator", dims:["creativity","patience","discipline"] },
+  { name:"Operations / Project Manager", dims:["planning","discipline","leadership"] },
+  { name:"Financial Analyst", dims:["logic","discipline","patience"] },
+  { name:"Accountant", dims:["discipline","logic","patience"] },
+  { name:"Urban Planner", dims:["planning","empathy","logic"] },
+  { name:"Event Planner", dims:["planning","socialEnergy","adaptability"] },
+  { name:"Firefighter / EMT", dims:["resilience","confidence","kindness"] },
+  { name:"Military / Law Enforcement", dims:["discipline","resilience","leadership"] },
+  { name:"Diplomat / Foreign Service", dims:["empathy","adaptability","leadership"] },
+  { name:"Nonprofit Program Manager", dims:["kindness","leadership","planning"] },
+  { name:"Data Scientist", dims:["logic","curiosity","discipline"] },
+  { name:"Product Manager", dims:["leadership","logic","adaptability"] },
+];
+
+/* ---- Relationship pairing types (compatibility computed in engine.js) -- */
+const RELATIONSHIP_TYPES = [
+  { key:"friendship", label:"Friendship" },
+  { key:"dating", label:"Dating" },
+  { key:"marriage", label:"Marriage" },
+  { key:"business", label:"Business Partner" },
+  { key:"creative", label:"Creative Partner" },
+  { key:"travel", label:"Travel Partner" },
+  { key:"gaming", label:"Gaming Partner" },
+  { key:"study", label:"Study Partner" },
+  { key:"roommate", label:"Roommate" },
+];
+
+/* ---- Measured traits (formulas live in engine.js) ----------------------
+   These replace the earlier "fun stat" joke labels with grounded, serious
+   readings so the result feels like an actual assessment rather than a
+   novelty score. Each is still just a formula over the 20 hidden
+   dimensions, scaled 0 to 100. */
+const MEASURED_TRAITS = [
+  "Emotional Steadiness","Decision Confidence","Social Stamina",
+  "Creative Output","Focus Capacity","Risk Tolerance","Empathy Index",
+  "Leadership Presence","Adaptability Score","Resilience Rating",
+  "Trust Radius","Independence Level","Friendship Reliability",
+  "Growth Mindset","Communication Clarity","Stress Recovery"
+];
+
+/* ---- Lines shown during brief "calculating" transitions ----------------
+   Rotated randomly, a mix of genuine-sounding processing steps and a
+   couple of lighter ones, purely as a loading-state flourish. */
+const CALC_LINES = [
+  "Calculating cool factor",
+  "Calculating baseline friendship motor",
+  "Reading between the lines",
+  "Cross-referencing your instincts",
+  "Weighing risk against reason",
+  "Measuring your patience threshold",
+  "Checking how you handle a bad Tuesday",
+  "Comparing this answer against the last one",
+  "Running the numbers on your empathy",
+  "Mapping your decision pattern",
+  "Adjusting for how you actually think, not just what you picked",
+  "Testing for consistency",
+  "Locating your stress response",
+  "Estimating your social battery",
+  "Narrowing down your archetype",
+  "Weighing loyalty against independence",
+  "Checking your leadership signal",
+  "Recalculating after that last answer",
+];
+
+</script>
+<script>
+/* =========================================================================
+   PERSONAFORGE, ENGINE MODULE
+   All algorithms documented inline. Pure functions, no DOM, fully testable.
+   ========================================================================= */
+
+const CLUSTERS = Object.keys(QUESTION_BANK);
+const BASELINE_PER_CLUSTER = 4;   // guaranteed questions per cluster
+const TOTAL_QUESTIONS = 35;       // final quiz length this build ships with
+// NOTE ON SCALING: to reach the full 150-bank / 50-served spec, add
+// questions to QUESTION_BANK (more per cluster or more clusters) and raise
+// TOTAL_QUESTIONS. Nothing else in this file needs to change, the
+// adaptive-selection algorithm below scales automatically.
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Adaptive question selection
+   1. Every cluster contributes its first BASELINE_PER_CLUSTER questions
+      up front, in a shuffled cluster order, so early answers sample every
+      trait area (this is what lets the engine detect emerging tendencies).
+   2. After the baseline round, running "cluster affinity" is computed as
+      the sum of |dimension delta| contributed by answers whose question
+      belonged to that cluster, i.e. how strongly that area is resonating,
+      regardless of direction.
+   3. Remaining slots are filled from the two to three highest-affinity
+      clusters' remaining (5th/6th) questions, the "go deeper" behavior
+      the spec asks for. If a cluster has no remaining questions, the next
+      highest-affinity cluster is used instead.
+   4. Selection order is decided progressively (re-ranked every 5 answers)
+      so it keeps adapting throughout the test, not just once.
+------------------------------------------------------------------------- */
+
+function shuffledClusters(seed){
+  const arr = [...CLUSTERS];
+  let s = seed;
+  for (let i = arr.length - 1; i > 0; i--){
+    s = (s * 9301 + 49297) % 233280;
+    const j = Math.floor((s / 233280) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+class QuizSession {
+  constructor(seed = Date.now() % 100000, name = ""){
+    this.seed = seed;
+    this.name = name;
+    this.dims = emptyDims();
+    this.answers = [];              // sparse: index-aligned with this.plan, entries or null
+    this.clusterAffinity = {};
+    CLUSTERS.forEach(c => this.clusterAffinity[c] = 0);
+    this.clusterAsked = {};
+    CLUSTERS.forEach(c => this.clusterAsked[c] = 0);
+    this.usedIds = new Set();
+    this.order = shuffledClusters(seed);
+    this.plan = this._buildBaseline();
+    this.cursor = 0;
+  }
+
+  _buildBaseline(){
+    const plan = [];
+    for (let i = 0; i < BASELINE_PER_CLUSTER; i++){
+      this.order.forEach(cluster => {
+        const q = QUESTION_BANK[cluster][i];
+        if (q) plan.push({ ...q, cluster });
+      });
+    }
+    return plan;
+  }
+
+  totalLength(){ return TOTAL_QUESTIONS; }
+
+  current(){
+    if (this.cursor >= TOTAL_QUESTIONS) return null;
+    if (this.cursor >= this.plan.length){
+      this.plan.push(this._pickAdaptive());
+    }
+    return this.plan[this.cursor];
+  }
+
+  currentAnswer(){
+    return this.answers[this.cursor] || null;
+  }
+
+  _pickAdaptive(){
+    const ranked = [...CLUSTERS].sort((a, b) => this.clusterAffinity[b] - this.clusterAffinity[a]);
+    for (const cluster of ranked){
+      const bank = QUESTION_BANK[cluster];
+      const nextIdx = this.clusterAsked[cluster];
+      if (nextIdx < bank.length && !this.usedIds.has(bank[nextIdx].id)){
+        return { ...bank[nextIdx], cluster };
+      }
+    }
+    // fallback: any unused question anywhere
+    const fallback = QUESTIONS.find(q => !this.usedIds.has(q.id));
+    return fallback || QUESTIONS[0];
+  }
+
+  /* Editing an already-answered question first reverts its dimension and
+     cluster-affinity contribution, then re-applies the new choice, so
+     going back and changing an answer produces a fully correct result
+     rather than double-counting. */
+  _revert(idx){
+    const prev = this.answers[idx];
+    if (!prev) return;
+    Object.entries(prev.d).forEach(([dim, val]) => { this.dims[dim] -= val; });
+    const magnitude = Object.values(prev.d).reduce((s, v) => s + Math.abs(v), 0);
+    this.clusterAffinity[prev.cluster] -= magnitude;
+    this.answers[idx] = null;
+  }
+
+  answer(optionIndex){
+    const q = this.current();
+    if (!q) return;
+    const opt = q.options[optionIndex];
+    const editing = !!this.answers[this.cursor];
+    if (editing){
+      this._revert(this.cursor);
+    } else {
+      this.usedIds.add(q.id);
+      this.clusterAsked[q.cluster] = (this.clusterAsked[q.cluster] || 0) + 1;
+    }
+    let magnitude = 0;
+    Object.entries(opt.d).forEach(([dim, val]) => {
+      this.dims[dim] = (this.dims[dim] || 0) + val;
+      magnitude += Math.abs(val);
+    });
+    this.clusterAffinity[q.cluster] += magnitude;
+    this.answers[this.cursor] = { questionId: q.id, cluster: q.cluster, optionIndex, text: opt.text, d: opt.d };
+    this.cursor++;
+  }
+
+  goBack(){
+    if (this.cursor > 0) this.cursor--;
+  }
+
+  goForward(){
+    // only allowed onto a question that already has a recorded answer,
+    // otherwise there's nothing to advance into without answering it
+    if (this.answers[this.cursor]) this.cursor++;
+  }
+
+  canGoBack(){ return this.cursor > 0; }
+  canSkipForward(){ return !!this.answers[this.cursor]; }
+
+  progress(){ return { current: this.cursor, total: TOTAL_QUESTIONS }; }
+  isComplete(){ return this.cursor >= TOTAL_QUESTIONS; }
+
+  encouragement(){
+    const remaining = TOTAL_QUESTIONS - this.cursor;
+    if (remaining <= 0) return "That's everything I need.";
+    if (remaining === TOTAL_QUESTIONS) return "Let's start.";
+    if (remaining <= 3) return "Almost there, just a couple more.";
+    if (remaining <= 5) return "A few more and I'll have a clear read.";
+    if (remaining <= 10) return "Ten left. You're doing fine.";
+    if (this.cursor >= 15 && this.cursor < 18) return "I'm starting to get a sense of you.";
+    if (remaining <= TOTAL_QUESTIONS * 0.5) return "Good pace, keep going.";
+    return "Just getting started here.";
+  }
+
+  normalizedDims(){
+    // clamp to a stable -10..10 range regardless of quiz length, for the
+    // encoding and archetype matching steps below.
+    const out = {};
+    DIMENSIONS.forEach(k => {
+      out[k] = Math.max(-10, Math.min(10, Math.round(this.dims[k])));
+    });
+    return out;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Archetype matching
+   Each archetype has a small "signature": 3 weighted dimensions that most
+   define it. Score = sum(normalizedDim[dim] * weight) for each archetype,
+   the highest score wins. This is a lightweight weighted-vector match, so
+   it rewards a person for being distinctively strong in an archetype's
+   core traits rather than requiring an exact 20-dimension fingerprint,
+   which keeps results feeling specific without demanding improbable
+   precision. The full ranked list is returned too, so the result page can
+   show how every other archetype scored, not just the top one.
+------------------------------------------------------------------------- */
+
+function matchArchetype(normDims){
+  const scored = ARCHETYPES.map(a => {
+    const score = a.signature.reduce((sum, s) => sum + (normDims[s.dim] || 0) * s.w, 0);
+    return { archetype: a, score };
+  }).sort((x, y) => y.score - x.score);
+  return { primary: scored[0].archetype, runnerUp: scored[1].archetype, ranked: scored };
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Sub-profile (why two people with the same archetype differ)
+   An archetype is decided by only 3 signature dimensions, so two people
+   can land on the same one while still being genuinely different once you
+   look at the other 17. This finds the two dimensions the person scores
+   highest on outside the archetype's own signature, and turns that into a
+   short, specific sentence, so results within the same archetype aren't
+   interchangeable.
+------------------------------------------------------------------------- */
+
+function computeSubProfile(normDims, archetype){
+  const sigDims = new Set(archetype.signature.map(s => s.dim));
+  const rest = DIMENSIONS.filter(d => !sigDims.has(d))
+    .map(d => ({ d, v: normDims[d] || 0 }))
+    .sort((a, b) => b.v - a.v);
+  const top = rest.slice(0, 2).filter(x => x.v > 0);
+  if (top.length === 0){
+    return `Within ${archetype.name}, your other traits are fairly balanced, no single one pulling much harder than the rest.`;
+  }
+  const labels = top.map(x => DIM_LABELS[x.d]);
+  return `Within ${archetype.name}, you lean especially into ${labels.join(" and ")}, which shapes your version of this type a little differently from someone else who tested the same result.`;
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Measured traits
+   Each trait is a plain, deterministic formula over normalized dimensions
+   (0-100 scale). No randomness anywhere in this file, so the same answers
+   always produce the same reading, the way an actual assessment should.
+------------------------------------------------------------------------- */
+
+function pct(v){ return Math.round(((v + 10) / 20) * 100); }
+
+function computeMeasuredTraits(normDims){
+  const clamp = v => Math.max(1, Math.min(100, Math.round(v)));
+  const g = k => pct(normDims[k] || 0);
+  return {
+    "Emotional Steadiness": clamp((g("resilience") + g("patience") + g("selfAwareness")) / 3),
+    "Decision Confidence": clamp((g("confidence") + g("logic") + g("drive")) / 3),
+    "Social Stamina": clamp((g("socialEnergy") + g("adaptability")) / 2),
+    "Creative Output": clamp((g("creativity") + g("curiosity") + g("independence")) / 3),
+    "Focus Capacity": clamp((g("discipline") + g("patience") + g("planning")) / 3),
+    "Risk Tolerance": clamp(g("risk")),
+    "Empathy Index": clamp((g("empathy") + g("kindness")) / 2),
+    "Leadership Presence": clamp((g("leadership") + g("confidence") + g("drive")) / 3),
+    "Adaptability Score": clamp(g("adaptability")),
+    "Resilience Rating": clamp((g("resilience") + g("discipline")) / 2),
+    "Trust Radius": clamp(g("trust")),
+    "Independence Level": clamp(g("independence")),
+    "Friendship Reliability": clamp((g("trust") + g("kindness") + g("patience") + g("empathy")) / 4),
+    "Growth Mindset": clamp((g("selfAwareness") + g("curiosity") + g("optimism")) / 3),
+    "Communication Clarity": clamp((g("logic") + g("confidence") + g("empathy")) / 3),
+    "Stress Recovery": clamp((g("resilience") + g("optimism") + g("patience")) / 3),
+  };
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Career matching
+   For each career, fit = average normalized score across its 3 signature
+   dimensions. Tiers: >=65 Excellent, >=45 Good, else Avoid (shown as a
+   growth note rather than a value judgement). A one-line "why" is
+   generated from whichever of the 3 dimensions scored highest for the
+   person, referencing that trait by name.
+------------------------------------------------------------------------- */
+
+const DIM_LABELS = {
+  confidence:"confidence", logic:"logical thinking", creativity:"creativity",
+  humor:"humor", adaptability:"adaptability", curiosity:"curiosity",
+  empathy:"empathy", leadership:"leadership", patience:"patience",
+  drive:"drive", risk:"risk tolerance", trust:"trust", kindness:"kindness",
+  discipline:"discipline", socialEnergy:"social energy",
+  selfAwareness:"self-awareness", planning:"planning", resilience:"resilience",
+  optimism:"optimism", independence:"independence"
+};
+
+function computeCareers(normDims){
+  return CAREERS.map(c => {
+    const scores = c.dims.map(d => pct(normDims[d] || 0));
+    const fit = Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+    const topDimIdx = scores.indexOf(Math.max(...scores));
+    const topDim = c.dims[topDimIdx];
+    const tier = fit >= 65 ? "Excellent Match" : fit >= 45 ? "Good Match" : "Avoid";
+    const why = tier === "Avoid"
+      ? `Your natural ${DIM_LABELS[c.dims[scores.indexOf(Math.min(...scores))]]} leans elsewhere, so this isn't a strength fit today.`
+      : `Your ${DIM_LABELS[topDim]} lines up well with what this path demands.`;
+    return { name:c.name, fit, tier, why };
+  }).sort((a,b) => b.fit - a.fit);
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Relationship matches
+   Each relationship type weights a different subset of dimensions, using
+   the person's own scores to describe how they show up in that dynamic
+   (not a two-person comparison, that's the Compare page, below).
+------------------------------------------------------------------------- */
+
+const RELATIONSHIP_WEIGHTS = {
+  friendship: ["trust","kindness","socialEnergy"],
+  dating: ["empathy","trust","confidence"],
+  marriage: ["patience","trust","discipline"],
+  business: ["drive","logic","discipline"],
+  creative: ["creativity","adaptability","curiosity"],
+  travel: ["adaptability","risk","curiosity"],
+  gaming: ["patience","logic","humor"],
+  study: ["discipline","patience","logic"],
+  roommate: ["patience","trust","discipline"],
+};
+
+function computeRelationshipStyles(normDims){
+  return RELATIONSHIP_TYPES.map(r => {
+    const dims = RELATIONSHIP_WEIGHTS[r.key];
+    const score = Math.round(dims.reduce((s,d)=>s+pct(normDims[d]||0),0) / dims.length);
+    return { key:r.key, label:r.label, score };
+  });
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Personality code encode/decode
+   Format:  [Name-]PF1-<archetypeIndex base36>-<20 dims packed as base36>-<checksum>
+   Every dimension is clamped to -10..10, shifted to 0..20 so it always
+   encodes as a single base36 digit (0-9,A-J covers 0-19, K covers 20).
+   The checksum is a simple mod-36 sum of all digit values, guarding
+   against typos when a code is shared or copy-pasted.
+   The optional name is sanitized to letters, numbers and underscores only
+   (so it can't contain the "-" delimiter) and placed at the front, e.g.
+   Yota-PF1-8-FJHCFHKGFDJGIGDEGCCC-R. Fully local, no server round trip
+   needed to decode either the name or the traits.
+------------------------------------------------------------------------- */
+
+const B36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function sanitizeName(name){
+  return (name || "").trim().replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20);
+}
+
+function encodeCode(archetypeId, normDims, name){
+  const archIdx = ARCHETYPES.findIndex(a => a.id === archetypeId);
+  const archDigit = B36[archIdx] || "0";
+  let digits = "";
+  let checksum = archIdx;
+  DIMENSIONS.forEach(dim => {
+    const shifted = Math.max(0, Math.min(20, (normDims[dim] || 0) + 10));
+    digits += B36[shifted];
+    checksum += shifted;
+  });
+  const checkDigit = B36[checksum % 36];
+  const base = `PF1-${archDigit}-${digits}-${checkDigit}`;
+  const cleanName = sanitizeName(name);
+  return cleanName ? `${cleanName}-${base}` : base;
+}
+
+function decodeCode(code){
+  try {
+    const raw = code.trim();
+    let name = "";
+    let body = raw;
+    const upperParts = raw.split("-");
+    if (upperParts[0] && upperParts[0].toUpperCase() !== "PF1"){
+      name = sanitizeName(upperParts[0]);
+      body = upperParts.slice(1).join("-");
+    }
+    const parts = body.trim().toUpperCase().split("-");
+    if (parts.length !== 4 || parts[0] !== "PF1") return null;
+    const [, archDigit, digits, checkDigit] = parts;
+    const archIdx = B36.indexOf(archDigit);
+    if (archIdx < 0 || !ARCHETYPES[archIdx]) return null;
+    if (digits.length !== DIMENSIONS.length) return null;
+    let checksum = archIdx;
+    const normDims = {};
+    for (let i = 0; i < DIMENSIONS.length; i++){
+      const val = B36.indexOf(digits[i]);
+      if (val < 0 || val > 20) return null;
+      checksum += val;
+      normDims[DIMENSIONS[i]] = val - 10;
+    }
+    if (B36[checksum % 36] !== checkDigit) return null;
+    return { archetype: ARCHETYPES[archIdx], normDims, name };
+  } catch (e){
+    return null;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Compatibility (Compare page)
+   For two decoded profiles, compute:
+   - relationshipScore: overall closeness, weighted toward complementary
+     (not just identical) traits: leadership plus patience, drive plus
+     planning, social energy plus empathy, and risk plus discipline are
+     all treated as good complements, not just close matches.
+   - communicationScore, adventureScore, creativeScore, trustScore: simple
+     paired averages and similarity on relevant dimension clusters.
+   - sharedStrengths / conflictAreas: dimensions where both score high
+     (shared) versus dimensions with the largest gap (friction risk).
+------------------------------------------------------------------------- */
+
+function similarity(a, b){
+  // 0..100, 100 = identical
+  const diff = Math.abs(a - b);
+  return Math.max(0, 100 - diff * 5);
+}
+
+function computeCompatibility(profileA, profileB){
+  const a = profileA.normDims, b = profileB.normDims;
+  const communicationScore = Math.round((similarity(a.socialEnergy,b.socialEnergy) + similarity(a.trust,b.trust) + similarity(a.empathy,b.empathy)) / 3);
+  const adventureScore = Math.round((similarity(a.risk,b.risk) + similarity(a.adaptability,b.adaptability) + similarity(a.curiosity,b.curiosity)) / 3);
+  const creativeScore = Math.round((similarity(a.creativity,b.creativity) + similarity(a.curiosity,b.curiosity)) / 2);
+  const trustScore = Math.round((similarity(a.trust,b.trust) + similarity(a.kindness,b.kindness)) / 2);
+
+  const complementBonus = [
+    ["leadership","patience"], ["drive","planning"], ["socialEnergy","empathy"], ["risk","discipline"]
+  ].reduce((sum, [x,y]) => sum + (100 - Math.abs(pct(a[x]) - pct(b[y]))) * 0.05, 0);
+
+  const overallSimilarity = DIMENSIONS.reduce((s,d) => s + similarity(a[d], b[d]), 0) / DIMENSIONS.length;
+  const relationshipScore = Math.round(Math.min(100, overallSimilarity * 0.75 + complementBonus));
+
+  const shared = DIMENSIONS.filter(d => a[d] >= 3 && b[d] >= 3).sort((x,y)=>(b[y]+a[y])-(b[x]+a[x])).slice(0,4);
+  const conflicts = DIMENSIONS.map(d => ({ d, gap: Math.abs(a[d]-b[d]) })).sort((x,y)=>y.gap-x.gap).slice(0,3).map(x=>x.d);
+
+  return { relationshipScore, communicationScore, adventureScore, creativeScore, trustScore,
+    sharedStrengths: shared.map(d => DIM_LABELS[d]), conflictAreas: conflicts.map(d => DIM_LABELS[d]) };
+}
+
+</script>
+<script>
+/* =========================================================================
+   PERSONAFORGE, APP MODULE
+   Renders every screen into #app. No framework, no build step.
+   ========================================================================= */
+
+const root = document.getElementById("app");
+let session = null;
+let lastResult = null;
+let pendingName = "";
+let soundOn = localStorage.getItem("pf_sound") !== "off";
+let careersExpanded = false;
+
+/* ---------------- tiny sound (optional, WebAudio, no assets) ---------- */
+let audioCtx = null;
+function click(freq = 440, dur = 0.045){
+  if (!soundOn) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+    o.frequency.value = freq; o.type = "sine";
+    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch(e){ /* audio unsupported, fail silently */ }
+}
+
+/* ---------------- decorative venetian blind bars ----------------------*/
+function spawnAmbience(){
+  const layer = document.getElementById("embers");
+  if (!layer || layer.dataset.done) return;
+  layer.dataset.done = "1";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) return;
+  for (let i = 0; i < 7; i++){
+    const bar = document.createElement("div");
+    bar.className = "blind-bar";
+    bar.style.top = (10 + i * 13) + "vh";
+    bar.style.animationDelay = (i * 1.4) + "s";
+    layer.appendChild(bar);
+  }
+}
+
+function pickLines(n){
+  const pool = [...CALC_LINES];
+  const out = [];
+  for (let i = 0; i < n && pool.length; i++){
+    const idx = Math.floor(Math.random() * pool.length);
+    out.push(pool.splice(idx, 1)[0]);
+  }
+  return out;
+}
+
+/* ---------------- routing ---------------------------------------------*/
+function navigate(view){
+  window.scrollTo(0, 0);
+  if (view === "landing") renderLanding();
+  else if (view === "compare") renderCompare();
+}
+
+/* ---------------- shared chrome ---------------------------------------*/
+function topBar(showBack){
+  return `
+  <div class="top-bar">
+    <div class="brand-mini">${showBack ? `<button class="icon-btn" onclick="navigate('landing')" aria-label="Home">&larr;</button>` : ""}<span class="dot"></span><span>PersonaForge</span></div>
+    <button class="icon-btn" onclick="toggleSound()" aria-label="Toggle sound">${soundOn ? "\u266B" : "\u2715"}</button>
+  </div>`;
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  localStorage.setItem("pf_sound", soundOn ? "on" : "off");
+  click(soundOn ? 660 : 220);
+  const btn = document.querySelector('.icon-btn[aria-label="Toggle sound"]');
+  if (btn) btn.textContent = soundOn ? "\u266B" : "\u2715";
+}
+
+/* ---------------- LANDING ---------------------------------------------*/
+function renderLanding(){
+  const saved = localStorage.getItem("pf_last_code");
+  root.innerHTML = `
+    ${topBar(false)}
+    <div class="landing">
+      <div class="logo-mark">Case File 01</div>
+      <h1>Persona<span>Forge</span></h1>
+      <p class="tagline">Decode yourself. This is an adaptive read built from scenarios, not a survey. It takes about seven minutes, and it changes direction as you answer.</p>
+      <div class="cta-row">
+        <button class="btn btn-primary" onclick="click(520);goToNameScreen()">Begin &rarr;</button>
+        <button class="btn btn-ghost" onclick="click(380);navigate('compare')">Compare Two Results</button>
+      </div>
+      ${saved ? `<button class="btn btn-ghost" style="margin-top:4px" onclick="click(380);loadSaved()">Reopen my last result</button>` : ""}
+      <div class="meta-row">
+        <span>Runs entirely on your device</span><span>&middot;</span><span>No account</span><span>&middot;</span><span>Works offline after first load</span>
+      </div>
+
+      <div class="quick-compare glass">
+        <label>Already have someone's code? Paste it here to see how you match.</label>
+        <div class="row">
+          <input type="text" id="quickCode" placeholder="Name-PF1-...">
+          <button class="btn btn-ghost" onclick="quickCompareGo()">Compare</button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-nav">
+      <button onclick="navigate('compare')">Compare page</button>
+      <button onclick="alert('PersonaForge runs entirely in your browser. Nothing you answer is sent anywhere, and nothing is stored except a code on your own device if you choose to save it.')">Privacy</button>
+    </div>
+  `;
+  spawnAmbience();
+}
+
+function quickCompareGo(){
+  const val = document.getElementById("quickCode").value.trim();
+  if (!val) return;
+  sessionStorage.setItem("pf_prefill_b", val);
+  click(420);
+  navigate("compare");
+}
+
+function loadSaved(){
+  const code = localStorage.getItem("pf_last_code");
+  const decoded = code && decodeCode(code);
+  if (!decoded){ alert("No valid saved result found on this device."); return; }
+  lastResult = buildResultFromDecoded(decoded, code);
+  renderResult();
+}
+
+/* ---------------- NAME CAPTURE -----------------------------------------*/
+function goToNameScreen(){
+  root.innerHTML = `
+    ${topBar(true)}
+    <div class="name-screen">
+      <div class="eyebrow accent">BEFORE WE START</div>
+      <h2>Who am I reading?</h2>
+      <p>Your name goes at the front of your result and your personality code, so it's clearly yours if you ever share it.</p>
+      <input type="text" id="nameField" class="name-input" placeholder="Your name" maxlength="20" autocomplete="off" />
+      <button class="btn btn-primary" onclick="confirmName()">Continue &rarr;</button>
+      <p style="font-size:12.5px;color:var(--text-dim)">You can also skip this and stay anonymous.</p>
+      <button class="btn btn-ghost" onclick="click(360);startQuiz('')" style="margin-top:-6px">Skip for now</button>
+    </div>
+  `;
+  spawnAmbience();
+  setTimeout(() => {
+    const f = document.getElementById("nameField");
+    if (f){ f.focus(); f.onkeydown = (e) => { if (e.key === "Enter") confirmName(); }; }
+  }, 50);
+}
+function confirmName(){
+  const val = document.getElementById("nameField").value.trim();
+  click(500);
+  startQuiz(val);
+}
+
+/* ---------------- QUIZ --------------------------------------------------*/
+function startQuiz(name){
+  pendingName = name || "";
+  session = new QuizSession(Date.now() % 100000, pendingName);
+  renderQuiz();
+}
+
+function renderQuiz(){
+  if (!session){ session = new QuizSession(Date.now() % 100000, pendingName); }
+  const q = session.current();
+  if (!q){ renderForging(); return; }
+  const { current, total } = session.progress();
+  const pctDone = Math.round((current / total) * 100);
+  const existing = session.currentAnswer();
+  root.innerHTML = `
+    <div class="container">
+      <div class="quiz-top">
+        ${topBar(true)}
+        <div class="progress-track"><div class="progress-fill" style="width:${pctDone}%"></div></div>
+        <div class="progress-meta">
+          <span>Question ${current + 1} of ${total}</span>
+          <span class="encourage">${session.encouragement()}</span>
+        </div>
+      </div>
+      <div class="question-card glass" id="qcard">
+        <div class="quiz-nav-row">
+          <button class="nav-btn" onclick="goBackQuestion()" ${session.canGoBack() ? "" : "disabled"}>&larr; Back</button>
+          <div class="q-num">SCENARIO ${String(current + 1).padStart(2,"0")}</div>
+          <span></span>
+        </div>
+        <div class="q-text">${q.text}</div>
+        <div class="options" role="listbox" aria-label="Answer options">
+          ${q.options.map((opt, i) => `
+            <button class="option ${existing && existing.optionIndex === i ? "selected" : ""}" role="option" onclick="selectOption(${i})">
+              <span class="opt-key">${String.fromCharCode(65+i)}</span>
+              <span>${opt.text}</span>
+            </button>`).join("")}
+        </div>
+        ${existing ? `<div class="continue-row"><button class="btn btn-ghost" onclick="continueForward()">Keep this answer, continue &rarr;</button></div>` : ""}
+      </div>
+    </div>
+  `;
+  spawnAmbience();
+  attachKeyHandler();
+}
+
+function attachKeyHandler(){
+  document.onkeydown = (e) => {
+    if (["1","2","3"].includes(e.key)){
+      const idx = parseInt(e.key, 10) - 1;
+      const opts = document.querySelectorAll(".option");
+      if (opts[idx]) selectOption(idx);
+    } else if (e.key === "ArrowLeft" && session.canGoBack()){
+      goBackQuestion();
+    } else if (e.key === "ArrowRight" && session.canSkipForward()){
+      continueForward();
+    }
+  };
+}
+
+function goBackQuestion(){
+  click(300);
+  session.goBack();
+  renderQuiz();
+}
+function continueForward(){
+  click(460);
+  session.goForward();
+  if (session.isComplete()) renderForging();
+  else renderQuiz();
+}
+
+function selectOption(idx){
+  const opts = document.querySelectorAll(".option");
+  opts.forEach(o => o.classList.remove("selected"));
+  if (opts[idx]) opts[idx].classList.add("selected");
+  click(420 + idx * 60);
+  session.answer(idx);
+  const card = document.getElementById("qcard");
+  if (card) card.classList.add("leaving");
+  showCalcOverlay(1, () => {
+    if (session.isComplete()) renderForging();
+    else renderQuiz();
+  });
+}
+
+function showCalcOverlay(count, done){
+  document.onkeydown = null;
+  const overlay = document.createElement("div");
+  overlay.className = "calc-overlay";
+  const line = pickLines(1)[0] || "Processing";
+  overlay.innerHTML = `<div class="calc-bars"><span></span><span></span><span></span><span></span></div><div class="calc-line">${line}...</div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    overlay.remove();
+    done();
+  }, 480);
+}
+
+/* ---------------- FORGING (brief transition + compute) -----------------*/
+function renderForging(){
+  document.onkeydown = null;
+  const lines = pickLines(4);
+  root.innerHTML = `
+    <div class="forging">
+      <div class="calc-bars"><span></span><span></span><span></span><span></span></div>
+      <h2>Putting it together</h2>
+      <p id="forge-line">${lines[0]}...</p>
+    </div>`;
+  let i = 0;
+  const int = setInterval(() => {
+    i++;
+    const el = document.getElementById("forge-line");
+    if (el && lines[i]) el.textContent = lines[i] + "...";
+  }, 420);
+  setTimeout(() => {
+    clearInterval(int);
+    computeResult();
+    renderResult();
+  }, 1900);
+}
+
+function computeResult(){
+  const normDims = session.normalizedDims();
+  const match = matchArchetype(normDims);
+  const code = encodeCode(match.primary.id, normDims, session.name);
+  lastResult = {
+    name: session.name || "",
+    normDims,
+    archetype: match.primary,
+    runnerUp: match.runnerUp,
+    ranked: match.ranked,
+    subProfile: computeSubProfile(normDims, match.primary),
+    code,
+    careers: computeCareers(normDims),
+    relationships: computeRelationshipStyles(normDims),
+    traits: computeMeasuredTraits(normDims),
+  };
+  localStorage.setItem("pf_last_code", code);
+  careersExpanded = false;
+}
+
+function buildResultFromDecoded(decoded, code){
+  const normDims = decoded.normDims;
+  const match = matchArchetype(normDims);
+  return {
+    name: decoded.name || "",
+    normDims,
+    archetype: decoded.archetype,
+    runnerUp: match.runnerUp,
+    ranked: match.ranked,
+    subProfile: computeSubProfile(normDims, decoded.archetype),
+    code,
+    careers: computeCareers(normDims),
+    relationships: computeRelationshipStyles(normDims),
+    traits: computeMeasuredTraits(normDims),
+  };
+}
+
+/* ---------------- RESULT -------------------------------------------------*/
+function renderResult(){
+  const r = lastResult;
+  const a = r.archetype;
+  const topCareers = careersExpanded ? r.careers : r.careers.slice(0, 8);
+  root.innerHTML = `
+    <div class="container result-hero">
+      ${topBar(true)}
+      ${r.name ? `<div class="name-tag">${r.name}'s Result</div>` : `<div class="name-tag">Your Result</div>`}
+      <div class="ingot glass">
+        <div class="ingot-icon">${a.icon}</div>
+        <div class="archetype-eyebrow">Primary Archetype</div>
+        <h2 class="ingot-name">${a.name}</h2>
+        <div class="ingot-title">${a.title}</div>
+        <p class="ingot-desc">${a.description}</p>
+        <p class="ingot-sub">${r.subProfile}</p>
+        <div class="ingot-code">${r.code}</div>
+      </div>
+      <div class="export-row">
+        <button class="btn btn-ghost" onclick="exportPNG('story')">Export Story</button>
+        <button class="btn btn-ghost" onclick="exportPNG('post')">Export Post</button>
+        <button class="btn btn-ghost" onclick="window.print()">Save as PDF</button>
+        <button class="btn btn-ghost" onclick="copyCode()">Copy Code</button>
+      </div>
+
+      <div class="compare-widget glass">
+        <h4>Compare with someone else</h4>
+        <p class="hint">Paste a friend's PersonaForge code to see how well you'd actually get along.</p>
+        <div class="row">
+          <input type="text" id="inlineCompareCode" placeholder="Name-PF1-...">
+          <button class="btn btn-accent" onclick="runInlineCompare()">Compare</button>
+        </div>
+        <div id="inlineCompareOut"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Hidden Trait Radar</span></div>
+        <canvas id="radar" width="520" height="520" role="img" aria-label="Radar chart of 20 hidden personality dimensions"></canvas>
+        <div class="radar-legend">20 dimensions, measured from your answers, never shown to you during the test</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Strengths and Growth Edges</span></div>
+        <div class="grid-2">
+          <div class="card glass"><h4>Strengths</h4><div class="tag-list">${a.strengths.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+          <div class="card glass"><h4>Watch-outs</h4><div class="tag-list">${a.weaknesses.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">How You Operate</span></div>
+        <div class="grid-2">
+          <div class="card glass"><h4>Work Style</h4><p>${a.workStyle}</p></div>
+          <div class="card glass"><h4>Under Stress</h4><p>${a.stressResponse}</p></div>
+          <div class="card glass"><h4>Friendship</h4><p>${a.friendshipStyle}</p></div>
+          <div class="card glass"><h4>Dating</h4><p>${a.datingStyle}</p></div>
+          <div class="card glass"><h4>Leadership</h4><p>${a.leadershipStyle}</p></div>
+          <div class="card glass"><h4>Learning</h4><p>${a.learningStyle}</p></div>
+          <div class="card glass"><h4>Communication</h4><p>${a.communicationStyle}</p></div>
+          <div class="card glass"><h4>Decision Making</h4><p>${a.decisionMaking}</p></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Ideal Environments and Hobbies</span></div>
+        <div class="grid-2">
+          <div class="card glass"><h4>Ideal Environments</h4><div class="tag-list">${a.idealEnvironments.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+          <div class="card glass"><h4>Favorite Hobbies</h4><div class="tag-list">${a.hobbies.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+        </div>
+        <div class="card glass" style="margin-top:12px"><h4>Growth Advice</h4><p>${a.growthAdvice}</p></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Perfect vs Worst Teammate</span></div>
+        <div class="grid-2">
+          <div class="card glass"><h4>Perfect Teammate</h4><p>${a.bestTeammate}</p></div>
+          <div class="card glass"><h4>Worst Teammate</h4><p>${a.worstTeammate}</p></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Measured Traits</span></div>
+        <div class="grid-4" id="traits">
+          ${Object.entries(r.traits).map(([k,v]) => `
+            <div class="stat-tile glass">
+              <div class="stat-val">${v}</div>
+              <div class="stat-label">${k}</div>
+              <div class="stat-bar-track"><div class="stat-bar-fill" data-w="${v}"></div></div>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Career Matches</span></div>
+        ${topCareers.map(c => `
+          <div class="career-row glass">
+            <span>${c.name}</span>
+            <span class="fit-badge fit-${c.tier === "Excellent Match" ? "excellent" : c.tier === "Good Match" ? "good" : "avoid"}">${c.tier}, ${c.fit}%</span>
+          </div>`).join("")}
+        <div class="careers-toggle"><button onclick="toggleCareers()">${careersExpanded ? "Show fewer" : `Show all ${r.careers.length}`}</button></div>
+        <p class="center-note" style="text-align:left">${r.careers[0].why}</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Relationship Styles</span></div>
+        <div class="card glass">
+          ${r.relationships.map(rel => `
+            <div class="relationship-row">
+              <span class="r-label">${rel.label}</span>
+              <div class="stat-bar-track"><div class="stat-bar-fill" data-w="${rel.score}"></div></div>
+              <span class="r-score">${rel.score}</span>
+            </div>`).join("")}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
+        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
+        <div class="card glass" style="margin-top:12px">
+          ${r.ranked.map((row, i) => {
+            const maxScore = r.ranked[0].score || 1;
+            const width = Math.max(4, Math.round((row.score / maxScore) * 100));
+            return `
+            <div class="rank-row ${i===0 ? "primary" : ""}">
+              <span class="rank-num">${String(i+1).padStart(2,"0")}</span>
+              <span class="rank-icon">${row.archetype.icon}</span>
+              <span class="rank-name">${row.archetype.name}</span>
+              <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${width}%"></div></div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Life Quote</span></div>
+        <div class="card glass" style="text-align:center; font-family:var(--font-display); font-size:19px; font-style:italic;">"${a.quote}"</div>
+      </div>
+
+      <div class="footer-nav">
+        <button onclick="click(400);goToNameScreen()">Retake the test</button>
+        <button onclick="click(400);navigate('compare')">Compare with someone</button>
+      </div>
+    </div>
+  `;
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".stat-bar-fill").forEach(el => {
+      el.style.width = (el.dataset.w || el.style.width) + (el.dataset.w ? "%" : "");
+    });
+    drawRadar(document.getElementById("radar"), r.normDims);
+  });
+}
+
+function toggleCareers(){
+  careersExpanded = !careersExpanded;
+  renderResult();
+}
+
+function copyCode(){
+  navigator.clipboard?.writeText(lastResult.code).then(() => {
+    click(700); alert("Personality code copied.");
+  }).catch(() => alert(lastResult.code));
+}
+
+function runInlineCompare(){
+  const codeStr = document.getElementById("inlineCompareCode").value;
+  const other = decodeCode(codeStr);
+  const out = document.getElementById("inlineCompareOut");
+  if (!other){
+    out.innerHTML = `<p class="center-note" style="text-align:left">That code doesn't look right. Check for typos and try again.</p>`;
+    return;
+  }
+  const mine = { normDims: lastResult.normDims };
+  const c = computeCompatibility(mine, other);
+  out.innerHTML = renderCompareResult(lastResult.archetype, lastResult.name, other.archetype, other.name, c);
+}
+
+/* ---------------- Radar chart (canvas, no library) ---------------------*/
+function drawRadar(canvas, normDims){
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const size = Math.min(500, root.clientWidth - 20);
+  canvas.width = size * dpr; canvas.height = size * dpr;
+  canvas.style.width = size + "px"; canvas.style.height = size + "px";
+  ctx.scale(dpr, dpr);
+  const cx = size/2, cy = size/2, R = size/2 - 52;
+  const dims = DIMENSIONS;
+  const n = dims.length;
+  ctx.clearRect(0,0,size,size);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.07)";
+  ctx.lineWidth = 1;
+  for (let ring = 1; ring <= 4; ring++){
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++){
+      const angle = (i / n) * Math.PI * 2 - Math.PI/2;
+      const r = (R * ring)/4;
+      const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  ctx.fillStyle = "rgba(237,234,227,0.5)";
+  ctx.font = "9.5px Manrope, sans-serif";
+  dims.forEach((d, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI/2;
+    const x = cx + Math.cos(angle) * R, y = cy + Math.sin(angle) * R;
+    ctx.strokeStyle = "rgba(255,255,255,0.05)";
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
+    const lx = cx + Math.cos(angle) * (R + 18), ly = cy + Math.sin(angle) * (R + 18);
+    ctx.textAlign = Math.cos(angle) > 0.2 ? "left" : Math.cos(angle) < -0.2 ? "right" : "center";
+    ctx.fillText(d, lx, ly);
+  });
+
+  ctx.beginPath();
+  dims.forEach((d, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI/2;
+    const val = Math.max(0, Math.min(1, (normDims[d] + 10) / 20));
+    const r = R * val;
+    const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = "rgba(179,36,43,0.16)";
+  ctx.strokeStyle = "#B3242B";
+  ctx.lineWidth = 1.6;
+  ctx.fill(); ctx.stroke();
+
+  // vertex dots
+  ctx.fillStyle = "#EDEAE3";
+  dims.forEach((d, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI/2;
+    const val = Math.max(0, Math.min(1, (normDims[d] + 10) / 20));
+    const r = R * val;
+    const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+    ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+/* ---------------- PNG export (canvas render of a share card) -----------*/
+function exportPNG(kind){
+  const r = lastResult; const a = r.archetype;
+  const dims = kind === "story" ? { w: 1080, h: 1920 } : { w: 1080, h: 1350 };
+  const canvas = document.createElement("canvas");
+  canvas.width = dims.w; canvas.height = dims.h;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#050505";
+  ctx.fillRect(0,0,dims.w,dims.h);
+  const glow = ctx.createRadialGradient(dims.w/2, dims.h*0.22, 40, dims.w/2, dims.h*0.22, dims.w*0.7);
+  glow.addColorStop(0, "rgba(179,36,43,0.18)"); glow.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = glow; ctx.fillRect(0,0,dims.w,dims.h);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#9A968D";
+  ctx.font = "600 26px 'Space Grotesk', sans-serif";
+  ctx.fillText("PERSONAFORGE", dims.w/2, dims.h*0.12);
+
+  if (r.name){
+    ctx.font = "500 30px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#EDEAE3";
+    ctx.fillText(r.name.toUpperCase(), dims.w/2, dims.h*0.18);
+  }
+
+  ctx.font = "700 90px 'Space Grotesk', sans-serif";
+  ctx.fillStyle = "#F5F1EA";
+  ctx.fillText(a.icon, dims.w/2, dims.h*0.30);
+
+  ctx.font = "700 60px 'Space Grotesk', sans-serif";
+  wrapText(ctx, a.name, dims.w/2, dims.h*0.38, dims.w*0.85, 66);
+
+  ctx.font = "italic 400 28px 'Manrope', sans-serif";
+  ctx.fillStyle = "#9A968D";
+  ctx.fillText(a.title, dims.w/2, dims.h*0.44);
+
+  ctx.font = "400 26px 'Manrope', sans-serif";
+  ctx.fillStyle = "#D8D2C8";
+  wrapText(ctx, a.description, dims.w/2, dims.h*0.52, dims.w*0.78, 38);
+
+  const topTraits = Object.entries(r.traits).sort((x,y)=>y[1]-x[1]).slice(0,3);
+  const statY = dims.h*0.7;
+  const spacing = dims.w/4;
+  topTraits.forEach(([k,v], i) => {
+    const x = dims.w/2 + (i-1)*spacing;
+    ctx.font = "700 50px 'Space Grotesk', sans-serif"; ctx.fillStyle = "#EDEAE3";
+    ctx.fillText(v, x, statY);
+    ctx.font = "400 18px 'Manrope', sans-serif"; ctx.fillStyle = "#9A968D";
+    wrapText(ctx, k, x, statY + 30, spacing - 10, 20);
+  });
+
+  ctx.font = "400 22px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#5C584F";
+  ctx.fillText(r.code, dims.w/2, dims.h*0.95);
+
+  const link = document.createElement("a");
+  link.download = `personaforge-${kind}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  click(760);
+}
+function wrapText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = String(text).split(" ");
+  let line = "", lines = [];
+  words.forEach(w => {
+    const test = line + w + " ";
+    if (ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = w + " "; }
+    else line = test;
+  });
+  lines.push(line);
+  const startY = y - ((lines.length-1)*lineHeight)/2;
+  lines.forEach((l,i) => ctx.fillText(l.trim(), x, startY + i*lineHeight));
+}
+
+/* ---------------- COMPARE ------------------------------------------------*/
+function renderCompare(){
+  const prefillB = sessionStorage.getItem("pf_prefill_b") || "";
+  sessionStorage.removeItem("pf_prefill_b");
+  root.innerHTML = `
+    <div class="container">
+      ${topBar(true)}
+      <div class="eyebrow accent">COMPARE</div>
+      <h2 style="margin:10px 0 6px">Two Codes, One Read</h2>
+      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste two PersonaForge codes to see how the two of you actually line up. Everything decodes locally, right here in the browser.</p>
+      <div class="compare-inputs" style="margin-top:20px">
+        <div><label>Person A code</label><textarea id="codeA" placeholder="Name-PF1-...">${lastResult ? lastResult.code : ""}</textarea></div>
+        <div><label>Person B code</label><textarea id="codeB" placeholder="Name-PF1-...">${prefillB}</textarea></div>
+      </div>
+      <div class="cta-row" style="justify-content:flex-start;margin-top:18px">
+        <button class="btn btn-primary" onclick="runCompare()">Compare</button>
+      </div>
+      <div id="compareOut"></div>
+    </div>
+  `;
+}
+
+function runCompare(){
+  const a = decodeCode(document.getElementById("codeA").value);
+  const b = decodeCode(document.getElementById("codeB").value);
+  const out = document.getElementById("compareOut");
+  if (!a || !b){
+    out.innerHTML = `<p class="center-note" style="text-align:left">One or both codes look off. Double check for typos and try again.</p>`;
+    return;
+  }
+  const c = computeCompatibility(a, b);
+  out.innerHTML = renderCompareResult(a.archetype, a.name, b.archetype, b.name, c);
+}
+
+function renderCompareResult(archA, nameA, archB, nameB, c){
+  return `
+    <div class="section">
+      <div class="card glass" style="text-align:center">
+        <h4>${nameA || "Person A"} and ${nameB || "Person B"}</h4>
+        <p style="color:var(--text-muted);margin-top:4px">${archA.icon} ${archA.name} &nbsp;meets&nbsp; ${archB.icon} ${archB.name}</p>
+        <div class="ingot-name" style="font-size:44px;margin-top:14px">${c.relationshipScore}%</div>
+        <p style="color:var(--text-muted)">Overall Compatibility</p>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card glass"><h4>Communication</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${c.communicationScore}%"></div></div></div>
+        <div class="card glass"><h4>Adventure</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${c.adventureScore}%"></div></div></div>
+        <div class="card glass"><h4>Creative</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${c.creativeScore}%"></div></div></div>
+        <div class="card glass"><h4>Trust</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${c.trustScore}%"></div></div></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card glass"><h4>Shared Strengths</h4><div class="tag-list">${c.sharedStrengths.map(s=>`<span class="tag">${s}</span>`).join("") || "<span class='tag'>Still emerging</span>"}</div></div>
+        <div class="card glass"><h4>Possible Friction</h4><div class="tag-list">${c.conflictAreas.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+      </div>
+      <div class="card glass" style="margin-top:12px"><h4>Advice</h4><p>Lean on the shared strengths to build trust quickly, and name the friction points out loud early. Most conflict here comes from different defaults, not different goals.</p></div>
+    </div>
+  `;
+}
+
+/* ---------------- init ---------------------------------------------------*/
+window.navigate = navigate;
+window.goToNameScreen = goToNameScreen;
+window.confirmName = confirmName;
+window.startQuiz = startQuiz;
+window.selectOption = selectOption;
+window.goBackQuestion = goBackQuestion;
+window.continueForward = continueForward;
+window.toggleSound = toggleSound;
+window.exportPNG = exportPNG;
+window.copyCode = copyCode;
+window.runCompare = runCompare;
+window.runInlineCompare = runInlineCompare;
+window.quickCompareGo = quickCompareGo;
+window.loadSaved = loadSaved;
+window.toggleCareers = toggleCareers;
+window.click = click; // exposed for inline handlers alongside audio helper
+
+renderLanding();
+
+</script>
+</body>
+</html>
