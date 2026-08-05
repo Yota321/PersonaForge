@@ -133,3 +133,135 @@ array) if you want to expand those lists later.
   forging-screen line pool to 18 rotating lines (including "Calculating
   cool factor" and "Calculating baseline friendship motor").
 - Removed every em dash from the UI copy and data content.
+
+## v2 update (the big one)
+
+Nothing from the noir redesign or v1 features was removed. This is all additive.
+
+**Adaptive engine**: question bank expanded from 60 to 150 (10 clusters x 15,
+all hand-written, no filler), and every run now serves 50 of them instead of
+35: 30 guaranteed baseline questions plus 20 pulled adaptively from whichever
+2-3 clusters are showing the strongest signal.
+
+**Hidden dimensions**: expanded from 20 to 25. Added emotionalStability,
+competitiveness, responsibility, persistence, openMindedness. The original
+20 keep their exact order and meaning, which is what makes old codes still
+decode correctly (see below).
+
+**New profiles on the result page**, all computed from the same 25
+dimensions, no new questions needed beyond the expanded bank:
+- Personality Mix: primary/secondary/third archetype as percentages, shown
+  right under the main result
+- Narrative Role: one of 15 original roles (Hero, Strategist, Trickster,
+  Survivor, etc.), scored the same way archetypes are
+- Social Profile: introvert/ambivert/extrovert spectrum, social battery,
+  conversation style, group size preference
+- Relationship Profile: love language mix, attachment style, conflict
+  style, trust/jealousy/personal space/emotional intimacy, relationship
+  dynamic (leads/follows/balanced/adaptive)
+- Thinking, Learning, and Decision style breakdowns, each as a percentage
+  split rather than a single label
+- Stress response, ranked (fight/flight/freeze/humor/planning/isolation/
+  seeking comfort/talking), plus ranked ideal environments
+- Achievements: 16 deterministic badges (Professional Overthinker, Golden
+  Retriever, Built Different, etc.) that unlock based on trait thresholds
+- Aesthetic profile (colors, fonts, clothing, room, workspace) and
+  entertainment predictions (music/movie/TV/book genres), both scored the
+  same signature-matching way as archetypes
+- Archetype extras: animal, element, symbol, and a hidden-potential line
+  generated from that archetype's own strengths/weaknesses
+- "Just for Fun" stats (Rizz, Aura, Chaos, etc.) kept, but moved into a
+  clearly-labeled, collapsed-by-default section that's explicit about not
+  being a real assessment, so it doesn't undercut the serious Measured
+  Traits section from the last update
+
+**Career matches**: now 4 tiers (Excellent, Good, Possible, Avoid) across
+46 careers, still shows the top 8 with a "show all" toggle.
+
+**Personality codes are versioned (PF1 to PF2) and never break old ones**.
+A PF2 code carries all 25 dimensions. Decoding checks the version tag:
+a PF1 code (20 dimensions) still decodes perfectly, its known traits come
+back exactly as they were, and the 5 dimensions added in v2 default to
+neutral until a retake. An "Upgraded from an older PF1 code" note shows on
+screen when this happens. This was tested directly, including feeding a
+hand-built legacy-format code through the real decoder.
+
+**Profile Viewer**: pasting any code into the landing page's "View" button
+reconstructs that person's entire result locally, personality, careers,
+relationships, achievements, everything, without needing a second code to
+compare against.
+
+**QR code**: built from scratch (no library, per the zero-dependency
+requirement) with a real Reed-Solomon implementation over GF(256), correct
+finder/timing/alignment pattern placement, all 8 standard mask patterns
+scored and the best one selected, and BCH-encoded format info. It's on the
+result page under "Scan to Share" and encodes a link back to that exact
+code. I verified it by writing an independent decoder and round-tripping
+several payloads through it (short strings, exact version-boundary
+lengths, a real share URL, punctuation), confirming byte-exact recovery
+and valid Reed-Solomon syndromes every time. I can't physically scan it
+with a camera in this sandboxed environment, so if it doesn't read on a
+real phone, that's the one piece worth double-checking first.
+
+**Timeline**: since there's no backend, "history" is a small local log
+(last 10 runs) kept in localStorage on that device. Retaking the test shows
+a "Since Last Time" delta against your previous run.
+
+**Privacy messaging**: "Everything stays on your device" now appears
+directly on the result page, alongside the existing landing-page privacy
+note.
+
+This was tested end-to-end in a real headless browser (not just read
+through), including the full 50-question adaptive flow, back/forward
+answer editing, the compare page, the profile viewer, an old-format code
+decoding correctly, and the QR code actually rendering pixels, with zero
+console or page errors in any of it.
+
+## v3 update
+
+Additive again, nothing removed. This one focused on making the engine
+itself smarter rather than just adding more sections.
+
+**Question System 2.0**: bank expanded from 150 to 200 (10 clusters x 20).
+The quiz no longer has a fixed length. It answers a minimum of 35
+questions, then checks its own confidence at 35, 40, and 45: if the top
+archetype is clearly ahead of the runner-up, it stops right there instead
+of padding out to 50. If two candidates are still close, it asks 5 more
+and checks again, capping at 50 no matter what. This was calibrated
+against real score distributions from dozens of simulated runs (not just
+guessed at), and tested for both the early-stop and full-length paths.
+
+**Smart disambiguation**: when the engine decides to keep going because two
+archetypes are close, it doesn't just ask more random questions. It works
+out which dimensions actually separate those two specific archetypes and
+biases its next picks toward clusters that touch those dimensions, so the
+extra questions are the ones most likely to resolve the tie.
+
+**Better personality read**: added Match Confidence and Personality
+Stability scores (how clearly you beat the runner-up, and how far ahead
+you are from the field overall), plus Hidden Strengths and Hidden
+Weaknesses, traits that scored notably high or low outside your matched
+archetype's own signature.
+
+**Compatibility engine rewrite**: the compare page now scores 31
+categories (Friendship, Romantic, Marriage, Long Distance, every kind of
+Partner, Daily Lifestyle, Leadership Balance, Chaos Together, and more),
+shows the top 8 with a "show all" toggle, and generates real explanation
+sentences from the actual dimension comparison, not fixed text, e.g. it
+only says "you both avoid conflict" when both people's patience scores
+actually support that. It also adds a full "Who Does What More" breakdown
+across 17 traits, four "perfect together" activity suggestions, and three
+generated fun facts.
+
+**New profile sections**: Fantasy Role (20 options, Knight to Dragon
+Rider), 4 more Narrative/Story roles (Villain, Hidden Villain, Chosen One,
+Lone Wolf), Friendship Profile (friend type, reliability, comfort, chaos,
+listening/advice/planning skill), Motivation style, and a small set of fun
+extras (mythical creature, season, time of day, chess piece). Work Profile
+got 5 more environment types (Freelancer, Research, Teaching, Creative
+Studio, Management).
+
+Tested the same way as the last two updates: a real headless browser run
+through the full flow, including the new dynamic-length quiz, the expanded
+result page, and a compare between two codes exercising every new section,
+with zero console or page errors.
