@@ -4312,10 +4312,10 @@ const QR = (function(){
   /* ---- Version capacity table, ECC level L, single block ---------------- */
   const VERSIONS = [
     { v:1, size:21, dataCodewords:19, ecCodewords:7 },
-    { v:2, size:25, dataCodewords:34, ecCodewords:10, align:18 },
-    { v:3, size:29, dataCodewords:55, ecCodewords:15, align:22 },
-    { v:4, size:33, dataCodewords:80, ecCodewords:20, align:26 },
-    { v:5, size:37, dataCodewords:108, ecCodewords:26, align:30 },
+    { v:2, size:25, dataCodewords:34, ecCodewords:10, align:[6,18] },
+    { v:3, size:29, dataCodewords:55, ecCodewords:15, align:[6,22] },
+    { v:4, size:33, dataCodewords:80, ecCodewords:20, align:[6,26] },
+    { v:5, size:37, dataCodewords:108, ecCodewords:26, align:[6,30] },
   ];
 
   function pickVersion(byteLength){
@@ -4555,12 +4555,8 @@ const QR = (function(){
     placeFinder(matrix, reserved, 0, size - 7);
     placeFinder(matrix, reserved, size - 7, 0);
     if (ver.align){
-      // The QR spec's alignment coordinate table lists candidate
-      // positions (e.g. {6, 18} for version 2); for versions 2-5 (one
-      // extra alignment pattern each) the only combination that doesn't
-      // land on a finder pattern is (align, align), so that single
-      // stored coordinate is used for both row and column here.
-      placeAlignment(matrix, reserved, ver.align, ver.align);
+      const [ar, ac] = ver.align;
+      placeAlignment(matrix, reserved, ar, ac);
     }
     placeTiming(matrix, reserved, size);
     reserveFormatAreas(reserved, size);
@@ -5489,6 +5485,24 @@ function renderResult(){
       </div>
 
       <div class="section">
+        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
+        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
+        <div class="card glass" style="margin-top:12px">
+          ${r.ranked.map((row, i) => {
+            const maxScore = r.ranked[0].score || 1;
+            const width = Math.max(4, Math.round((row.score / maxScore) * 100));
+            return `
+            <div class="rank-row ${i===0 ? "primary" : ""}">
+              <span class="rank-num">${String(i+1).padStart(2,"0")}</span>
+              <span class="rank-icon">${row.archetype.icon}</span>
+              <span class="rank-name">${row.archetype.name}</span>
+              <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${width}%"></div></div>
+            </div>`;
+          }).join("")}
+        </div>
+      </div>
+
+      <div class="section">
         <div class="section-title"><span class="eyebrow">Life Quote</span></div>
         <div class="card glass" style="text-align:center; font-family:var(--font-display); font-size:19px; font-style:italic;">"${a.quote}"</div>
       </div>
@@ -5699,24 +5713,6 @@ function renderResult(){
       </div>
 
       ${previousTimeline ? renderTimelineDelta(r, previousTimeline) : ""}
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
-        <div class="card glass" style="margin-top:12px">
-          ${r.ranked.map((row, i) => {
-            const maxScore = r.ranked[0].score || 1;
-            const width = Math.max(4, Math.round((row.score / maxScore) * 100));
-            return `
-            <div class="rank-row ${i===0 ? "primary" : ""}">
-              <span class="rank-num">${String(i+1).padStart(2,"0")}</span>
-              <span class="rank-icon">${row.archetype.icon}</span>
-              <span class="rank-name">${row.archetype.name}</span>
-              <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${width}%"></div></div>
-            </div>`;
-          }).join("")}
-        </div>
-      </div>
 
       <div class="section">
         <div class="section-title"><span class="eyebrow">Scan to Share</span></div>
