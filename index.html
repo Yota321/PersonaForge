@@ -5,7 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0F1117" />
 <title>PersonaForge, Discover. Compare. Evolve.</title>
-<meta name="description" content="PersonaForge: an adaptive, scenario-based personality read with a warm premium design. 100%% client-side, no accounts, works offline." />
+<meta name="description" content="PersonaForge is a privacy-first personality platform that generates rich personality profiles, adaptive assessments, compatibility comparisons, and shareable results. Everything runs entirely in your browser with no accounts and no servers." />
+<link rel="canonical" href="https://yota321.github.io/PersonaForge/" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="PersonaForge" />
+<meta property="og:description" content="Discover your personality, compare with friends, and share your profile. Everything runs locally with no accounts or servers." />
+<meta property="og:image" content="assets/Open_Graph.png" />
+<meta property="og:url" content="https://yota321.github.io/PersonaForge/" />
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="PersonaForge" />
+<meta name="twitter:description" content="Discover your personality, compare with friends, and share your profile. Everything runs locally with no accounts or servers." />
+<meta name="twitter:image" content="assets/Open_Graph.png" />
+
+<!-- Favicon: icon only, not the full logo. SVG preferred, PNG fallback. -->
+<link rel="icon" type="image/svg+xml" href="assets/Icon_black.svg" media="(prefers-color-scheme: light)" />
+<link rel="icon" type="image/svg+xml" href="assets/Icon_white.svg" media="(prefers-color-scheme: dark)" />
+<link rel="icon" type="image/png" href="assets/Icon_black_192.png" />
+<link rel="apple-touch-icon" href="assets/Icon_white_512.png" />
+
+<!-- PWA preparation: manifest not implemented yet, link only -->
+<link rel="manifest" href="manifest.json" />
+
+<!-- Preload only what is used immediately -->
+<link rel="preload" as="image" href="assets/Logo_white.svg" />
+<link rel="preload" as="audio" href="assets/BG.mp3" />
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.fontshare.com">
@@ -225,12 +253,15 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
 /* ---------- Landing ---------- */
 .landing{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; justify-content:center; flex:1; gap: 26px; padding-top: 6vh; }
 .logo-mark{ font-family: var(--font-mono); font-size: 13px; letter-spacing:0.3em; color: var(--text-dim); text-transform:uppercase; }
-.landing h1{
+.landing h1, #brandLogoFallback{
   font-size: clamp(46px, 9vw, 94px); line-height: 0.95; letter-spacing: -0.02em;
   color: var(--text);
   animation: revealIn 1s var(--ease) both;
 }
 .landing h1 span{ color: var(--accent); }
+.brand-logo{
+  max-width: min(70vw, 420px); height: auto; animation: revealIn 1s var(--ease) both;
+}
 @keyframes revealIn{
   0%{ filter: blur(10px); opacity:0; transform: translateY(10px); }
   100%{ filter: blur(0); opacity:1; transform:none; }
@@ -584,7 +615,7 @@ canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 <body>
 <div id="embers" aria-hidden="true"></div>
 <div id="app"></div>
-<audio id="bgMusic" src="BG.mp3" loop preload="auto"></audio>
+<audio id="bgMusic" src="assets/BG.mp3" loop preload="auto"></audio>
 
 <script>
 
@@ -4658,11 +4689,19 @@ function toggleTheme(){
   // properties directly and repaints on its own, so toggling theme there
   // never interrupts what the person is doing (e.g. mid-quiz).
   if (lastResult && document.getElementById("radar")){ renderResult(); }
-  else { updateThemeIcon(); }
+  else { updateThemeIcon(); updateBrandLogo(); }
 }
 function updateThemeIcon(){
   const btn = document.querySelector('.icon-btn[aria-label="Toggle light or dark theme"]');
   if (btn) btn.innerHTML = currentTheme === "light" ? ICONS.sun : ICONS.moon;
+}
+function setPageTitle(suffix){
+  document.title = suffix ? `Forge \u2022 ${suffix}` : "Forge";
+}
+
+function updateBrandLogo(){
+  const logo = document.getElementById("brandLogo");
+  if (logo) logo.src = currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg";
 }
 let careersExpanded = false;
 let funStatsOpen = false;
@@ -4683,7 +4722,7 @@ function click(freq = 440, dur = 0.045){
 }
 
 /* ---------------- background music -------------------------------------
-   BG.mp3 lives next to index.html (same GitHub Pages root), loaded via
+   BG.mp3 lives in the assets folder, loaded via
    the <audio id="bgMusic"> element outside #app so it keeps playing
    across every screen re-render instead of restarting. The same speaker
    icon that mutes the tiny click sounds controls this too. Browsers
@@ -4693,7 +4732,7 @@ const bgMusic = document.getElementById("bgMusic");
 if (bgMusic){
   bgMusic.volume = 0.35;
   bgMusic.addEventListener("error", () => {
-    // BG.mp3 missing or failed to load: fail silently, never break the app
+    // assets/BG.mp3 missing or failed to load: fail silently, never break the app
   });
   const startMusicOnce = () => {
     if (!soundOn){ document.removeEventListener("pointerdown", startMusicOnce); return; }
@@ -4855,17 +4894,17 @@ function navigate(view){
    library, since this environment has no live network access to fetch
    one, but the visual language stays cohesive across every use. */
 const ICONS = {
-  home: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 10 3l7 6.5"/><path d="M5 8.5V17h10V8.5"/><path d="M8 17v-5h4v5"/></svg>`,
-  sun: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7"/></svg>`,
-  moon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 12.2A6.8 6.8 0 1 1 7.8 3.5a6 6 0 0 0 8.7 8.7Z"/></svg>`,
-  soundOn: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.3a4 4 0 0 1 0 5.4M15.3 5a7.2 7.2 0 0 1 0 10"/></svg>`,
-  soundOff: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.5l4 5M17 7.5l-4 5"/></svg>`,
+  home: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 10 3l7 6.5"/><path d="M5 8.5V17h10V8.5"/><path d="M8 17v-5h4v5"/></svg>`,
+  sun: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7"/></svg>`,
+  moon: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 12.2A6.8 6.8 0 1 1 7.8 3.5a6 6 0 0 0 8.7 8.7Z"/></svg>`,
+  soundOn: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.3a4 4 0 0 1 0 5.4M15.3 5a7.2 7.2 0 0 1 0 10"/></svg>`,
+  soundOff: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.5l4 5M17 7.5l-4 5"/></svg>`,
 };
 
 function topBar(showBack){
   return `
   <div class="top-bar">
-    <div class="brand-mini">${showBack ? `<button class="icon-btn" onclick="goHome()" aria-label="Home">${ICONS.home}</button>` : ""}<span class="dot"></span><span>PersonaForge</span></div>
+    <div class="brand-mini">${showBack ? `<button class="icon-btn" onclick="goHome()" aria-label="Home">${ICONS.home}</button>` : ""}<span class="dot"></span><span>Forge</span></div>
     <div style="display:flex;gap:8px">
       <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light or dark theme">${currentTheme === "light" ? ICONS.sun : ICONS.moon}</button>
       <button class="icon-btn" onclick="toggleSound()" aria-label="Toggle sound">${soundOn ? ICONS.soundOn : ICONS.soundOff}</button>
@@ -4985,13 +5024,16 @@ function toggleSound(){
 /* ---------------- LANDING ---------------------------------------------*/
 function renderLanding(){
   setAccentColors();
+  setPageTitle();
   const saved = localStorage.getItem("pf_last_code");
   const savedQuiz = getSavedQuizProgress();
   root.innerHTML = `
     <div class="container">${topBar(false)}</div>
     <div class="landing">
       <div class="logo-mark">Discover. Compare. Evolve.</div>
-      <h1>Persona<span>Forge</span></h1>
+      <img id="brandLogo" class="brand-logo" alt="Forge" src="${currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg"}"
+        onerror="this.style.display='none'; document.getElementById('brandLogoFallback').style.display='block';" />
+      <h1 id="brandLogoFallback" style="display:none">Forge</h1>
       <p class="tagline">A personality read that actually adapts to you. Answer a set of scenarios, not a survey, and watch it change direction as it gets to know you. Takes about seven minutes.</p>
       ${savedQuiz ? `
       <div class="card glass" style="max-width:420px;text-align:center">
@@ -5026,7 +5068,7 @@ function renderLanding(){
     <div class="footer-nav">
       <button onclick="navigate('compare')">Compare page</button>
       <button onclick="navigate('party')">Party Compare (3-5 people)</button>
-      <button onclick="alert('PersonaForge runs entirely in your browser. Nothing you answer is sent anywhere, and nothing is stored except a code on your own device if you choose to save it.')">Privacy</button>
+      <button onclick="alert('Everything stays on your device. Forge never uploads your personality anywhere, and nothing is stored except a code on your own device if you choose to save it.')">Privacy</button>
     </div>
   `;
   spawnAmbience();
@@ -5063,6 +5105,7 @@ function loadSaved(){
 /* ---------------- NAME CAPTURE -----------------------------------------*/
 function goToNameScreen(){
   setAccentColors();
+  setPageTitle("Assessment");
   root.innerHTML = `
     <div class="container">${topBar(true)}</div>
     <div class="name-screen">
@@ -5119,6 +5162,7 @@ function startQuiz(name, meta){
 }
 
 function renderQuiz(){
+  setPageTitle("Assessment");
   if (!session){ session = new QuizSession(Date.now() % 100000, pendingName); }
   const q = session.current();
   if (!q){ renderForging(); return; }
@@ -5356,6 +5400,7 @@ function renderResult(){
   const a = r.archetype;
   setAccentColors(a.colors[0], a.colors[1]);
   setShareableURL(r.code);
+  setPageTitle(r.name || "Your Result");
   const topCareers = careersExpanded ? r.careers : r.careers.slice(0, 8);
   const previousTimeline = getPreviousTimelineEntry();
   root.innerHTML = `
@@ -5381,8 +5426,8 @@ function renderResult(){
         <div class="ingot-code">${r.code}</div>
         ${r.upgradedFromV1 ? `
         <div class="upgrade-banner">
-          <p>Your profile was created using PersonaForge Version 1.</p>
-          <p>PersonaForge has improved. Your original 20 traits carried over exactly, the 5 newer ones default to neutral for now.</p>
+          <p>Your profile was created using Forge Version 1.</p>
+          <p>Forge has improved. Your original 20 traits carried over exactly, the 5 newer ones default to neutral for now.</p>
           <button class="btn btn-accent" style="margin-top:10px" onclick="startUpgradeQuiz()">Answer ${UPGRADE_QUESTION_COUNT} questions to unlock the newer profile sections</button>
         </div>` : ""}
       </div>
@@ -5396,7 +5441,7 @@ function renderResult(){
 
       <div class="compare-widget glass">
         <h4>Compare with someone else</h4>
-        <p class="hint">Paste a friend's PersonaForge code to see how well you'd actually get along.</p>
+        <p class="hint">Paste a friend's Forge code to see how well you'd actually get along.</p>
         <div class="row">
           <input type="text" id="inlineCompareCode" placeholder="Name-PF1-...">
           <button class="btn btn-accent" onclick="runInlineCompare()">Compare</button>
@@ -5529,7 +5574,7 @@ function renderResult(){
 
       <div class="section">
         <div class="section-title"><span class="eyebrow">Other Frameworks</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">Approximate, for reference only, if you're familiar with these systems. Your PersonaForge archetype above is still the primary read.</p>
+        <p class="center-note" style="text-align:left;margin-top:0">Approximate, for reference only, if you're familiar with these systems. Your Forge archetype above is still the primary read.</p>
         <div class="grid-2" style="margin-top:12px">
           <div class="card glass framework-card framework-mbti"><h4>Closest MBTI</h4><p style="font-size:22px;font-family:var(--font-display)">${r.frameworks.mbti}</p></div>
           <div class="card glass framework-card framework-enneagram"><h4>Closest Enneagram</h4><p>${r.frameworks.enneagram.name}</p></div>
@@ -6017,7 +6062,7 @@ function exportPNG(kind){
   ctx.textAlign = "center";
   ctx.fillStyle = "#A7B0C2";
   ctx.font = "600 26px 'Space Grotesk', sans-serif";
-  ctx.fillText("PERSONAFORGE", dims.w/2, dims.h*0.12);
+  ctx.fillText("FORGE", dims.w/2, dims.h*0.12);
 
   if (r.name){
     ctx.font = "500 30px 'JetBrains Mono', monospace";
@@ -6056,9 +6101,12 @@ function exportPNG(kind){
   ctx.font = "400 22px 'JetBrains Mono', monospace";
   ctx.fillStyle = "#6B7385";
   ctx.fillText(r.code, dims.w/2, dims.h*0.95);
+  ctx.font = "400 18px 'Manrope', sans-serif";
+  ctx.fillStyle = "#4B5163";
+  ctx.fillText("Generated with Forge", dims.w/2, dims.h*0.975);
 
   const link = document.createElement("a");
-  link.download = `personaforge-${kind}.png`;
+  link.download = `forge-${kind}.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
   click(760);
@@ -6079,6 +6127,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight){
 /* ---------------- COMPARE ------------------------------------------------*/
 function renderCompare(){
   setAccentColors();
+  setPageTitle("Compare");
   const prefillB = sessionStorage.getItem("pf_prefill_b") || "";
   sessionStorage.removeItem("pf_prefill_b");
   root.innerHTML = `
@@ -6086,7 +6135,7 @@ function renderCompare(){
       ${topBar(true)}
       <div class="eyebrow accent">COMPARE</div>
       <h2 style="margin:10px 0 6px">Two Codes, One Read</h2>
-      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste two PersonaForge codes to see how the two of you actually line up. Everything decodes locally, right here in the browser.</p>
+      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste two Forge codes to see how the two of you actually line up. Everything decodes locally, right here in the browser.</p>
       <div class="compare-inputs" style="margin-top:20px">
         <div><label>Person A code</label><textarea id="codeA" placeholder="Name-PF1-...">${lastResult ? lastResult.code : ""}</textarea></div>
         <div><label>Person B code</label><textarea id="codeB" placeholder="Name-PF1-...">${prefillB}</textarea></div>
@@ -6126,12 +6175,13 @@ function toggleCompareCategories(){
 /* ---------------- PARTY COMPARE (3-5 people) ------------------------------*/
 function renderParty(){
   setAccentColors();
+  setPageTitle("Party Compare");
   root.innerHTML = `
     <div class="container">
       ${topBar(true)}
       <div class="eyebrow accent">PARTY COMPARE</div>
       <h2 style="margin:10px 0 6px">The Whole Group</h2>
-      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste 3 to 5 PersonaForge codes to see how the whole group lines up together, not just pair by pair.</p>
+      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste 3 to 5 Forge codes to see how the whole group lines up together, not just pair by pair.</p>
       <div class="compare-inputs party-inputs" style="margin-top:20px">
         <div><label>Person 1</label><textarea id="partyCode0" placeholder="Name-PF2-...">${lastResult ? lastResult.code : ""}</textarea></div>
         <div><label>Person 2</label><textarea id="partyCode1" placeholder="Name-PF2-..."></textarea></div>

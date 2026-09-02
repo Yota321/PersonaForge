@@ -52,15 +52,7 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [
-    {
-      "src": "assets/Open_Graph.png",
-      "sizes": "1200x630",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "PersonaForge \u2014 adaptive personality assessment landing screen"
-    }
-  ],
+  "screenshots": [],
   "shortcuts": [
     {
       "name": "Start Assessment",

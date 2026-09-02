@@ -15,11 +15,48 @@
                                so a cache hit is safe and fast)
      - Cross-origin fonts  -> Stale While Revalidate (serve instantly from
                                cache, refresh quietly in the background)
+     - Anything else       -> left alone, untouched by this worker
 
-   Bump CACHE_VERSION whenever the app shell or its asset list changes.
-   Old caches are removed automatically on activate.
+   Portability — nothing in this file assumes a repo name, branch, or
+   hosting path. `SCOPE` (below) is read from `self.registration.scope`,
+   which the browser sets to wherever this worker was actually registered
+   from (a GitHub Pages project subpath like "/PersonaForge/", a user/org
+   page at the domain root, or a custom domain — all work unchanged). If
+   the repo is renamed, forked, or moved to a custom domain, this file
+   does not need to be touched.
+
+   GitHub Pages routing — GitHub Pages has no server-side routing, so a
+   direct visit to a "deep" URL (e.g. a shared "/Name-PF2-xxxx" profile
+   link) would normally 404. The repo's 404.html handles that case by
+   redirecting back to this app's scope with the route folded into
+   "?code=" (see 404.html for details) — this worker only ever sees
+   ordinary navigations to the scope root after that redirect happens,
+   so its Network-First shell logic doesn't need any special-casing for it.
    ============================================================================= */
 
+/* -----------------------------------------------------------------------
+   CACHE VERSIONING — the only thing you should need to touch when the
+   app shell or its cached asset list changes.
+
+   Bump CACHE_VERSION (e.g. "v1" -> "v2") whenever:
+     - APP_SHELL or STATIC_ASSETS below gains, loses, or renames an entry
+     - index.html, manifest.json, or any cached asset's *content* changes
+       in a way that isn't already reflected by a new filename
+     - the caching strategy itself changes in a way old caches wouldn't
+       reflect
+
+   You do NOT need to bump it for:
+     - server-side/content changes to things this worker never caches
+       (there are none — everything client-side is covered above)
+
+   Bumping the constant changes every derived cache name at once (see
+   CURRENT_CACHES below), which makes the *next* activate event delete
+   every cache from the old version automatically — see the "activate"
+   handler further down. Combined with skipWaiting()/clients.claim(),
+   this is what stops a returning visitor from ever getting stuck on a
+   stale app shell: the moment a new worker installs, it takes over and
+   clears the old caches, rather than waiting for every tab to close.
+   ----------------------------------------------------------------------- */
 const CACHE_VERSION = "v1";
 
 const SHELL_CACHE = `personaforge-shell-${CACHE_VERSION}`;
@@ -31,9 +68,13 @@ const FONT_CACHE = `personaforge-fonts-${CACHE_VERSION}`;
 const CURRENT_CACHES = [SHELL_CACHE, STATIC_CACHE, FONT_CACHE];
 
 /* -----------------------------------------------------------------------
-   Scope-relative paths so this file works whether the site lives at the
-   domain root or in a GitHub Pages project subpath (e.g. /PersonaForge/).
-   `SCOPE` resolves to the directory this worker was registered from.
+   SCOPE — resolved at runtime from the browser itself, never hardcoded.
+   This is what makes the whole file portable: `self.registration.scope`
+   is always the actual directory this worker was registered from,
+   whatever that happens to be (GitHub Pages project subpath, a user/org
+   page at the root, or a custom domain). `toURL()` just resolves a
+   scope-relative path against it, so every cached URL below is correct
+   no matter where the app is deployed.
    ----------------------------------------------------------------------- */
 const SCOPE = self.registration.scope;
 const toURL = (path) => new URL(path, SCOPE).toString();
@@ -45,11 +86,19 @@ const APP_SHELL = [
   toURL("manifest.json"),
 ];
 
-// Static assets served from /assets/. Cached opportunistically on install
-// so the very first visit already primes the offline experience; any
-// asset missing from this list is still picked up on first request by the
-// runtime cache-first handler below, so this list doesn't need to be
-// perfectly exhaustive.
+/* -----------------------------------------------------------------------
+   ASSET MANIFEST — the single place to edit when icons or branding
+   assets are added, renamed, or removed. Everything under assets/ is
+   listed once, here, as scope-relative paths; nothing else in this file
+   (or manifest.json / 404.html) duplicates these strings by hand — each
+   references its own copy of the filenames it needs, so replacing an
+   icon set later means updating the filename in each file that uses it,
+   not hunting for it inside caching logic. Cached opportunistically on
+   install so the very first visit already primes the offline experience;
+   an asset missing from this list is still picked up on first request by
+   the runtime cache-first handler below, so the list doesn't need to be
+   perfectly exhaustive to keep the app working.
+   ----------------------------------------------------------------------- */
 const STATIC_ASSETS = [
   "assets/BG.mp3",
   "assets/Logo_black.svg",
@@ -145,14 +194,23 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
+  // Non-GET requests are left untouched. PersonaForge has no backend to
+  // POST to, so in practice this branch never fires — it's here so the
+  // worker fails safe rather than by omission if that ever changes.
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
   const isSameOrigin = url.origin === self.location.origin;
 
-  // Never intercept anything the app might treat as user data. There is
-  // none — PersonaForge has no API — but this keeps the worker honest and
-  // future-proof if that ever changes.
+  // Why profile data is never cached here, structurally rather than by
+  // convention: this worker only intercepts *network requests* (the
+  // fetch event) and stores responses in the Cache Storage API. Profile
+  // codes, quiz answers, and comparison results all live in
+  // localStorage, which this worker never reads, writes, or has access
+  // to — there is no code path here that could cache them even by
+  // accident. The line below is an explicit escape hatch on top of that:
+  // any request tagged "?no-cache" is passed straight to the network,
+  // untouched, for anything that should never be intercepted at all.
   if (url.searchParams.has("no-cache")) return;
 
   // --- 1. Navigations & HTML: Network First -----------------------------

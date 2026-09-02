@@ -188,21 +188,38 @@
 
   <main class="card" role="status" aria-live="polite">
     <div class="mark">
-      <img id="markIcon" src="/PersonaForge/assets/Icon_white.svg" alt="" width="30" height="30"
-           onerror="this.onerror=null; this.src='/PersonaForge/assets/Icon_black.svg';" />
+      <!-- src is set by script below once the base path is known; the
+           onerror swap between white/black icon variants stays in markup
+           since it needs no path knowledge to work, only a bare filename. -->
+      <img id="markIcon" alt="" width="30" height="30" />
     </div>
     <h1>Forge<span class="dot">.</span></h1>
     <p class="tagline">Discover. Compare. Evolve.</p>
     <div class="spinner" aria-hidden="true"></div>
     <p class="message">This page doesn't exist on its own — it's part of the app.<br>Taking you back to PersonaForge…</p>
-    <a class="btn" id="returnBtn" href="/PersonaForge/">Return to Forge</a>
+    <a class="btn" id="returnBtn" href=".">Return to Forge</a>
     <p class="footer-note">Nothing on this page was sent anywhere. Your data stays on this device.</p>
   </main>
 
   <noscript>
-    <!-- No-JS fallback: can't preserve the code/path without script, but
-         at least gets the visitor back to a working app. -->
-    <meta http-equiv="refresh" content="0; url=/PersonaForge/" />
+    <!--
+      No-JS fallback. Without script we can't ask the service worker for
+      its real scope or apply the GitHub Pages heuristic below, so this
+      leans entirely on browser URL-resolution rules instead of a
+      hardcoded path:
+
+      "." is resolved by the browser relative to the *current* (broken)
+      URL. GitHub Pages serves this file's content at the original
+      requested address (e.g. ".../PersonaForge/Yota-PF2-abcd1234" or a
+      custom domain's ".../Name-PF2-abcd1234"), and for a URL with one
+      path segment past the app's base, "." resolves to exactly that
+      base — no matter what it's called or how deep the domain root is.
+      Query params and hash are lost in this no-JS path (there's no way
+      around that without script), but the visitor always lands back on
+      a working app rather than a dead end.
+    -->
+    <meta http-equiv="refresh" content="0; url=." />
+    <p><a href=".">Return to Forge</a></p>
   </noscript>
 
   <script>
@@ -222,19 +239,71 @@
       } catch (e) { /* localStorage unavailable (private mode, etc.) — ignore */ }
 
       /* -----------------------------------------------------------------
-         REPO_BASE must match where PersonaForge is actually hosted.
-         Update this if the project is ever renamed or moved.
+         ASSET CONFIG — the one place to edit if icon filenames ever
+         change. Bare filenames only; the base path they hang off of is
+         resolved dynamically below, never hardcoded.
          ----------------------------------------------------------------- */
-      var REPO_BASE = "/PersonaForge/";
+      var ICONS = { white: "assets/Icon_white.svg", black: "assets/Icon_black.svg" };
 
-      function buildRedirectURL() {
+      /* -----------------------------------------------------------------
+         BASE PATH DETECTION — no hardcoded repo name, branch, or host.
+         GitHub Pages serves this file's *content* at whatever URL the
+         visitor actually requested (it does not redirect first), so
+         location.pathname here is the broken URL, not this file's own
+         location — we can't just resolve paths relative to the script.
+         Two strategies, tried in order:
+
+         1. Ask an already-installed service worker for its scope. If
+            this visitor has ever loaded the real app before, the worker
+            registered from index.html knows *exactly* where the app
+            lives — this covers every case correctly, including a custom
+            domain deployed into a subdirectory, which no heuristic can
+            guess reliably on its own.
+
+         2. Fall back to the standard GitHub Pages convention: a project
+            page's first path segment is its repo name
+            ("user.github.io/repo/..."), so on a "*.github.io" host we
+            take that first segment as the base. A user/org page
+            ("user.github.io/...") or a custom domain has no such
+            segment, so it falls through to "/" (site root) — which is
+            also correct for a root deployment.
+
+         This means renaming the repo, forking it, or moving it to a
+         custom domain never requires touching this file.
+         ----------------------------------------------------------------- */
+      function detectBasePathFromConvention() {
+        var host = window.location.hostname || "";
+        var segments = window.location.pathname.split("/").filter(Boolean);
+        if (/\.github\.io$/i.test(host) && segments.length > 0) {
+          return "/" + segments[0] + "/"; // project page: /<repo>/
+        }
+        return "/"; // user/org page root, or a custom domain
+      }
+
+      function detectBasePath() {
+        if (!("serviceWorker" in navigator)) {
+          return Promise.resolve(detectBasePathFromConvention());
+        }
+        return navigator.serviceWorker.getRegistrations()
+          .then(function (registrations) {
+            if (registrations && registrations.length > 0 && registrations[0].scope) {
+              return new URL(registrations[0].scope).pathname;
+            }
+            return detectBasePathFromConvention();
+          })
+          .catch(function () {
+            return detectBasePathFromConvention();
+          });
+      }
+
+      function buildRedirectURL(basePath) {
         var loc = window.location;
         var origin = loc.origin || (loc.protocol + "//" + loc.host);
 
-        // Whatever GitHub Pages couldn't find — e.g. "/PersonaForge/Yota-PF2-abcd1234"
+        // Whatever the server couldn't find — e.g. "<base>Yota-PF2-abcd1234"
         var pathname = loc.pathname || "/";
-        var rest = pathname.indexOf(REPO_BASE) === 0
-          ? pathname.slice(REPO_BASE.length)
+        var rest = pathname.indexOf(basePath) === 0
+          ? pathname.slice(basePath.length)
           : pathname.replace(/^\//, "");
         var segments = rest.split("/").filter(Boolean);
 
@@ -243,7 +312,10 @@
         // An explicit ?code=... on the broken URL always wins. Otherwise,
         // if the trailing path segment looks like a PF1/PF2 code, restore
         // it exactly the way a normal shared link would carry it — this
-        // mirrors index.html's own getProfileCodeFromURL() fallback.
+        // mirrors index.html's own getProfileCodeFromURL() fallback. Any
+        // other, unrecognized segment is preserved too (as "path"), so
+        // route formats added to the app later still survive a 404 —
+        // this page doesn't need to know what they mean, only carry them.
         if (!params.get("code") && segments.length) {
           var last = segments[segments.length - 1];
           if (/-PF[12]-/.test(last)) {
@@ -253,38 +325,60 @@
           }
         }
 
-        var target = origin + REPO_BASE;
+        var target = origin + basePath;
         var query = params.toString();
         if (query) target += "?" + query;
         if (loc.hash) target += loc.hash; // hash fragments pass through untouched
 
+        // Redirect-loop guard: if everything we'd redirect to is already
+        // exactly where we are (which would only happen if a real page at
+        // the base path itself somehow 404'd), stop folding the path into
+        // a param and just go to the bare base path instead.
+        if (target === loc.href) {
+          target = origin + basePath;
+        }
+
         return target;
       }
 
-      var redirectUrl = REPO_BASE;
-      try {
-        redirectUrl = buildRedirectURL();
-      } catch (e) {
-        redirectUrl = REPO_BASE; // safest possible fallback
-      }
-
       var returnBtn = document.getElementById("returnBtn");
-      if (returnBtn) returnBtn.setAttribute("href", redirectUrl);
+      var markIcon = document.getElementById("markIcon");
 
-      // Automatic redirect, ~1 second in — long enough to read the
-      // message, short enough not to feel stuck.
-      var redirected = false;
-      var redirectTimer = window.setTimeout(function () {
-        redirected = true;
-        window.location.replace(redirectUrl);
-      }, 1000);
+      detectBasePath().then(function (basePath) {
+        if (!basePath) basePath = "/";
 
-      // Safety net: if for any reason the automatic redirect doesn't
-      // happen (blocked navigation, slow/unusual browser, etc.), reveal
-      // the manual button shortly after so the visitor is never stuck.
-      window.setTimeout(function () {
-        if (!redirected && returnBtn) returnBtn.classList.add("visible");
-      }, 1800);
+        if (markIcon) {
+          markIcon.src = basePath + ICONS.white;
+          markIcon.onerror = function () {
+            markIcon.onerror = null;
+            markIcon.src = basePath + ICONS.black;
+          };
+        }
+
+        var redirectUrl = basePath;
+        try {
+          redirectUrl = buildRedirectURL(basePath);
+        } catch (e) {
+          redirectUrl = basePath; // safest possible fallback
+        }
+
+        if (returnBtn) returnBtn.setAttribute("href", redirectUrl);
+
+        // Automatic redirect, ~1 second in — long enough to read the
+        // message, short enough not to feel stuck.
+        var redirected = false;
+        window.setTimeout(function () {
+          redirected = true;
+          window.location.replace(redirectUrl);
+        }, 1000);
+
+        // Safety net: if for any reason the automatic redirect doesn't
+        // happen (blocked navigation, slow/unusual browser, etc.), reveal
+        // the manual button shortly after so the visitor is never stuck.
+        window.setTimeout(function () {
+          if (!redirected && returnBtn) returnBtn.classList.add("visible");
+        }, 1800);
+      });
     })();
   </script>
 </body>
