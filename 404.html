@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#0F1117" />
+<title>Forge — Redirecting…</title>
+<meta name="description" content="Redirecting you back to PersonaForge." />
+<style>
+  /* =====================================================================
+     Same design language as the main app: dark-first, soft purple accent,
+     glassmorphism cards, Cabinet Grotesk / JetBrains Mono type. Kept as a
+     single self-contained file since a 404 page can't depend on the app
+     ever having loaded.
+     ===================================================================== */
+  :root{
+    --bg: #0F1117;
+    --bg-alt: #12141C;
+    --card: rgba(30,34,48,0.55);
+    --border: rgba(167,139,250,0.18);
+    --text: #F8FAFC;
+    --text-muted: #A7B0C2;
+    --text-dim: #6B7385;
+    --accent: #A78BFA;
+    --accent-soft: #C4B5FD;
+    --sky: #7DD3FC;
+    --shadow: 0 24px 60px -20px rgba(8,9,14,0.6);
+    --ease: cubic-bezier(.22,1,.36,1);
+  }
+  [data-theme="light"]{
+    --bg: #FFFFFF;
+    --bg-alt: #F8FAFC;
+    --card: rgba(255,255,255,0.6);
+    --border: rgba(100,116,139,0.22);
+    --text: #0F172A;
+    --text-muted: #475569;
+    --text-dim: #64748B;
+    --accent: #8B5CF6;
+    --accent-soft: #A78BFA;
+    --sky: #0EA5E9;
+    --shadow: 0 24px 50px -22px rgba(100,116,139,0.35);
+  }
+  @media (prefers-color-scheme: light){
+    :root:not([data-theme="dark"]){
+      --bg: #FFFFFF; --bg-alt: #F8FAFC; --card: rgba(255,255,255,0.6);
+      --border: rgba(100,116,139,0.22); --text: #0F172A; --text-muted: #475569;
+      --text-dim: #64748B; --accent: #8B5CF6; --accent-soft: #A78BFA; --sky: #0EA5E9;
+      --shadow: 0 24px 50px -22px rgba(100,116,139,0.35);
+    }
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html, body{ height:100%; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cabinet Grotesk', 'Manrope', system-ui, -apple-system, sans-serif;
+    min-height: 100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before{
+    content:'';
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(55% 45% at 20% 0%, rgba(167,139,250,0.20), transparent 60%),
+      radial-gradient(50% 40% at 100% 10%, rgba(125,211,252,0.14), transparent 60%),
+      radial-gradient(45% 35% at 50% 100%, rgba(110,231,183,0.10), transparent 60%);
+  }
+
+  .card{
+    position:relative; z-index:1;
+    width:100%; max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: var(--shadow);
+    padding: 44px 32px 36px;
+    text-align:center;
+    animation: rise .6s var(--ease) both;
+  }
+
+  .mark{
+    width:56px; height:56px; margin: 0 auto 20px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(167,139,250,0.18), rgba(125,211,252,0.10));
+    border: 1px solid var(--border);
+    animation: pulse 2.4s var(--ease) infinite;
+  }
+  .mark img{ width:30px; height:30px; display:block; }
+
+  h1{
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  h1 .dot{ color: var(--accent); }
+
+  .tagline{
+    font-family: 'JetBrains Mono', 'Geist Mono', 'Courier New', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin-bottom: 22px;
+  }
+
+  .message{
+    color: var(--text-muted);
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin-bottom: 26px;
+  }
+  .message code{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+
+  .spinner{
+    width: 18px; height: 18px;
+    margin: 0 auto 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    width:100%;
+    padding: 13px 20px;
+    border-radius: 14px;
+    border: none;
+    background: var(--accent);
+    color: #14101F;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 14.5px;
+    cursor: pointer;
+    text-decoration:none;
+    transition: background .2s var(--ease), transform .2s var(--ease), opacity .3s var(--ease);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .btn:hover{ background: var(--accent-soft); transform: translateY(-2px); }
+  .btn.visible{ opacity: 1; pointer-events: auto; }
+
+  .footer-note{
+    margin-top: 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  @keyframes rise{
+    from{ opacity:0; transform: translateY(14px) scale(.985); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+  @keyframes pulse{
+    0%, 100%{ box-shadow: 0 0 0 0 rgba(167,139,250,0.28); }
+    50%{ box-shadow: 0 0 0 10px rgba(167,139,250,0); }
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <main class="card" role="status" aria-live="polite">
+    <div class="mark">
+      <img id="markIcon" src="/PersonaForge/assets/Icon_white.svg" alt="" width="30" height="30"
+           onerror="this.onerror=null; this.src='/PersonaForge/assets/Icon_black.svg';" />
+    </div>
+    <h1>Forge<span class="dot">.</span></h1>
+    <p class="tagline">Discover. Compare. Evolve.</p>
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="message">This page doesn't exist on its own — it's part of the app.<br>Taking you back to PersonaForge…</p>
+    <a class="btn" id="returnBtn" href="/PersonaForge/">Return to Forge</a>
+    <p class="footer-note">Nothing on this page was sent anywhere. Your data stays on this device.</p>
+  </main>
+
+  <noscript>
+    <!-- No-JS fallback: can't preserve the code/path without script, but
+         at least gets the visitor back to a working app. -->
+    <meta http-equiv="refresh" content="0; url=/PersonaForge/" />
+  </noscript>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* -----------------------------------------------------------------
+         Match the app's own theme choice if it's already been set
+         (localStorage is shared across every path on this origin), else
+         fall back to the OS preference via the CSS media query above.
+         ----------------------------------------------------------------- */
+      try {
+        var savedTheme = window.localStorage.getItem("pf_theme");
+        if (savedTheme === "light" || savedTheme === "dark") {
+          document.documentElement.setAttribute("data-theme", savedTheme);
+        }
+      } catch (e) { /* localStorage unavailable (private mode, etc.) — ignore */ }
+
+      /* -----------------------------------------------------------------
+         REPO_BASE must match where PersonaForge is actually hosted.
+         Update this if the project is ever renamed or moved.
+         ----------------------------------------------------------------- */
+      var REPO_BASE = "/PersonaForge/";
+
+      function buildRedirectURL() {
+        var loc = window.location;
+        var origin = loc.origin || (loc.protocol + "//" + loc.host);
+
+        // Whatever GitHub Pages couldn't find — e.g. "/PersonaForge/Yota-PF2-abcd1234"
+        var pathname = loc.pathname || "/";
+        var rest = pathname.indexOf(REPO_BASE) === 0
+          ? pathname.slice(REPO_BASE.length)
+          : pathname.replace(/^\//, "");
+        var segments = rest.split("/").filter(Boolean);
+
+        var params = new URLSearchParams(loc.search || "");
+
+        // An explicit ?code=... on the broken URL always wins. Otherwise,
+        // if the trailing path segment looks like a PF1/PF2 code, restore
+        // it exactly the way a normal shared link would carry it — this
+        // mirrors index.html's own getProfileCodeFromURL() fallback.
+        if (!params.get("code") && segments.length) {
+          var last = segments[segments.length - 1];
+          if (/-PF[12]-/.test(last)) {
+            params.set("code", decodeURIComponent(last));
+          } else {
+            params.set("path", segments.join("/"));
+          }
+        }
+
+        var target = origin + REPO_BASE;
+        var query = params.toString();
+        if (query) target += "?" + query;
+        if (loc.hash) target += loc.hash; // hash fragments pass through untouched
+
+        return target;
+      }
+
+      var redirectUrl = REPO_BASE;
+      try {
+        redirectUrl = buildRedirectURL();
+      } catch (e) {
+        redirectUrl = REPO_BASE; // safest possible fallback
+      }
+
+      var returnBtn = document.getElementById("returnBtn");
+      if (returnBtn) returnBtn.setAttribute("href", redirectUrl);
+
+      // Automatic redirect, ~1 second in — long enough to read the
+      // message, short enough not to feel stuck.
+      var redirected = false;
+      var redirectTimer = window.setTimeout(function () {
+        redirected = true;
+        window.location.replace(redirectUrl);
+      }, 1000);
+
+      // Safety net: if for any reason the automatic redirect doesn't
+      // happen (blocked navigation, slow/unusual browser, etc.), reveal
+      // the manual button shortly after so the visitor is never stuck.
+      window.setTimeout(function () {
+        if (!redirected && returnBtn) returnBtn.classList.add("visible");
+      }, 1800);
+    })();
+  </script>
+</body>
+</html>

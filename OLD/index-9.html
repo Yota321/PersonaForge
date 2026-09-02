@@ -574,8 +574,6 @@ canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 /* party compare */
 .party-inputs{ grid-template-columns: 1fr 1fr 1fr; }
 @media (max-width: 640px){ .party-inputs{ grid-template-columns: 1fr; } }
-.party-extra-inputs{ grid-template-columns: 1fr 1fr; }
-@media (max-width: 640px){ .party-extra-inputs{ grid-template-columns: 1fr; } }
 
 
 
@@ -6138,7 +6136,7 @@ function renderParty(){
         <div><label>Person 3</label><textarea id="partyCode2" placeholder="Name-PF2-..."></textarea></div>
       </div>
       <button class="btn btn-ghost" style="margin-top:12px" onclick="toggleMorePartySlots()" id="partyToggleBtn">+ Add up to 2 more people</button>
-      <div id="extraPartySlots" class="hidden compare-inputs party-extra-inputs" style="margin-top:12px">
+      <div id="extraPartySlots" class="hidden party-inputs" style="margin-top:12px">
         <div><label>Person 4</label><textarea id="partyCode3" placeholder="Name-PF2-..."></textarea></div>
         <div><label>Person 5</label><textarea id="partyCode4" placeholder="Name-PF2-..."></textarea></div>
       </div>

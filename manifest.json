@@ -1,0 +1,93 @@
+{
+  "id": ".",
+  "name": "PersonaForge",
+  "short_name": "Forge",
+  "description": "Discover. Compare. Evolve. An adaptive, scenario-based personality assessment that runs entirely in your browser \u2014 no accounts, no backend, no tracking. Generate a shareable PF2 code, compare it with friends, and revisit your results anytime, even offline.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait-primary",
+  "theme_color": "#0F1117",
+  "background_color": "#0F1117",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "utilities", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "assets/Icon_black_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/Icon_black_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/Icon_white_192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/Icon_white_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/Icon_black_512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/Icon_black.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/Open_Graph.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "PersonaForge \u2014 adaptive personality assessment landing screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Assessment",
+      "short_name": "Start",
+      "description": "Begin a fresh adaptive personality assessment",
+      "url": "./?intent=start",
+      "icons": [
+        { "src": "assets/Icon_black_192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Compare Profiles",
+      "short_name": "Compare",
+      "description": "Compare two PF1/PF2 profile codes",
+      "url": "./?intent=compare",
+      "icons": [
+        { "src": "assets/Icon_black_192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    },
+    {
+      "name": "Load Shared Profile",
+      "short_name": "Load Code",
+      "description": "Paste or scan a shared profile code to view a result",
+      "url": "./?intent=load",
+      "icons": [
+        { "src": "assets/Icon_black_192.png", "sizes": "192x192", "type": "image/png" }
+      ]
+    }
+  ]
+}
