@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="robots" content="noindex" />
 <meta name="theme-color" content="#0F1117" />
-<title>Forge — Redirecting…</title>
-<meta name="description" content="Redirecting you back to PersonaForge." />
+<title>Forge · Recalibrating…</title>
+<meta name="description" content="This route did not make it through the forge. Redirecting you back to PersonaForge." />
 <style>
   /* =====================================================================
      Same design language as the main app: dark-first, soft purple accent,
@@ -196,9 +196,9 @@
     <h1>Forge<span class="dot">.</span></h1>
     <p class="tagline">Discover. Compare. Evolve.</p>
     <div class="spinner" aria-hidden="true"></div>
-    <p class="message">This page doesn't exist on its own — it's part of the app.<br>Taking you back to PersonaForge…</p>
-    <a class="btn" id="returnBtn" href=".">Return to Forge</a>
-    <p class="footer-note">Nothing on this page was sent anywhere. Your data stays on this device.</p>
+    <p class="message">This URL did not score high enough to exist.<br>Reforging your path back to Forge…</p>
+    <a class="btn" id="returnBtn" href=".">Back to Forge</a>
+    <p class="footer-note">Nothing here was tracked. Your data never left this device.</p>
   </main>
 
   <noscript>
@@ -213,13 +213,13 @@
       requested address (e.g. ".../PersonaForge/Yota-PF2-abcd1234" or a
       custom domain's ".../Name-PF2-abcd1234"), and for a URL with one
       path segment past the app's base, "." resolves to exactly that
-      base — no matter what it's called or how deep the domain root is.
+      base, no matter what it's called or how deep the domain root is.
       Query params and hash are lost in this no-JS path (there's no way
       around that without script), but the visitor always lands back on
       a working app rather than a dead end.
     -->
     <meta http-equiv="refresh" content="0; url=." />
-    <p><a href=".">Return to Forge</a></p>
+    <p><a href=".">Back to Forge</a></p>
   </noscript>
 
   <script>
@@ -229,14 +229,22 @@
       /* -----------------------------------------------------------------
          Match the app's own theme choice if it's already been set
          (localStorage is shared across every path on this origin), else
-         fall back to the OS preference via the CSS media query above.
+         fall back to the OS preference via the same rule the CSS above
+         uses (light only if the OS asks for it and nothing overrides it;
+         dark by default). `resolvedTheme` is reused below to pick the
+         icon color that's actually readable on that background — a
+         white glyph on a light card is invisible, and vice versa.
          ----------------------------------------------------------------- */
+      var resolvedTheme = "dark";
       try {
         var savedTheme = window.localStorage.getItem("pf_theme");
         if (savedTheme === "light" || savedTheme === "dark") {
+          resolvedTheme = savedTheme;
           document.documentElement.setAttribute("data-theme", savedTheme);
+        } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) {
+          resolvedTheme = "light";
         }
-      } catch (e) { /* localStorage unavailable (private mode, etc.) — ignore */ }
+      } catch (e) { /* localStorage unavailable (private mode, etc.), default to dark */ }
 
       /* -----------------------------------------------------------------
          ASSET CONFIG — the one place to edit if icon filenames ever
@@ -348,10 +356,14 @@
         if (!basePath) basePath = "/";
 
         if (markIcon) {
-          markIcon.src = basePath + ICONS.white;
+          // Dark background needs the white glyph; light background needs
+          // the black glyph, or it just disappears into the card.
+          var primaryIcon = resolvedTheme === "light" ? ICONS.black : ICONS.white;
+          var fallbackIcon = resolvedTheme === "light" ? ICONS.white : ICONS.black;
+          markIcon.src = basePath + primaryIcon;
           markIcon.onerror = function () {
             markIcon.onerror = null;
-            markIcon.src = basePath + ICONS.black;
+            markIcon.src = basePath + fallbackIcon;
           };
         }
 
