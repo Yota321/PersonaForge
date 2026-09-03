@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0F1117" />
+
+<title>Forge · Terms of Service &amp; Credits</title>
+<meta name="description" content="Terms of Service, privacy notes, and third-party credits for Forge, the privacy-first personality platform (officially PersonaForge)." />
+<link rel="canonical" href="https://yota321.github.io/PersonaForge/tos.html" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="PersonaForge — Terms of Service" />
+<meta property="og:description" content="Terms, privacy notes, and third-party credits for Forge. Everything runs locally with no accounts or servers." />
+<meta property="og:image" content="assets/Open_Graph.png" />
+<meta property="og:url" content="https://yota321.github.io/PersonaForge/tos.html" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="PersonaForge — Terms of Service" />
+<meta name="twitter:description" content="Terms, privacy notes, and third-party credits for Forge. Everything runs locally with no accounts or servers." />
+<meta name="twitter:image" content="assets/Open_Graph.png" />
+
+<!-- Icons -->
+<link rel="icon" type="image/svg+xml" href="assets/Icon_black.svg" media="(prefers-color-scheme: light)" />
+<link rel="icon" type="image/svg+xml" href="assets/Icon_white.svg" media="(prefers-color-scheme: dark)" />
+<link rel="icon" type="image/png" href="assets/Icon_black_192.png" />
+<link rel="apple-touch-icon" href="assets/Icon_white_512.png" />
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+
+/* =========================================================================
+   FORGE DESIGN SYSTEM — shared with index.html
+   Same tokens, same base rules, same utility classes (.container, .glass,
+   .btn*, .icon-btn, .top-bar, .brand-mini, .eyebrow, .footer-nav) so this
+   page reads as another screen in the app rather than a separate site.
+   Everything below this block, from "TOS PAGE" onward, is specific to
+   this page only.
+   ========================================================================= */
+:root{
+  --bg: #0F1117;
+  --bg-alt: #12141C;
+  --surface: #171A22;
+  --surface-strong: #1E2230;
+  --card: #1E2230;
+  --border: rgba(167,139,250,0.14);
+  --border-strong: rgba(167,139,250,0.28);
+  --text: #F8FAFC;
+  --text-muted: #A7B0C2;
+  --text-dim: #6B7385;
+  --accent: #A78BFA;
+  --accent-soft: #C4B5FD;
+  --sky: #7DD3FC;
+  --mint: #6EE7B7;
+  --peach: #FDBA74;
+  --gold: #FACC15;
+  --coral: #FB7185;
+  --success: #34D399;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --shadow-soft: 0 24px 60px -20px rgba(8,9,14,0.6);
+  --ease: cubic-bezier(.22,1,.36,1);
+  --font-display: 'Cabinet Grotesk', 'Space Grotesk', sans-serif;
+  --font-body: 'Cabinet Grotesk', 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', 'Courier New', monospace;
+}
+[data-theme="light"]{
+  --bg: #FFFFFF;
+  --bg-alt: #F8FAFC;
+  --surface: #F1F5F9;
+  --surface-strong: #E2E8F0;
+  --card: #FFFFFF;
+  --border: rgba(100,116,139,0.16);
+  --border-strong: rgba(100,116,139,0.32);
+  --text: #0F172A;
+  --text-muted: #475569;
+  --text-dim: #64748B;
+  --accent: #8B5CF6;
+  --accent-soft: #A78BFA;
+  --sky: #0EA5E9;
+  --mint: #10B981;
+  --peach: #F97316;
+  --gold: #CA8A04;
+  --coral: #E11D48;
+  --success: #059669;
+  --shadow-soft: 0 24px 50px -22px rgba(100,116,139,0.35);
+}
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(60% 50% at 15% 0%, rgba(139,92,246,0.08), transparent 60%),
+    radial-gradient(55% 45% at 100% 10%, rgba(14,165,233,0.07), transparent 60%),
+    radial-gradient(50% 40% at 50% 100%, rgba(16,185,129,0.06), transparent 60%);
+}
+[data-theme="light"] .glass{ box-shadow: 0 8px 24px -12px rgba(100,116,139,0.18); }
+
+body.theme-transitions, body.theme-transitions .glass{ transition: background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease); }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+html{ scroll-behavior: smooth; background: var(--bg); height:100%; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index: 0; pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 15% 0%, rgba(167,139,250,0.10), transparent 60%),
+    radial-gradient(55% 45% at 100% 10%, rgba(125,211,252,0.08), transparent 60%),
+    radial-gradient(50% 40% at 50% 100%, rgba(110,231,183,0.06), transparent 60%);
+}
+::selection{ background: var(--accent); color:#14101F; }
+a{ color: inherit; }
+button{ font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible, summary:focus-visible{
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
+}
+h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; }
+
+.container{ max-width: 900px; margin: 0 auto; padding: 0 max(28px, env(safe-area-inset-right)) 0 max(28px, env(safe-area-inset-left)); position:relative; z-index:1; }
+@media (max-width: 560px){
+  .container{ padding: 0 max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left)); }
+}
+
+/* ---------- Decorative floating orbs (aria-hidden, same as index.html) - */
+#embers{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+.blind-bar{
+  position:absolute; width:38vmax; height:38vmax; border-radius:50%; filter: blur(70px);
+  opacity:0.16; animation: floaty ease-in-out infinite;
+}
+@keyframes floaty{ 0%,100%{ transform: translate(0,0) scale(1); } 50%{ transform: translate(3%, -4%) scale(1.08); } }
+
+/* ---------- Surfaces ---------- */
+.glass{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  box-shadow: 0 20px 44px -28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative; overflow: hidden;
+}
+[data-theme="light"] .glass{ box-shadow: 0 20px 44px -28px rgba(100,116,139,0.28), inset 0 1px 0 rgba(255,255,255,0.6); }
+.glass::before{
+  content:''; position:absolute; inset:-40%; pointer-events:none; z-index:0;
+  background: radial-gradient(closest-side, rgba(255,255,255,0.05), transparent 70%);
+  animation: reflectionDrift 16s ease-in-out infinite;
+}
+@keyframes reflectionDrift{ 0%,100%{ transform: translate(-15%, -10%); } 50%{ transform: translate(15%, 12%); } }
+.glass > *{ position:relative; z-index:1; }
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding: 13px 26px; border-radius: var(--radius-md); font-weight: 500; font-size: 14.5px;
+  letter-spacing: 0.01em; white-space: nowrap; flex-shrink:0; position:relative; overflow:hidden;
+  transition: transform .45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  border: 1px solid transparent; text-decoration:none;
+}
+.btn-primary{
+  background: linear-gradient(120deg, var(--accent), var(--sky), var(--mint), var(--accent));
+  background-size: 280% 280%;
+  animation: gradientDrift 9s ease-in-out infinite;
+  color: #14101F;
+  box-shadow: 0 14px 34px -14px rgba(167,139,250,0.55);
+}
+@keyframes gradientDrift{ 0%,100%{ background-position: 0% 50%; } 50%{ background-position: 100% 50%; } }
+.btn-primary:hover{ transform: translateY(-3px); box-shadow: 0 20px 44px -14px rgba(167,139,250,0.7); }
+.btn-primary:active{ transform: translateY(0) scale(.97); }
+.btn-ghost{ background: var(--surface); border:1px solid var(--border); color: var(--text); }
+.btn-ghost:hover{ background: var(--surface-strong); border-color: var(--border-strong); transform: translateY(-2px); }
+.btn-ghost:active{ transform: translateY(0) scale(.97); }
+
+.eyebrow{
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-dim); display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{ content:''; width:5px; height:5px; background: var(--accent); flex-shrink:0; }
+.eyebrow.accent{ color: var(--accent-soft); }
+
+/* ---------- Top bar: home / centered logo / theme toggle ------------- */
+.top-bar{
+  position: sticky; top: max(14px, env(safe-area-inset-top)); z-index: 40;
+  display:grid; grid-template-columns: 38px 1fr 38px; align-items:center; gap: 10px;
+  padding: 12px 18px; margin: 6px 0 26px;
+  background: linear-gradient(180deg, rgba(23,26,34,0.55), rgba(23,26,34,0.32));
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  box-shadow: 0 12px 30px -18px rgba(0,0,0,0.5);
+  animation: navFadeIn .6s var(--ease) both;
+}
+[data-theme="light"] .top-bar{ background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); }
+@keyframes navFadeIn{ from{ opacity:0; transform: translateY(-8px); } to{ opacity:1; transform:none; } }
+.top-bar-brand{ display:flex; align-items:center; justify-content:center; min-width:0; }
+.top-bar-logo{ height: 20px; width:auto; display:block; }
+.top-bar-brand-fallback{ display:none; font-family:var(--font-display); font-weight:600; font-size:15px; letter-spacing:-0.01em; }
+.brand-mini{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:500; letter-spacing:-0.01em; }
+.brand-mini .dot{ width:6px; height:6px; background: var(--accent); border-radius:50%; }
+.icon-btn{
+  width:38px; height:38px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
+  background: var(--surface); border:1px solid var(--border); font-size:16px;
+  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+}
+.icon-btn:hover{ border-color: var(--border-strong); transform: scale(1.06) rotate(2deg); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
+.icon-btn:active{ transform: scale(0.94); }
+.icon-btn svg{ width:17px; height:17px; }
+
+.footer-nav{ position:relative; z-index:1; display:flex; justify-content:center; gap:18px; margin-top:8px; flex-wrap:wrap; }
+.footer-nav a{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
+.footer-nav a:hover{ color: var(--text-muted); }
+
+@keyframes revealIn{ 0%{ filter: blur(10px); opacity:0; transform: translateY(10px); } 100%{ filter: blur(0); opacity:1; transform:none; } }
+
+
+/* =========================================================================
+   TOS PAGE — everything below is specific to this page. New rules only,
+   built from the same tokens above (colors, radius, shadow, ease, fonts),
+   so it stays visually inseparable from the rest of Forge without
+   duplicating anything already defined for the main app.
+   ========================================================================= */
+
+.screen{ min-height: 100vh; display:flex; flex-direction:column; padding: 32px 0 64px; }
+
+/* ---------- Hero ---------- */
+.tos-hero{ padding: 8px 0 34px; animation: revealIn .7s var(--ease) both; }
+.tos-hero h1{ font-size: clamp(32px, 5.5vw, 48px); line-height: 1.05; margin: 10px 0 12px; }
+.tos-sub{ color: var(--text-muted); font-size: 15.5px; max-width: 58ch; }
+.tos-meta{ margin-top: 18px; display:flex; gap:16px; flex-wrap:wrap; }
+.tos-meta .eyebrow::before{ display:none; }
+
+/* ---------- Personality disclaimer callout ---------- */
+.tos-callout{
+  padding: 22px 24px; margin: 0 0 36px; border-radius: var(--radius-xl);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(160deg, rgba(167,139,250,0.10), rgba(125,211,252,0.05));
+}
+.tos-callout h2{ font-size: 18px; margin: 6px 0 10px; }
+.tos-callout p{ font-size: 14px; color: var(--text-muted); margin-top: 8px; }
+.tos-callout p:first-of-type{ margin-top: 0; }
+.tos-callout ul{ margin: 10px 0 0 20px; color: var(--text-muted); font-size: 14px; }
+.tos-callout li{ margin-bottom: 4px; }
+
+/* ---------- Layout: sidebar TOC + content ---------- */
+.tos-layout{ display:grid; grid-template-columns: 200px minmax(0,1fr); gap: 32px; align-items:start; }
+@media (max-width: 760px){ .tos-layout{ grid-template-columns: 1fr; } }
+
+.tos-toc{ position: sticky; top: 88px; padding: 18px 16px; display:flex; flex-direction:column; gap:2px; max-height: calc(100vh - 120px); overflow-y:auto; }
+@media (max-width: 760px){ .tos-toc{ position:static; max-height:none; } }
+.tos-toc-title{ font-size: 11px; letter-spacing:0.12em; text-transform:uppercase; color: var(--text-dim); font-family: var(--font-mono); margin-bottom:8px; padding: 0 10px; }
+.tos-toc a{
+  display:block; padding: 7px 10px; border-radius: 10px; font-size: 13px; color: var(--text-muted);
+  text-decoration:none; transition: background .2s var(--ease), color .2s var(--ease);
+}
+.tos-toc a:hover{ background: var(--surface-strong); color: var(--text); }
+
+/* Mobile "On this page" collapsible replacement for the sticky sidebar */
+.tos-toc-mobile{ display:none; margin-bottom: 28px; }
+@media (max-width: 760px){
+  .tos-toc{ display:none; }
+  .tos-toc-mobile{ display:block; }
+}
+
+/* ---------- Content sections ---------- */
+.tos-content{ display:flex; flex-direction:column; gap: 40px; min-width:0; }
+.tos-section{ scroll-margin-top: 96px; }
+.tos-section h2{ font-size: 21px; margin: 4px 0 12px; }
+.tos-section p{ font-size: 14.5px; color: var(--text-muted); margin-bottom: 10px; }
+.tos-section p:last-child{ margin-bottom:0; }
+.tos-section ul, .tos-section ol{ margin: 10px 0 10px 20px; color: var(--text-muted); font-size: 14.5px; }
+.tos-section li{ margin-bottom: 6px; }
+.tos-section strong{ color: var(--text); font-weight:600; }
+.tos-section code{ font-family: var(--font-mono); font-size: 12.5px; background: var(--surface); border:1px solid var(--border); padding: 1px 6px; border-radius: 6px; color: var(--accent-soft); }
+.tos-placeholder{ display:inline-block; margin-top:6px; font-family: var(--font-mono); font-size:11.5px; letter-spacing:0.04em; color: var(--peach); background: rgba(253,186,116,0.12); border:1px solid rgba(253,186,116,0.3); padding:3px 9px; border-radius: 999px; }
+
+/* ---------- Accordions (Third-Party, Fonts, Music, Open Source) -------- */
+.tos-accordion{ border-radius: var(--radius-lg); overflow:hidden; }
+.tos-accordion summary{
+  list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding: 16px 18px; font-family: var(--font-display); font-weight:500; font-size:15px;
+}
+.tos-accordion summary::-webkit-details-marker{ display:none; }
+.tos-accordion summary .chev{ width:18px; height:18px; flex-shrink:0; color: var(--text-dim); transition: transform .3s var(--ease); }
+.tos-accordion[open] summary .chev{ transform: rotate(180deg); }
+.tos-accordion summary .count{ font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); font-weight:400; margin-left:auto; margin-right:4px; }
+.tos-accordion-body{ padding: 0 18px 18px; }
+.tos-accordion-body > p.hint{ font-size:13px; color: var(--text-dim); margin-bottom:12px; }
+
+.credit-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+.credit-item{ background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-md); padding: 14px 15px; }
+.credit-item h4{ font-size: 13.5px; font-weight:600; margin-bottom:6px; }
+.credit-item dl{ font-size: 12.5px; color: var(--text-muted); }
+.credit-item dt{ font-family: var(--font-mono); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; color: var(--text-dim); margin-top:7px; }
+.credit-item dt:first-child{ margin-top:0; }
+.credit-item dd{ margin: 2px 0 0; }
+.credit-item a{ color: var(--accent-soft); text-decoration: underline; text-underline-offset:2px; word-break: break-word; }
+
+.music-card{ display:flex; flex-direction:column; gap:4px; background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-md); padding: 16px 18px; }
+.music-card .track-name{ font-family: var(--font-display); font-weight:600; font-size:15px; }
+.music-card .track-meta{ font-size:12.5px; color: var(--text-dim); font-family: var(--font-mono); }
+.music-card p{ font-size:13.5px; color: var(--text-muted); margin-top:8px; }
+.music-card a{ color: var(--accent-soft); text-decoration: underline; text-underline-offset:2px; }
+
+/* ---------- Version history ---------- */
+.version-row{ display:flex; gap:14px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size:13.5px; }
+.version-row:last-child{ border-bottom:none; }
+.version-row .v-tag{ font-family: var(--font-mono); font-size:12px; color: var(--accent-soft); flex-shrink:0; width:64px; }
+.version-row .v-date{ color: var(--text-dim); flex-shrink:0; width:150px; }
+.version-row .v-note{ color: var(--text-muted); }
+@media (max-width: 520px){ .version-row{ flex-direction:column; gap:2px; } .version-row .v-date, .version-row .v-tag{ width:auto; } }
+
+/* ---------- Footer ---------- */
+.tos-footer{ margin-top: 56px; padding: 26px 24px; text-align:center; display:flex; flex-direction:column; gap:12px; }
+.tos-footer .brand-mini{ justify-content:center; }
+.tos-footer p{ font-size:12.5px; color: var(--text-dim); }
+
+@media print{
+  #embers, .top-bar, .tos-toc, .btn{ display:none !important; }
+  .tos-layout{ display:block; }
+}
+
+</style>
+</head>
+<body>
+
+<div id="embers" aria-hidden="true">
+  <div class="blind-bar" style="left:-10%; top:-10%; background:var(--accent);"></div>
+  <div class="blind-bar" style="right:-14%; bottom:-16%; background:var(--sky); animation-delay:-6s;"></div>
+</div>
+
+<div class="screen container">
+
+  <!-- ================= TOP BAR ================= -->
+  <div class="top-bar">
+    <button class="icon-btn" id="homeBtn" aria-label="Home"></button>
+    <div class="top-bar-brand">
+      <img id="topBarLogo" class="top-bar-logo" src="assets/Logo_white.svg" alt="Forge"
+        onerror="this.style.display='none'; document.getElementById('topBarBrandFallback').style.display='block';" />
+      <span id="topBarBrandFallback" class="top-bar-brand-fallback">Forge</span>
+    </div>
+    <button class="icon-btn" id="themeBtn" aria-label="Toggle light or dark theme"></button>
+  </div>
+
+  <!-- ================= HERO ================= -->
+  <header class="tos-hero">
+    <div class="eyebrow accent">LEGAL &amp; CREDITS</div>
+    <h1>Terms of Service</h1>
+    <p class="tos-sub">The rules, privacy notes, and full third-party credits behind Forge, written so they're actually worth reading.</p>
+    <div class="tos-meta">
+      <span class="eyebrow">Version <span id="metaVersion"></span></span>
+      <span class="eyebrow">Last updated <span id="metaUpdated"></span></span>
+    </div>
+  </header>
+
+  <!-- ================= PERSONALITY DISCLAIMER ================= -->
+  <section class="tos-callout" aria-labelledby="disclaimer-heading">
+    <div class="eyebrow accent">READ THIS FIRST</div>
+    <h2 id="disclaimer-heading">Forge is not a medical or clinical tool</h2>
+    <p>Forge is a personality <em>exploration</em> tool, built for curiosity, self-reflection, and comparing notes with friends. It is not a medical assessment, not psychological advice, not psychiatric advice, and not a diagnostic tool of any kind. It does not replace a licensed doctor, therapist, psychiatrist, or counselor, and nothing it generates should be used to make medical or mental-health decisions.</p>
+    <ul>
+      <li>Any resemblance to MBTI, DISC, the Enneagram, Big Five, or similar frameworks in Forge's output is an interpretive projection generated by <strong>Forge's own personality model</strong> — not an official, licensed, or certified assessment from those systems.</li>
+      <li>Compatibility results describe a modeled interaction between two profiles. They are a fun comparison, not a guarantee, prediction, or professional judgment about any real relationship.</li>
+    </ul>
+    <p>If you're going through something that a quiz can't help with, please talk to a real, qualified professional.</p>
+  </section>
+
+  <div class="tos-layout">
+
+    <!-- ================= DESKTOP TOC ================= -->
+    <nav class="tos-toc glass" aria-label="Table of contents">
+      <div class="tos-toc-title">On this page</div>
+      <div id="tocList"></div>
+    </nav>
+
+    <!-- ================= MOBILE TOC ================= -->
+    <details class="tos-toc-mobile glass tos-accordion">
+      <summary>On this page <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg></summary>
+      <div class="tos-accordion-body" id="tocListMobile"></div>
+    </details>
+
+    <!-- ================= CONTENT ================= -->
+    <main class="tos-content">
+
+      <section class="tos-section" id="acceptance">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By opening or using Forge (officially <strong>PersonaForge</strong>, referred to throughout as "Forge" or "the app"), you agree to these Terms of Service. If you don't agree with them, please don't use Forge. These terms apply from the moment you first load the app, and continue to apply every time you come back.</p>
+      </section>
+
+      <section class="tos-section" id="about">
+        <h2>2. About Forge</h2>
+        <p>Forge is an adaptive, scenario-based personality exploration app. It asks a series of questions, adapts the next question based on your previous answers, and turns the result into a two-part personality code (<code>PF1</code> / <code>PF2</code>) along with a visual trait breakdown, an archetype, and optional career and compatibility notes.</p>
+        <p>Forge runs <strong>entirely inside your browser</strong>. There is no account system, no backend server, and no analytics of any kind — everything described in these terms reflects that architecture.</p>
+      </section>
+
+      <section class="tos-section" id="eligibility">
+        <h2>3. Eligibility</h2>
+        <p>Forge doesn't collect personal information and has no age-verification mechanism of any kind, so it also has no way to enforce a minimum age. If the laws where you live require a certain age or guardian's consent to use interactive tools like this one, it's your responsibility to comply with them before using Forge.</p>
+      </section>
+
+      <section class="tos-section" id="privacy">
+        <h2>4. Privacy</h2>
+        <p>Forge is built to keep your data on your own device, not on a server, because there isn't one. Specifically:</p>
+        <ul>
+          <li>No account, sign-up, email address, or personal profile is ever requested.</li>
+          <li>No analytics, tracking pixels, or third-party data collection scripts run anywhere in the app.</li>
+          <li>Your quiz answers, results, and preferences are stored locally in your browser (see <a href="#local-storage">Local Storage</a> below) and are never transmitted anywhere by Forge itself.</li>
+        </ul>
+        <p>One thing worth knowing: if you type a name into Forge before or after your assessment, that name can end up embedded in your result's shareable code, link, or QR code, since that's how Forge lets you share a labeled result with someone else. Don't enter a name (or anything else) you wouldn't want visible to anyone you share that link or code with.</p>
+      </section>
+
+      <section class="tos-section" id="local-storage">
+        <h2>5. Local Storage</h2>
+        <p>Forge uses your browser's <code>localStorage</code> to remember a small amount of information between visits, entirely on your device:</p>
+        <ul>
+          <li>Your light/dark theme preference</li>
+          <li>Whether ambient sound is on or off</li>
+          <li>Your most recently generated result code, so it can greet you with it on return visits</li>
+          <li>An in-progress quiz session, so you can pick up where you left off if you close the tab mid-assessment</li>
+          <li>A short history of your recent results (up to the last 10), used to power comparisons</li>
+        </ul>
+        <p>This data is specific to the browser and device you're using — it doesn't sync across devices, and clearing your browser's site data for Forge will remove all of it permanently.</p>
+      </section>
+
+      <section class="tos-section" id="offline">
+        <h2>6. Offline Functionality</h2>
+        <p>Forge is designed to keep working without an internet connection once you've loaded it at least once. A service worker caches the app itself (the page, styles, scripts, icons, fonts, and background audio) so it can be reopened offline. It always tries to fetch the newest version of the app first when you're online, and only falls back to the offline copy when there's no connection.</p>
+        <p>The service worker only ever caches the static files that make up the app. It never caches your results, your quiz answers, or anything stored in <code>localStorage</code> — that data isn't the kind of thing a network cache touches in the first place.</p>
+      </section>
+
+      <section class="tos-section" id="responsibilities">
+        <h2>7. User Responsibilities</h2>
+        <ul>
+          <li>Use Forge lawfully, and don't attempt to disrupt, overload, reverse-engineer for malicious purposes, or interfere with the app's normal operation.</li>
+          <li>Don't present Forge's generated results as an official, certified, or clinical psychological assessment when sharing them with others.</li>
+          <li>Respect other people's shared profile codes and links the same way you'd want yours respected — see the next section for why that matters.</li>
+        </ul>
+      </section>
+
+      <section class="tos-section" id="shared-codes">
+        <h2>8. Shared Profile Codes</h2>
+        <p>Every result Forge generates can be represented as a compact <code>PF1</code>/<code>PF2</code> code, a shareable link, or a scannable QR code. Because Forge has no accounts or access control of any kind, <strong>anyone who has your code, link, or QR image can view the result it represents</strong> — there's no password or permission step in between. Treat anything you share this way as effectively public, and only share what you're comfortable with others seeing.</p>
+      </section>
+
+      <section class="tos-section" id="generated-results">
+        <h2>9. Generated Results</h2>
+        <p>Your archetype, trait breakdown, career notes, and compatibility results are all generated deterministically from your quiz answers using Forge's own personality model — not a licensed clinical instrument. As Forge's model is refined over time, results generated by a newer version may interpret the same underlying answers slightly differently than an older version once did. A code you saved a while ago will still work, but its exact presentation may evolve as Forge does.</p>
+      </section>
+
+      <section class="tos-section" id="intellectual-property">
+        <h2>10. Intellectual Property</h2>
+        <p>The Forge name, logo, icon set, interface design, wording, and the underlying PF1/PF2 personality model and quiz content are the intellectual property of the Forge project. The specific answers you give and the resulting personal profile are yours to keep, export, and share as you like. Third-party assets used inside Forge remain the property of their respective owners — see the credits below for exactly what's used and under what terms.</p>
+      </section>
+
+      <section class="tos-section" id="third-party-assets">
+        <h2>11. Third-Party Assets</h2>
+        <p>Forge is built with as few external dependencies as possible. The full, itemized list of everything third-party actually used — libraries, fonts, delivery services, and anything else — lives in the <a href="#third-party-credits">Third-Party Notices &amp; Credits</a> section below, kept up to date as Forge's dependencies change.</p>
+      </section>
+
+      <section class="tos-section" id="music-attribution">
+        <h2>12. Music Attribution</h2>
+        <p>Forge's background ambience is a licensed track sourced from a free-BGM library, used under that library's usage terms. Forge does not claim ownership or authorship of this music. Full details, including the source, license, and a direct link to the original listing, are in the <a href="#music-credits">Music Credits</a> section below.</p>
+      </section>
+
+      <section class="tos-section" id="open-source">
+        <h2>13. Open Source Software</h2>
+        <p>Forge doesn't currently bundle any third-party open-source libraries — the quiz engine, QR code generator, canvas-drawn charts, and icon set are all original code written for this project. If that changes in a future version, every open-source dependency will be listed, grouped by license, in the <a href="#open-source-credits">Open Source Notices</a> section below.</p>
+      </section>
+
+      <section class="tos-section" id="no-warranty">
+        <h2>14. No Warranty</h2>
+        <p>Forge is provided "as is" and "as available," without warranties of any kind, whether express or implied — including, without limitation, any implied warranty of merchantability, fitness for a particular purpose, or non-infringement. Forge doesn't guarantee that the app will be uninterrupted, error-free, or perfectly accurate at all times.</p>
+      </section>
+
+      <section class="tos-section" id="liability">
+        <h2>15. Limitation of Liability</h2>
+        <p>To the maximum extent permitted by applicable law, the Forge project and its maintainer(s) are not liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of, or inability to use, Forge — including any decisions made on the basis of a generated result.</p>
+      </section>
+
+      <section class="tos-section" id="termination">
+        <h2>16. Termination of Use</h2>
+        <p>You can stop using Forge at any time, simply by closing the tab; clearing your browser's local storage for the site removes everything Forge has saved. The Forge project may also modify, suspend, or discontinue any part of the app, or these terms, at any time. Continuing to use Forge after a change to these terms means you accept the updated version.</p>
+      </section>
+
+      <section class="tos-section" id="future-updates">
+        <h2>17. Future Updates</h2>
+        <p>Forge is an evolving project. Its personality model, features, and these terms are all expected to grow over time — including possible future opt-in features (for example, cloud sync) that don't exist yet and are not implied to exist by anything on this page today. Any such change will be reflected here and logged in the <a href="#version-history">Version History</a> below.</p>
+      </section>
+
+      <section class="tos-section" id="governing-law">
+        <h2>18. Governing Law</h2>
+        <p class="tos-placeholder">Placeholder — to be completed</p>
+        <p>This section will state the governing jurisdiction for these terms in a future update.</p>
+      </section>
+
+      <section class="tos-section" id="contact">
+        <h2>19. Contact Information</h2>
+        <p class="tos-placeholder">Placeholder — to be completed</p>
+        <p>A contact method for legal or privacy inquiries will be added here.</p>
+      </section>
+
+      <section class="tos-section" id="version-history">
+        <h2>20. Version History</h2>
+        <div id="versionHistory"></div>
+      </section>
+
+      <section class="tos-section" id="last-updated">
+        <h2>21. Last Updated</h2>
+        <p>These Terms of Service were last updated on <strong id="lastUpdatedInline"></strong>.</p>
+      </section>
+
+      <!-- ================= CREDITS (config-driven) ================= -->
+
+      <section class="tos-section" id="third-party-credits">
+        <h2>Third-Party Notices &amp; Credits</h2>
+        <p>Generated from Forge's own dependency list. Every library, framework, font, or third-party asset actually used by the app is itemized below — nothing assumed, nothing left out.</p>
+        <details class="tos-accordion glass" open>
+          <summary>
+            Dependencies &amp; services
+            <span class="count" id="thirdPartyCount"></span>
+            <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg>
+          </summary>
+          <div class="tos-accordion-body">
+            <p class="hint">To add a new dependency later, add one entry to the <code>THIRD_PARTY</code> array in this page's script — nothing else needs to change.</p>
+            <div class="credit-grid" id="thirdPartyGrid"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="tos-section" id="fonts-credits">
+        <h2>Fonts</h2>
+        <p>Every typeface used across Forge, and where it comes from.</p>
+        <details class="tos-accordion glass" open>
+          <summary>
+            Typefaces
+            <span class="count" id="fontsCount"></span>
+            <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg>
+          </summary>
+          <div class="tos-accordion-body">
+            <div class="credit-grid" id="fontsGrid"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="tos-section" id="icons-graphics">
+        <h2>Icons &amp; Graphics</h2>
+        <p>The Forge logo, icon set, Open Graph image, favicons, PWA install icons, and every other piece of brand artwork in this app are original assets created for <strong>PersonaForge</strong>, unless a specific asset is noted otherwise above. The interface icon set (home, sun, moon, and so on) is hand-drawn line art built for Forge — not pulled from an external icon library.</p>
+      </section>
+
+      <section class="tos-section" id="music-credits">
+        <h2>Music Credits</h2>
+        <div id="musicCredit"></div>
+      </section>
+
+      <section class="tos-section" id="open-source-credits">
+        <h2>Open Source Notices</h2>
+        <p>An expandable, future-proofed home for any open-source software Forge comes to depend on, grouped by license family. Right now, this list is empty on purpose — see <a href="#open-source">Open Source Software</a> above.</p>
+        <details class="tos-accordion glass">
+          <summary>
+            By license
+            <span class="count" id="openSourceCount"></span>
+            <svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg>
+          </summary>
+          <div class="tos-accordion-body">
+            <p class="hint">To list a new open-source dependency later, push an entry into the matching license group inside the <code>OPEN_SOURCE_GROUPS</code> array in this page's script.</p>
+            <div id="openSourceGroups"></div>
+          </div>
+        </details>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ================= RETURN HOME ================= -->
+  <div class="footer-nav" style="margin-top:48px;">
+    <a href="index.html" id="returnHomeBottom" class="btn btn-primary" style="text-decoration:none;">Back to Forge</a>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="tos-footer glass">
+    <div class="brand-mini"><span class="dot"></span><span>Forge</span></div>
+    <p>PersonaForge ("Forge") · Version <span id="footerVersion"></span> · © <span id="footerYear"></span> The Forge project. All rights reserved except where third-party and open-source credits above say otherwise.</p>
+    <p>Background music used under license — see <a href="#music-credits">Music Credits</a>. Third-party software and fonts used under their own licenses — see <a href="#third-party-credits">Third-Party Notices</a> and <a href="#open-source-credits">Open Source Notices</a>.</p>
+    <nav class="footer-nav">
+      <a href="index.html">Home</a>
+      <a href="#" aria-disabled="true" title="Coming soon">Privacy Policy (coming soon)</a>
+      <a href="tos.html">Terms of Service</a>
+      <a href="#open-source-credits">Licenses</a>
+      <a href="https://github.com/Yota321/PersonaForge" target="_blank" rel="noopener">GitHub</a>
+      <a href="#contact" title="Placeholder">Contact</a>
+    </nav>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* =======================================================================
+     CONFIGURATION — the only part of this file you should need to touch
+     for routine updates. Every array below drives a rendered section
+     above; add an entry here and it appears on the page automatically,
+     no HTML editing required.
+     ======================================================================= */
+
+  // Bump this (and add a row to VERSION_HISTORY) whenever this page's
+  // legal content, credits, or structure meaningfully changes.
+  var TOS_VERSION = "1.0.0";
+  var LAST_UPDATED = "September 3, 2026";
+
+  var VERSION_HISTORY = [
+    { version: "1.0.0", date: "September 3, 2026", notes: "Initial Terms of Service, privacy notes, and third-party credits published." }
+  ];
+
+  // Every font actually used anywhere in Forge.
+  var FONTS = [
+    {
+      name: "Cabinet Grotesk",
+      role: "Display &amp; body typeface — headings, buttons, primary text",
+      source: "Fontshare (Indian Type Foundry)",
+      homepage: "https://www.fontshare.com/fonts/cabinet-grotesk",
+      license: "Fontshare Free Font License",
+      attribution: "Not required"
+    },
+    {
+      name: "JetBrains Mono",
+      role: "Monospace typeface — labels, codes, timestamps, eyebrows",
+      source: "Google Fonts",
+      homepage: "https://fonts.google.com/specimen/JetBrains+Mono",
+      license: "SIL Open Font License 1.1",
+      attribution: "Not required (permitted under the OFL)"
+    }
+  ];
+
+  // Every third-party library, framework, or delivery service actually
+  // used by Forge. Rows marked "Original Forge code" are listed here for
+  // completeness, to make clear what was checked and confirmed to be
+  // in-house rather than silently omitted.
+  var THIRD_PARTY = [
+    { name: "Google Fonts", purpose: "Webfont delivery for JetBrains Mono", homepage: "https://fonts.google.com/", license: "Hosting service; the font itself keeps its own license (see Fonts above)", attribution: "See Fonts above" },
+    { name: "Fontshare", purpose: "Webfont delivery for Cabinet Grotesk", homepage: "https://www.fontshare.com/", license: "Hosting service; the font itself keeps its own license (see Fonts above)", attribution: "See Fonts above" },
+    { name: "QR code generator", purpose: "Renders the scannable QR code for shared profile links", homepage: "—", license: "Original Forge code (implements the public ISO/IEC 18004 QR standard; no third-party library used)", attribution: "Not applicable" },
+    { name: "Trait radar chart", purpose: "Canvas-drawn radar visualization on the results screen", homepage: "—", license: "Original Forge code", attribution: "Not applicable" },
+    { name: "Interface icon set", purpose: "Every UI icon (home, theme, sound, navigation, etc.)", homepage: "—", license: "Original Forge artwork; no external icon library used", attribution: "Not applicable" }
+  ];
+
+  // Music credit. This is the one block to edit if the background track
+  // ever changes — set trackConfirmed to true once the fields below are
+  // verified against the source page, and the placeholder badge on the
+  // page disappears automatically.
+  var MUSIC_CREDIT = {
+    trackConfirmed: false,
+    trackName: "See source page for exact track title",
+    composer: "See source page for composer credit",
+    sourceSite: "DOVA-SYNDROME",
+    sourceSiteUrl: "https://dova-s.jp/",
+    trackPageUrl: "https://dova-s.jp/bgm/detail/15575",
+    license: "DOVA-SYNDROME Audio Source Usage License",
+    licenseSummary: "Free for personal and commercial use, no royalties or usage fees, and no copyright/credit notice is legally required. Rights to the track remain with its original composer. Individual composers may set additional terms on top of this baseline license, which take precedence where they apply.",
+    attributionRequired: false,
+    usageStatement: "Used by Forge as a soft, looping background ambience (assets/BG.mp3) that plays only if the person using the app leaves sound on. Forge does not modify, resell, redistribute, or claim ownership of this track — it is used strictly as background music within the app, consistent with the source license above."
+  };
+
+  // Open-source dependency groups. Empty today by design (see the Open
+  // Source Software section) — append { name, homepage, license, notice }
+  // objects into the relevant array below as dependencies are added.
+  var OPEN_SOURCE_GROUPS = [
+    { license: "MIT", entries: [] },
+    { license: "Apache License 2.0", entries: [] },
+    { license: "BSD", entries: [] },
+    { license: "Creative Commons", entries: [] },
+    { license: "Other", entries: [] }
+  ];
+
+  // Table of contents. Kept as data so adding a legal section later means
+  // adding one line here, not hand-editing a nav list.
+  var TOC = [
+    { id: "acceptance", label: "1. Acceptance of Terms" },
+    { id: "about", label: "2. About Forge" },
+    { id: "eligibility", label: "3. Eligibility" },
+    { id: "privacy", label: "4. Privacy" },
+    { id: "local-storage", label: "5. Local Storage" },
+    { id: "offline", label: "6. Offline Functionality" },
+    { id: "responsibilities", label: "7. User Responsibilities" },
+    { id: "shared-codes", label: "8. Shared Profile Codes" },
+    { id: "generated-results", label: "9. Generated Results" },
+    { id: "intellectual-property", label: "10. Intellectual Property" },
+    { id: "third-party-assets", label: "11. Third-Party Assets" },
+    { id: "music-attribution", label: "12. Music Attribution" },
+    { id: "open-source", label: "13. Open Source Software" },
+    { id: "no-warranty", label: "14. No Warranty" },
+    { id: "liability", label: "15. Limitation of Liability" },
+    { id: "termination", label: "16. Termination of Use" },
+    { id: "future-updates", label: "17. Future Updates" },
+    { id: "governing-law", label: "18. Governing Law" },
+    { id: "contact", label: "19. Contact Information" },
+    { id: "version-history", label: "20. Version History" },
+    { id: "last-updated", label: "21. Last Updated" },
+    { id: "third-party-credits", label: "Third-Party Credits" },
+    { id: "fonts-credits", label: "Fonts" },
+    { id: "icons-graphics", label: "Icons & Graphics" },
+    { id: "music-credits", label: "Music Credits" },
+    { id: "open-source-credits", label: "Open Source Notices" }
+  ];
+
+  /* =======================================================================
+     ICONS — same hand-drawn 20x20 line-icon family as index.html, reused
+     here so the top bar looks identical to every other screen in Forge.
+     ======================================================================= */
+  var ICONS = {
+    home: '<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 10 3l7 6.5"/><path d="M5 8.5V17h10V8.5"/><path d="M8 17v-5h4v5"/></svg>',
+    sun: '<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7"/></svg>',
+    moon: '<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 12.2A6.8 6.8 0 1 1 7.8 3.5a6 6 0 0 0 8.7 8.7Z"/></svg>'
+  };
+
+  function esc(str) {
+    return String(str == null ? "" : str).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+  function linkOrDash(url) {
+    if (!url || url === "—" || url === "-") return "—";
+    return '<a href="' + esc(url) + '" target="_blank" rel="noopener">' + esc(url.replace(/^https?:\/\//, "")) + "</a>";
+  }
+
+  /* =======================================================================
+     THEME — same storage key and default as index.html, so this page
+     always matches whatever the user last chose in the app itself.
+     ======================================================================= */
+  var currentTheme = window.localStorage.getItem("pf_theme") === "light" ? "light" : "dark";
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    document.documentElement.dataset.theme = theme;
+    try { window.localStorage.setItem("pf_theme", theme); } catch (e) { /* private mode, etc. */ }
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", theme === "light" ? "#FFFFFF" : "#0F1117");
+    var themeBtn = document.getElementById("themeBtn");
+    if (themeBtn) themeBtn.innerHTML = theme === "light" ? ICONS.sun : ICONS.moon;
+    var logo = document.getElementById("topBarLogo");
+    if (logo) logo.src = theme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg";
+  }
+  function toggleTheme() {
+    document.body.classList.add("theme-transitions");
+    applyTheme(currentTheme === "light" ? "dark" : "light");
+  }
+
+  /* =======================================================================
+     RETURN HOME — prefers browser history when it clearly came from
+     inside the app, otherwise falls back to a plain relative link to
+     index.html (also the real href on both buttons, so they work with
+     no JS, a right-click "open in new tab", or a screen reader).
+     ======================================================================= */
+  function goHome(event) {
+    try {
+      if (window.history.length > 1 && document.referrer) {
+        var refOrigin = new URL(document.referrer).origin;
+        if (refOrigin === window.location.origin) {
+          if (event) event.preventDefault();
+          window.history.back();
+          return;
+        }
+      }
+    } catch (e) { /* fall through to the plain link below */ }
+    // No usable same-origin history — let the normal href navigation to
+    // index.html happen (no preventDefault called).
+  }
+
+  /* =======================================================================
+     RENDERERS — build the config-driven sections above from the arrays
+     defined at the top of this script.
+     ======================================================================= */
+  function renderTOC(container) {
+    var html = TOC.map(function (item) {
+      return '<a href="#' + item.id + '">' + esc(item.label) + "</a>";
+    }).join("");
+    container.innerHTML = html;
+  }
+
+  function renderVersionHistory(container) {
+    container.innerHTML = VERSION_HISTORY.map(function (v) {
+      return '<div class="version-row"><span class="v-tag">v' + esc(v.version) + '</span><span class="v-date">' + esc(v.date) + '</span><span class="v-note">' + esc(v.notes) + "</span></div>";
+    }).join("");
+  }
+
+  function renderFonts(container) {
+    container.innerHTML = FONTS.map(function (f) {
+      return '<div class="credit-item"><h4>' + esc(f.name) + '</h4><dl>' +
+        '<dt>Role</dt><dd>' + f.role + '</dd>' +
+        '<dt>Source</dt><dd>' + esc(f.source) + '</dd>' +
+        '<dt>Homepage</dt><dd>' + linkOrDash(f.homepage) + '</dd>' +
+        '<dt>License</dt><dd>' + esc(f.license) + '</dd>' +
+        '<dt>Attribution</dt><dd>' + esc(f.attribution) + '</dd>' +
+        '</dl></div>';
+    }).join("");
+    document.getElementById("fontsCount").textContent = FONTS.length + (FONTS.length === 1 ? " typeface" : " typefaces");
+  }
+
+  function renderThirdParty(container) {
+    container.innerHTML = THIRD_PARTY.map(function (d) {
+      return '<div class="credit-item"><h4>' + esc(d.name) + '</h4><dl>' +
+        '<dt>Purpose</dt><dd>' + esc(d.purpose) + '</dd>' +
+        '<dt>Homepage</dt><dd>' + linkOrDash(d.homepage) + '</dd>' +
+        '<dt>License</dt><dd>' + esc(d.license) + '</dd>' +
+        '<dt>Attribution</dt><dd>' + esc(d.attribution) + '</dd>' +
+        '</dl></div>';
+    }).join("");
+    document.getElementById("thirdPartyCount").textContent = THIRD_PARTY.length + " entries";
+  }
+
+  function renderOpenSource(container) {
+    var totalEntries = 0;
+    container.innerHTML = OPEN_SOURCE_GROUPS.map(function (group) {
+      totalEntries += group.entries.length;
+      var body = group.entries.length
+        ? '<div class="credit-grid">' + group.entries.map(function (e) {
+            return '<div class="credit-item"><h4>' + esc(e.name) + '</h4><dl>' +
+              '<dt>Homepage</dt><dd>' + linkOrDash(e.homepage) + '</dd>' +
+              '<dt>License</dt><dd>' + esc(e.license) + '</dd>' +
+              (e.notice ? '<dt>Notice</dt><dd>' + esc(e.notice) + '</dd>' : '') +
+              '</dl></div>';
+          }).join("") + '</div>'
+        : '<p class="hint" style="margin:0 0 4px;">No ' + esc(group.license) + '-licensed libraries are currently bundled with Forge.</p>';
+      return '<details class="tos-accordion" style="border:1px solid var(--border); border-radius: var(--radius-md); margin-bottom:8px;">' +
+        '<summary style="padding:12px 14px; font-size:13.5px;">' + esc(group.license) + ' <span class="count">(' + group.entries.length + ')</span>' +
+        '<svg class="chev" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 8l5 5 5-5"/></svg></summary>' +
+        '<div class="tos-accordion-body" style="padding:0 14px 14px;">' + body + '</div></details>';
+    }).join("");
+    document.getElementById("openSourceCount").textContent = totalEntries + " total";
+  }
+
+  function renderMusicCredit(container) {
+    var m = MUSIC_CREDIT;
+    var badge = m.trackConfirmed ? "" : '<span class="tos-placeholder" style="margin-bottom:8px;">Track title &amp; composer pending confirmation from source page</span><br>';
+    container.innerHTML =
+      '<div class="music-card">' +
+        badge +
+        '<span class="track-name">' + esc(m.trackName) + '</span>' +
+        '<span class="track-meta">Composer: ' + esc(m.composer) + '</span>' +
+        '<p><strong>Source:</strong> ' + esc(m.sourceSite) + ' — <a href="' + esc(m.trackPageUrl) + '" target="_blank" rel="noopener">' + esc(m.trackPageUrl) + '</a></p>' +
+        '<p><strong>License:</strong> ' + esc(m.license) + '. ' + esc(m.licenseSummary) + '</p>' +
+        '<p><strong>Attribution required:</strong> ' + (m.attributionRequired ? "Yes" : "No, but credited here anyway") + '</p>' +
+        '<p><strong>Usage in Forge:</strong> ' + esc(m.usageStatement) + '</p>' +
+        '<p>Forge claims no ownership of this track. Full license terms are available at <a href="' + esc(m.sourceSiteUrl) + '" target="_blank" rel="noopener">' + esc(m.sourceSiteUrl) + '</a>.</p>' +
+      '</div>';
+  }
+
+  /* =======================================================================
+     INIT
+     ======================================================================= */
+  document.getElementById("metaVersion").textContent = TOS_VERSION;
+  document.getElementById("metaUpdated").textContent = LAST_UPDATED;
+  document.getElementById("lastUpdatedInline").textContent = LAST_UPDATED;
+  document.getElementById("footerVersion").textContent = TOS_VERSION;
+  document.getElementById("footerYear").textContent = new Date().getFullYear();
+
+  renderTOC(document.getElementById("tocList"));
+  renderTOC(document.getElementById("tocListMobile"));
+  renderVersionHistory(document.getElementById("versionHistory"));
+  renderFonts(document.getElementById("fontsGrid"));
+  renderThirdParty(document.getElementById("thirdPartyGrid"));
+  renderOpenSource(document.getElementById("openSourceGroups"));
+  renderMusicCredit(document.getElementById("musicCredit"));
+
+  applyTheme(currentTheme);
+
+  var homeBtn = document.getElementById("homeBtn");
+  homeBtn.innerHTML = ICONS.home;
+  homeBtn.addEventListener("click", goHome);
+  // The icon-btn in the top bar has no href to fall back on, so give it
+  // one explicitly: clicking it either uses history (see goHome) or
+  // navigates to index.html directly.
+  homeBtn.addEventListener("click", function (event) {
+    // If goHome already handled it via history.back(), this is a no-op
+    // because the page is already navigating away.
+    if (!event.defaultPrevented) window.location.href = "index.html";
+  });
+
+  document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+  document.getElementById("returnHomeBottom").addEventListener("click", goHome);
+})();
+</script>
+</body>
+</html>

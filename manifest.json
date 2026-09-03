@@ -1,8 +1,8 @@
 {
   "id": ".",
-  "name": "PersonaForge",
+  "name": "Forge",
   "short_name": "Forge",
-  "description": "Discover. Compare. Evolve. An adaptive, scenario-based personality assessment that runs entirely in your browser \u2014 no accounts, no backend, no tracking. Generate a shareable PF2 code, compare it with friends, and revisit your results anytime, even offline.",
+  "description": "Discover. Compare. Evolve. Forge (officially PersonaForge) is an adaptive, scenario-based personality assessment that runs entirely in your browser \u2014 no accounts, no backend, no tracking. Generate a shareable PF2 code, compare it with friends, and revisit your results anytime, even offline.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
