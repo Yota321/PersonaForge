@@ -1,8 +1,8 @@
-# PersonaForge
+# Forge
 
 Discover how you think, connect, lead, create, and grow.
 
-PersonaForge is a privacy-first adaptive personality platform that runs entirely inside your browser.
+PersonaForge or Forge is a privacy-first adaptive personality platform that runs entirely inside your browser.
 
 No accounts.
 No servers.
