@@ -388,28 +388,6 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
 
 .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-.values-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-@media (max-width: 640px){ .values-grid{ grid-template-columns: 1fr; } }
-.value-card{ padding:18px; }
-.value-card-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
-.value-icon{ font-size:18px; }
-.value-name{ font-weight:500; flex:1; }
-.value-pct{ font-family: var(--font-mono); color: var(--user-accent-1); font-size:14px; }
-.value-explain{ font-size:13px; color: var(--text-muted); margin-top:10px; line-height:1.5; }
-.value-source{ font-family: var(--font-mono); font-size:11px; color: var(--text-dim); margin-top:8px; }
-
-.sinvirtue-wrap{ position:relative; display:flex; justify-content:center; margin-top:14px; }
-.sinvirtue-flip{
-  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-  width:64px; height:64px; border-radius:50%; z-index:2;
-  background: linear-gradient(135deg, var(--user-accent-1), var(--user-accent-2));
-  color:#14101F; font-weight:600; font-size:13px;
-  box-shadow: 0 10px 24px -10px rgba(0,0,0,0.5);
-  transition: transform .3s cubic-bezier(0.34,1.56,0.64,1);
-}
-.sinvirtue-flip:hover{ transform: translate(-50%,-50%) scale(1.08) rotate(8deg); }
-.sinvirtue-flip:active{ transform: translate(-50%,-50%) scale(0.94); }
-.sinvirtue-caption{ text-align:center; margin-top:10px; font-family: var(--font-mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color: var(--text-muted); }
 .grid-4{ display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
 @media (max-width: 640px){ .grid-2, .grid-3, .grid-4{ grid-template-columns: 1fr 1fr; } }
 
@@ -502,17 +480,17 @@ canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 .footer-nav button:hover{ color: var(--text-muted); }
 
 .top-bar{
-  position: sticky; top: 18px; z-index: 40;
+  position: sticky; top: 16px; z-index: 40;
   display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;
-  padding: 16px 26px; margin: 10px 0 32px;
-  background: linear-gradient(180deg, rgba(23,26,34,0.5), rgba(23,26,34,0.26));
-  backdrop-filter: blur(22px) saturate(150%);
+  padding: 14px 22px; margin: 8px 0 28px;
+  background: linear-gradient(180deg, rgba(23,26,34,0.55), rgba(23,26,34,0.32));
+  backdrop-filter: blur(18px) saturate(140%);
   border: 1px solid var(--border);
   border-radius: 999px;
-  box-shadow: 0 16px 36px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  box-shadow: 0 12px 30px -18px rgba(0,0,0,0.5);
   animation: navFadeIn .6s var(--ease) both;
 }
-[data-theme="light"] .top-bar{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.34)); box-shadow: 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6); }
+[data-theme="light"] .top-bar{ background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); }
 @keyframes navFadeIn{ from{ opacity:0; transform: translateY(-8px); } to{ opacity:1; transform:none; } }
 .nav-zone{ display:flex; align-items:center; }
 .nav-left{ justify-self:start; }
@@ -2829,73 +2807,6 @@ const ENNEAGRAM_TYPES = [
   { name:"Type 8, The Challenger", signature:[{dim:"confidence",w:1},{dim:"leadership",w:1},{dim:"competitiveness",w:1}] },
   { name:"Type 9, The Peacemaker", signature:[{dim:"patience",w:2},{dim:"adaptability",w:1}] },
 ];
-/* ---- Human Values --------------------------------------------------------
-   A motivational layer, separate from archetype/frameworks: not "what
-   type are you" but "what seems to move you when you decide things".
-   Each value is a weighted signature over the same 25 measured
-   dimensions, scored the same way archetype signatures are, so nothing
-   new is being invented, just a different lens on the same evidence.
-   Explicitly PersonaForge's interpretation, not a validated instrument. */
-const HUMAN_VALUES = [
-  { id:"determination", name:"Determination", icon:"\uD83D\uDCAA",
-    signature:[{dim:"drive",w:2},{dim:"persistence",w:2},{dim:"discipline",w:1}],
-    why:"how much you push through rather than let go" },
-  { id:"justice", name:"Justice", icon:"\u2696\uFE0F",
-    signature:[{dim:"responsibility",w:2},{dim:"logic",w:1},{dim:"trust",w:1}],
-    why:"how much fairness and accountability shape your calls" },
-  { id:"compassion", name:"Compassion", icon:"\uD83E\uDEC2",
-    signature:[{dim:"empathy",w:2},{dim:"kindness",w:2}],
-    why:"how readily you feel and respond to what others are going through" },
-  { id:"curiosity", name:"Curiosity", icon:"\uD83D\uDD0D",
-    signature:[{dim:"curiosity",w:2},{dim:"openMindedness",w:1}],
-    why:"how much unanswered questions pull at you" },
-  { id:"bravery", name:"Bravery", icon:"\uD83E\uDDA1",
-    signature:[{dim:"risk",w:2},{dim:"confidence",w:1},{dim:"resilience",w:1}],
-    why:"how willing you are to act despite the odds or the fear" },
-  { id:"integrity", name:"Integrity", icon:"\uD83E\uDEA8",
-    signature:[{dim:"trust",w:2},{dim:"selfAwareness",w:1},{dim:"responsibility",w:1}],
-    why:"how consistent you stay between what you believe and what you do" },
-  { id:"hope", name:"Hope", icon:"\u2728",
-    signature:[{dim:"optimism",w:2},{dim:"resilience",w:1}],
-    why:"how much you expect things to work out, even under pressure" },
-  { id:"wisdom", name:"Wisdom", icon:"\uD83E\uDD89",
-    signature:[{dim:"selfAwareness",w:2},{dim:"logic",w:1},{dim:"openMindedness",w:1}],
-    why:"how much reflection shapes your judgment before you act" },
-  { id:"kindness", name:"Kindness", icon:"\uD83D\uDC9E",
-    signature:[{dim:"kindness",w:2},{dim:"empathy",w:1},{dim:"patience",w:1}],
-    why:"how naturally you extend warmth without being asked" },
-  { id:"creativity", name:"Creativity", icon:"\uD83C\uDFA8",
-    signature:[{dim:"creativity",w:2},{dim:"openMindedness",w:1},{dim:"curiosity",w:1}],
-    why:"how much you reach for a new angle instead of the obvious one" },
-  { id:"discipline", name:"Discipline", icon:"\uD83C\uDFAF",
-    signature:[{dim:"discipline",w:2},{dim:"planning",w:1},{dim:"persistence",w:1}],
-    why:"how consistently you follow through on your own structure" },
-  { id:"loyalty", name:"Loyalty", icon:"\uD83E\uDD1D",
-    signature:[{dim:"trust",w:2},{dim:"patience",w:1},{dim:"responsibility",w:1}],
-    why:"how much you stay committed once you're in" },
-  { id:"freedom", name:"Freedom", icon:"\uD83E\uDD85",
-    signature:[{dim:"independence",w:2},{dim:"adaptability",w:1},{dim:"risk",w:1}],
-    why:"how much you protect your own room to choose" },
-  { id:"responsibility", name:"Responsibility", icon:"\uD83E\uDEA2",
-    signature:[{dim:"responsibility",w:2},{dim:"discipline",w:1},{dim:"planning",w:1}],
-    why:"how seriously you treat the things you're accountable for" },
-];
-
-/* ---- Seven Sins / Heavenly Virtues (fun profile) --------------------------
-   A playful, explicitly non-serious lens: each axis is one measured
-   dimension read two ways. The Sin reading and the Virtue reading are
-   opposite ends of the exact same evidence, nothing is recalculated,
-   only the label and direction flip. */
-const SIN_VIRTUE_AXES = [
-  { dim:"confidence", sinLabel:"Pride", virtueLabel:"Humility", sinIsHigh:true },
-  { dim:"competitiveness", sinLabel:"Greed", virtueLabel:"Charity", sinIsHigh:true },
-  { dim:"patience", sinLabel:"Wrath", virtueLabel:"Patience", sinIsHigh:false },
-  { dim:"kindness", sinLabel:"Envy", virtueLabel:"Kindness", sinIsHigh:false },
-  { dim:"risk", sinLabel:"Lust", virtueLabel:"Chastity", sinIsHigh:true },
-  { dim:"discipline", sinLabel:"Gluttony", virtueLabel:"Temperance", sinIsHigh:false },
-  { dim:"drive", sinLabel:"Sloth", virtueLabel:"Diligence", sinIsHigh:false },
-];
-
 const MBTI_AXES = [
   { letters:["E","I"], posDims:["socialEnergy"], negDims:[] },
   { letters:["N","S"], posDims:["openMindedness","curiosity"], negDims:["discipline","planning"] },
@@ -4279,47 +4190,6 @@ function computeMBTI(normDims){
   });
   return type;
 }
-/* -------------------------------------------------------------------------
-   ALGORITHM: Human Values
-   Scores every value in HUMAN_VALUES the same way archetype matching
-   scores a signature: weighted sum over the relevant dimensions,
-   normalized against the maximum that signature could possibly reach
-   (so a value with a heavier signature isn't unfairly favored), returns
-   the top 5. Each result carries which measured dimensions it came from
-   and their actual values, so the explanation can point at real
-   evidence instead of a generic sentence. */
-function computeHumanValues(normDims){
-  const scored = HUMAN_VALUES.map(v => {
-    const raw = v.signature.reduce((s,x) => s + getDimensionScore(normDims, x.dim) * x.w, 0);
-    const maxPossible = v.signature.reduce((s,x) => s + 10 * x.w, 0);
-    const pct = Math.max(0, Math.min(100, Math.round(((raw + maxPossible) / (2 * maxPossible)) * 100)));
-    const topDim = [...v.signature].sort((a,b) => Math.abs(getDimensionScore(normDims,b.dim)) - Math.abs(getDimensionScore(normDims,a.dim)))[0];
-    return { value: v, pct, topDim: topDim.dim, topDimPct: getDimensionPercent(normDims, topDim.dim) };
-  });
-  scored.sort((a,b) => b.pct - a.pct);
-  return scored.slice(0, 5).map(s => ({
-    id: s.value.id, name: s.value.name, icon: s.value.icon, pct: s.pct,
-    explanation: `${s.pct}% reflects ${s.value.why}, most visibly in your ${DIM_LABELS[s.topDim]} (${s.topDimPct}%).`,
-    inferredFrom: s.value.signature.map(x => DIM_LABELS[x.dim]),
-  }));
-}
-
-/* -------------------------------------------------------------------------
-   ALGORITHM: Seven Sins / Heavenly Virtues (fun, non-serious)
-   Each of the 7 axes is one measured dimension read two directions.
-   Nothing is recomputed between modes, the same normDims values just get
-   read as either the sin-side or virtue-side percentage depending on
-   sinIsHigh, so "only the interpretation changes" holds literally, not
-   just in spirit. */
-function computeSinVirtueProfile(normDims){
-  return SIN_VIRTUE_AXES.map(axis => {
-    const raw = getDimensionPercent(normDims, axis.dim);
-    const sinPct = axis.sinIsHigh ? raw : 100 - raw;
-    const virtuePct = 100 - sinPct;
-    return { dim: axis.dim, sinLabel: axis.sinLabel, virtueLabel: axis.virtueLabel, sinPct, virtuePct };
-  });
-}
-
 function computeFrameworkApproximations(normDims){
   return {
     bigFive: computeBigFive(normDims),
@@ -5424,8 +5294,6 @@ function renderForging(){
 function buildProfileExtras(normDims, archetype, ranked, session, upgradedFromV1){
   return {
     mix: computePersonalityMix(ranked),
-    humanValues: computeHumanValues(normDims),
-    sinVirtue: computeSinVirtueProfile(normDims),
     narrativeRole: computeNarrativeRole(normDims),
     social: computeSocialProfile(normDims),
     relationship: computeRelationshipProfile(normDims),
@@ -5733,24 +5601,6 @@ function renderResult(){
       </div>
 
       <div class="section">
-        <div class="section-title"><span class="eyebrow">Human Values</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">A separate, motivational layer, not another personality type: what seems to move you when you actually decide something. This is PersonaForge's interpretation of your measured evidence, not a validated instrument.</p>
-        <div class="values-grid" style="margin-top:12px">
-          ${r.humanValues.map(v => `
-          <div class="card glass value-card">
-            <div class="value-card-head">
-              <span class="value-icon">${v.icon}</span>
-              <span class="value-name">${v.name}</span>
-              <span class="value-pct count-up" data-target="${v.pct}" data-suffix="%">0%</span>
-            </div>
-            <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v.pct}%"></div></div>
-            <p class="value-explain">${v.explanation}</p>
-            <div class="value-source">Drawn from: ${v.inferredFrom.join(", ")}</div>
-          </div>`).join("")}
-        </div>
-      </div>
-
-      <div class="section">
         <div class="section-title"><span class="eyebrow">Friendship Profile</span></div>
         <div class="card glass">
           <h4>${r.friendship.type.name}</h4>
@@ -5906,19 +5756,10 @@ function renderResult(){
         </div>` : ""}
       </div>
 
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Seven Sins / Heavenly Virtues</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">A playful, dramatic reading of the same evidence above, not a real assessment. Flip it to see the other side.</p>
-        <div class="sinvirtue-wrap">
-          <canvas id="sinVirtueRadar"></canvas>
-          <button class="sinvirtue-flip" id="sinVirtueFlipBtn" onclick="flipSinVirtue()" aria-label="Flip between Sins and Virtues">Flip</button>
-        </div>
-        <div class="sinvirtue-caption" id="sinVirtueCaption">Seven Deadly Sins</div>
-      </div>
-
       ${previousTimeline ? renderTimelineDelta(r, previousTimeline) : ""}
 
-      <div class="section">        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
+      <div class="section">
+        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
         <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
         <div class="card glass" style="margin-top:12px">
           ${r.ranked.map((row, i) => {
@@ -5959,8 +5800,6 @@ function renderResult(){
       el.style.width = (el.dataset.w || el.style.width) + (el.dataset.w ? "%" : "");
     });
     drawRadar(document.getElementById("radar"), r.normDims, r.archetype.colors[0]);
-    sinVirtueMode = "sin";
-    drawSinVirtueRadar(document.getElementById("sinVirtueRadar"), r.sinVirtue, sinVirtueMode, r.archetype.colors[0]);
     const qrCanvas = document.getElementById("qrCanvas");
     if (qrCanvas){
       const shareUrl = shareURLFor(r.code);
@@ -6212,93 +6051,6 @@ function drawRadar(canvas, normDims, accentColor){
     if (t < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-}
-
-/* ---------------- Seven Sins / Heavenly Virtues (fun, flippable) ---------
-   Same 7 axes, same underlying percentages, just read from the sin side
-   or the virtue side (100 - the other). Flipping morphs the polygon from
-   its current shape to the new one instead of snapping, since the whole
-   point is that it's the same evidence seen differently, not a new
-   chart. Respects prefers-reduced-motion (snaps instantly instead). */
-let sinVirtueMode = "sin";
-function drawSinVirtueRadar(canvas, axes, mode, accentColor, fromValues){
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const dpr = window.devicePixelRatio || 1;
-  const n = axes.length;
-  const values = axes.map(a => mode === "sin" ? a.sinPct : a.virtuePct);
-  const labels = axes.map(a => mode === "sin" ? a.sinLabel : a.virtueLabel);
-  const color = accentColor || "#A78BFA";
-  const isLight = document.documentElement.dataset.theme === "light";
-  const gridColor = isLight ? "rgba(15,23,42,0.10)" : "rgba(255,255,255,0.08)";
-  const labelColor = isLight ? "rgba(15,23,42,0.72)" : "rgba(248,250,252,0.68)";
-
-  const available = Math.min(340, root.clientWidth - 24);
-  const size = available;
-  canvas.width = size * dpr; canvas.height = size * dpr;
-  canvas.style.width = size + "px"; canvas.style.height = size + "px";
-  ctx.scale(dpr, dpr);
-  const cx = size/2, cy = size/2, R = size/2 - 54;
-
-  function frame(currentValues){
-    ctx.clearRect(0,0,size,size);
-    ctx.strokeStyle = gridColor; ctx.lineWidth = 1;
-    for (let ring = 1; ring <= 4; ring++){
-      ctx.beginPath();
-      for (let i = 0; i <= n; i++){
-        const angle = (i/n) * Math.PI*2 - Math.PI/2;
-        const r = (R*ring)/4;
-        const x = cx + Math.cos(angle)*r, y = cy + Math.sin(angle)*r;
-        i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-      }
-      ctx.stroke();
-    }
-    ctx.fillStyle = labelColor;
-    ctx.font = "12px Manrope, sans-serif";
-    ctx.textBaseline = "middle";
-    axes.forEach((a,i) => {
-      const angle = (i/n) * Math.PI*2 - Math.PI/2;
-      const x = cx + Math.cos(angle)*R, y = cy + Math.sin(angle)*R;
-      ctx.strokeStyle = gridColor;
-      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
-      const cosA = Math.cos(angle);
-      const lx = cx + cosA*(R+16), ly = cy + Math.sin(angle)*(R+16);
-      ctx.textAlign = cosA > 0.15 ? "left" : cosA < -0.15 ? "right" : "center";
-      ctx.fillText(labels[i], lx, ly);
-    });
-    ctx.beginPath();
-    axes.forEach((a,i) => {
-      const angle = (i/n) * Math.PI*2 - Math.PI/2;
-      const r = R * Math.max(0, Math.min(1, currentValues[i]/100));
-      const x = cx + Math.cos(angle)*r, y = cy + Math.sin(angle)*r;
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    ctx.closePath();
-    ctx.fillStyle = hexToRgba(color, 0.2);
-    ctx.strokeStyle = color; ctx.lineWidth = 1.8;
-    ctx.fill(); ctx.stroke();
-  }
-
-  if (reducedMotion() || !fromValues){ frame(values); return; }
-  const start = performance.now(), duration = 550;
-  function tick(now){
-    const t = Math.min(1, (now-start)/duration);
-    const eased = 1 - Math.pow(1-t, 3);
-    const current = values.map((v,i) => fromValues[i] + (v - fromValues[i]) * eased);
-    frame(current);
-    if (t < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-function flipSinVirtue(){
-  const r = lastResult;
-  if (!r || !r.sinVirtue) return;
-  const fromValues = r.sinVirtue.map(a => sinVirtueMode === "sin" ? a.sinPct : a.virtuePct);
-  sinVirtueMode = sinVirtueMode === "sin" ? "virtue" : "sin";
-  click(sinVirtueMode === "virtue" ? 660 : 330);
-  drawSinVirtueRadar(document.getElementById("sinVirtueRadar"), r.sinVirtue, sinVirtueMode, r.archetype.colors[0], fromValues);
-  const caption = document.getElementById("sinVirtueCaption");
-  if (caption) caption.textContent = sinVirtueMode === "sin" ? "Seven Deadly Sins" : "Seven Heavenly Virtues";
 }
 
 /* ---------------- PNG export (canvas render of a share card) -----------*/
@@ -6738,7 +6490,6 @@ function takeAssessmentFromShared(){
 }
 
 window.toggleTheme = toggleTheme;
-window.flipSinVirtue = flipSinVirtue;
 window.openSharedProfile = openSharedProfile;
 window.compareSharedWithMine = compareSharedWithMine;
 window.takeAssessmentFromShared = takeAssessmentFromShared;
