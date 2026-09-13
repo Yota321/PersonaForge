@@ -10,18 +10,21 @@
 <meta property="og:type" content="website" />
 <meta property="og:title" content="PersonaForge" />
 <meta property="og:description" content="Discover your personality, compare with friends, and share your profile. Everything runs locally with no accounts or servers." />
-<meta property="og:image" content="assets/Open_Graph.png" />
+<meta property="og:image" content="https://yota321.github.io/PersonaForge/assets/Open_Graph.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta property="og:url" content="https://yota321.github.io/PersonaForge/" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="PersonaForge" />
 <meta name="twitter:description" content="Discover your personality, compare with friends, and share your profile. Everything runs locally with no accounts or servers." />
-<meta name="twitter:image" content="assets/Open_Graph.png" />
+<meta name="twitter:image" content="https://yota321.github.io/PersonaForge/assets/Open_Graph.png" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_black.svg" media="(prefers-color-scheme: light)" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_white.svg" media="(prefers-color-scheme: dark)" />
 <link rel="icon" type="image/png" href="assets/Icon_black_192.png" />
 <link rel="apple-touch-icon" href="assets/Icon_white_512.png" />
 <link rel="manifest" href="manifest.json" />
 <link rel="preload" as="image" href="assets/Logo_white.svg" />
+<link rel="preload" as="image" href="assets/Hero_Home.jpg" fetchpriority="high" />
 <link rel="preload" as="audio" href="assets/BG.mp3" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,6 +120,61 @@
 
 body.theme-transitions, body.theme-transitions .glass, body.theme-transitions .card{ transition: background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease); }
 
+/* ---------------- Dark/light scan transition ---------------------------
+   Chromium's View Transitions API snapshots the page just before and
+   just after the theme swap in toggleTheme() and stacks them as
+   ::view-transition-old(root) (the "before" bitmap, painted first) and
+   ::view-transition-new(root) (the "after" bitmap, painted on top).
+   Left alone, the browser cross-fades them with opacity. Overriding just
+   the "new" layer's animation turns that cross-fade into a scan: the old
+   theme stays put underneath, and the new one progressively covers it
+   from the bottom of the viewport up — like a beam sweeping past every
+   surface (backgrounds, cards, gradients, borders, icons, shadows,
+   glass, header, menu) in one motion, because they're all part of the
+   same bitmap rather than transitioning independently. mix-blend-mode is
+   forced to normal on both layers since the browser's default
+   (plus-lighter, for its own cross-fade math) would otherwise tint the
+   seam between them.
+   This used to reveal via clip-path (a hard inset() rectangle), which
+   gave a razor-straight, instant-on edge — functionally a wipe, but it
+   read as a mechanical cutoff rather than a "scan," since nothing about
+   a perfectly sharp line suggests something sweeping past. Swapped to
+   mask-image with a soft-edged gradient band instead: a ~26-point-tall
+   strip that fades from fully transparent to fully opaque (rather than
+   a 0-width on/off line) travels from below the viewport to above it,
+   so the boundary between revealed/unrevealed is always a gradient, not
+   an edge, and the new theme genuinely feathers in as the band passes
+   rather than snapping into place behind a moving cutoff.
+   Both keyframes keep the same 4-stop structure (opaque, opaque, clear,
+   clear) with only the stop *positions* changing, which is what lets
+   Chromium interpolate the gradient smoothly frame-to-frame instead of
+   jump-cutting between two unrelated gradients. Positions intentionally
+   run past 0%/100% (-24% up to 124%) so the band starts fully below the
+   page (nothing revealed yet) and ends fully above it (everything
+   revealed) — the out-of-range stops get clamped by the browser into a
+   fully-transparent or fully-opaque gradient at each end, which is
+   exactly the flat start/end state this needs. */
+@keyframes lp-theme-scan-reveal{
+  0%{
+    mask-image: linear-gradient(to top, white 0%, white -37%, transparent -11%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, white 0%, white -37%, transparent -11%, transparent 100%);
+  }
+  100%{
+    mask-image: linear-gradient(to top, white 0%, white 111%, transparent 137%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, white 0%, white 111%, transparent 137%, transparent 100%);
+  }
+}
+::view-transition-group(root){ animation-duration: 900ms; }
+::view-transition-old(root), ::view-transition-new(root){
+  animation: none; mix-blend-mode: normal;
+}
+::view-transition-new(root){
+  animation: lp-theme-scan-reveal 900ms var(--ease) both;
+}
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-new(root){ animation: none; }
+}
+
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
@@ -159,6 +217,22 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
 
 /* ---------- Floating background gradient orbs (decorative, aria-hidden) - */
 #embers{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+/* Landing-only: dampens the shared ambient glow (body::before, #embers)
+   so this page's background reads flat/quiet and color lives in the
+   cards instead — without touching those elements for every other
+   screen, which still want their full atmosphere. Sits at the same
+   z-index but later in the DOM, so it paints above them and below all
+   real landing content (z-index:1+). */
+/* Fully opaque now (was a 60%-opacity dampener over the shared ambient
+   blobs) — the reference calls for an almost-flat background with only
+   subtle radial lighting, not large colourful blobs bleeding through
+   from #embers. Colour now lives entirely inside the cards; this layer
+   just paints one quiet highlight instead. */
+.lp-bg-flatten{ position:fixed; inset:0; z-index:0; pointer-events:none; background: var(--bg); }
+.lp-bg-flatten::after{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(60% 45% at 50% 0%, rgba(167,139,250,0.09), transparent 70%);
+}
 .blind-bar{
   position:absolute; width:38vmax; height:38vmax; border-radius:50%; filter: blur(70px);
   opacity:0.22; animation: floaty ease-in-out infinite;
@@ -202,8 +276,9 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
   background: linear-gradient(120deg, var(--accent), var(--sky), var(--mint), var(--accent));
   background-size: 280% 280%;
   animation: gradientDrift 9s ease-in-out infinite;
-  color: #14101F;
+  color: #0A0612;
   box-shadow: 0 14px 34px -14px rgba(167,139,250,0.55), 0 0 0 0 rgba(167,139,250,0);
+  transform: translate(var(--magnet-x, 0px), var(--magnet-y, 0px));
 }
 @keyframes gradientDrift{ 0%,100%{ background-position: 0% 50%; } 50%{ background-position: 100% 50%; } }
 .btn-primary::after{
@@ -211,10 +286,10 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
   background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 48%, transparent 62%);
   background-size: 220% 100%; background-position: 140% 0;
 }
-.btn-primary:hover{ transform: translateY(-3px); box-shadow: 0 20px 44px -14px rgba(167,139,250,0.7); }
+.btn-primary:hover{ transform: translate(var(--magnet-x, 0px), calc(var(--magnet-y, 0px) - 3px)); box-shadow: 0 20px 44px -14px rgba(167,139,250,0.7); }
 .btn-primary:hover::after{ opacity:1; animation: shimmerSweep 1.1s var(--ease); }
 @keyframes shimmerSweep{ from{ background-position: 140% 0; } to{ background-position: -40% 0; } }
-.btn-primary:active{ transform: translateY(0) scale(.97); }
+.btn-primary:active{ transform: translate(var(--magnet-x, 0px), var(--magnet-y, 0px)) scale(.97); }
 .btn-ghost{
   background: var(--surface); border:1px solid var(--border); color: var(--text);
 }
@@ -240,32 +315,684 @@ h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing:
 .eyebrow.accent{ color: var(--accent-soft); }
 
 /* ---------- Landing ---------- */
-.landing{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; justify-content:center; flex:1; gap: 26px; padding-top: 6vh; }
-.logo-mark{ font-family: var(--font-mono); font-size: 13px; letter-spacing:0.3em; color: var(--text-dim); text-transform:uppercase; }
-.landing h1, #brandLogoFallback{
-  font-size: clamp(46px, 9vw, 94px); line-height: 0.95; letter-spacing: -0.02em;
-  color: var(--text);
-  animation: revealIn 1s var(--ease) both;
-}
-.landing h1 span{ color: var(--accent); }
-.brand-logo{
-  max-width: min(70vw, 420px); height: auto; animation: revealIn 1s var(--ease) both;
-}
 @keyframes revealIn{
   0%{ filter: blur(10px); opacity:0; transform: translateY(10px); }
   100%{ filter: blur(0); opacity:1; transform:none; }
 }
-.landing .tagline{ font-size: 17px; color: var(--text-muted); max-width: 460px; }
 .cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
-.landing .cta-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top: 6px; }
-.landing .meta-row{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top: 30px; color: var(--text-dim); font-size:12.5px; font-family: var(--font-mono); }
 
-.quick-compare{ margin-top: 34px; width:100%; max-width: 480px; padding: 18px 20px; text-align:left; }
-.quick-compare label{ font-size:12.5px; color: var(--text-muted); display:block; margin-bottom:8px; }
-.quick-compare .row{ display:flex; gap:10px; flex-wrap:wrap; }
-.quick-compare input{
-  flex:1; min-width:180px; background: rgba(255,255,255,0.02); border:1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); padding: 11px 13px; font-family: var(--font-mono); font-size:13px;
+/* width:100% (not a vw percentage) + a high max-width ceiling: a vw-based
+   width is sensitive to browser zoom, since zooming changes the CSS
+   viewport width itself — at 96vw/1760px, a wide monitor at 100% zoom
+   (e.g. 1920px) hit the 1760 cap and showed ~80px of margin per side,
+   while 110% zoom (a narrower effective viewport, ~1745px) stayed under
+   the cap and showed only ~35px, so the page visibly changed how "edge
+   to edge" it felt depending on zoom level alone. width:100% always
+   fills whatever the viewport actually is; the 84px padding is now the
+   *only* margin, so it looks identical at any zoom. The max-width only
+   exists as a ceiling for genuinely ultra-wide displays. */
+.landing-v2{ position:relative; z-index:1; max-width: 2200px; width:100%; margin-inline:auto; padding: 0 84px 8px; display:flex; flex-direction:column; gap: 64px; }
+.landing-v2 > .section{ margin-top:0; }
+/* Must outrank .landing-v2's own stacking context (also z-index:1) so
+   the sticky top bar's overflow menu — nested inside this wrapper's own
+   stacking context — can never paint underneath hero/bento content that
+   happens to come later in the DOM. A z-index on a descendant (the menu)
+   can't escape its ancestor's stacking context on its own. */
+.lp-topbar-wrap{ max-width: 2200px; width:100%; margin-inline:auto; padding:0 84px; position:relative; z-index:50; }
+/* The 84px side padding above is sized for the desktop hero composition
+   (72-96px per this pass's spec); at phone widths it would eat more
+   than 40% of the viewport on its own, so it steps down well before
+   the 900px layout breakpoint. */
+@media (max-width: 760px){
+  .landing-v2, .lp-topbar-wrap, .lp-footer-inner{ padding-left:20px; padding-right:20px; }
+}
+
+/* ---- Hero + bento, unified into one unit ----
+   A 2-track CSS Grid: text column | shared hero-photo+bento canvas.
+   .lp-bento-canvas is a single position:relative box holding the photo
+   and all four cards, each absolutely positioned by percentage (see the
+   OVERLAP MATH comment further down for exactly where those percentages
+   come from) so the whole cluster scales as one unit at any width.
+   Below 900px this reverts to a simple stacked flex column in DOM order
+   — text, photo, Discover, (dark card hidden under 760px),
+   Compare/Evolve — identical to the previous mobile layout.
+   Track ratio widened to 49:51 (text:canvas), up from 46:54 — a further
+   ~6.5% shift toward the text side (per explicit request: "increase the
+   text column by roughly 5-8%, don't enlarge the page"), same reasoning
+   as the earlier 43->46 bump: the text side still read as the weaker
+   half. column-gap stays a literal 22px (within the 20-24px target)
+   rather than a flex gap, which previously let the text column's box
+   grow wider than its actual content and made the visual gap to the
+   hero image much bigger than the coded gap value (confirmed via
+   getBoundingClientRect in an earlier pass: a 56px flex-gap next to a
+   540px paragraph in a 720px box read as ~236px of dead space).
+   align-items:stretch (was :start) + .lp-hero-text's justify-content:
+   space-between (was :center) together are what make the two columns
+   share one height instead of text ending early: .lp-bento-canvas's own
+   height is intrinsic (the padding-top trick below) so stretch can't
+   change it, but it CAN stretch the text column's box to match that
+   height, and space-between then pins the label to the top (level with
+   the photo) and the "Runs on your device..." line to the bottom (level
+   with the bento's own bottom) instead of letting them float centered
+   inside unused vertical space — matching the requested "footer text
+   baseline aligns with the bottom of the bento" without needing to
+   guess at manual gap/margin values that would only hold at one width. */
+.lp-hero-grid{
+  display:grid; grid-template-columns: minmax(340px,49fr) minmax(380px,51fr); column-gap:22px;
+  align-items:stretch; position:relative;
+  padding-top: 2vh;
+}
+.lp-hero-text{ display:flex; flex-direction:column; justify-content:space-between; gap: 24px; animation: revealIn .8s var(--ease) both; }
+/* aspect-ratio alone (with height:auto) measurably mis-sizes this box
+   once its absolutely-positioned percentage-height children are in
+   play — verified via getBoundingClientRect: removing the children
+   snaps it back to the correct aspect-ratio height, so the two features
+   don't compose cleanly here. The classic padding-top spacer sidesteps
+   it: percentage padding always resolves against the parent's WIDTH
+   regardless of height being definite, so it gives this box a real,
+   unambiguous height with no interaction with its children at all. */
+/* Sizing comes entirely from the grid track (see .lp-hero-grid's
+   minmax(400px,54fr) column) rather than its own flex-basis/max-width.
+   88.16% = 670/760, this canvas's own reference height:width (see the
+   OVERLAP MATH note below for where 670 and 760 come from). */
+.lp-bento-canvas{ position:relative; min-width:0; }
+.lp-bento-canvas::before{ content:''; display:block; padding-top: 88.16%; }
+.lp-hero-text h1{
+  font-size: clamp(46px, 7.2vw, 86px); line-height: 0.96; letter-spacing: -0.02em; color: var(--text);
+}
+.accent-text{ color: var(--accent); }
+/* No max-width at all now (was a fixed 540px cap): the text column is a
+   real grid track now (see .lp-hero-grid), not an oversized flex box, so
+   letting the paragraph fill 100% of it is what actually closes the
+   internal dead space that made this column read as "smaller" than the
+   bento side despite the box itself measuring wider. */
+.lp-sub{ font-size: 16.5px; color: var(--text-muted); max-width: 100%; line-height:1.65; }
+.lp-hero-text .cta-row{ margin-top: 4px; }
+.lp-hero-text .cta-row .btn-primary{ min-width: 270px; }
+/* Overridden to a responsive value inside the min-width:901px block
+   below (cqw-based, same rationale as h1/.lp-sub there) — this flat
+   270px remains as the ≤900px stacked-layout value, where the row has
+   the full viewport width to work with and doesn't need to shrink. */
+.lp-status-card{ max-width: 440px; padding: 18px 20px; }
+.lp-status-card p{ margin-top:8px; }
+.lp-reopen{ align-self:flex-start; margin-top:-14px; }
+.lp-trust-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; color: var(--text-muted); font-size:12.5px; font-family: var(--font-mono); }
+.dot-sep{ width:3px; height:3px; border-radius:50%; background: var(--text-dim); display:inline-block; }
+
+/* Pulled up against the parent's 28px gap so it reads as attached to
+   the buttons above it (a caption on the CTA), rather than sitting at
+   the same distance as every other, unrelated block in the column. */
+.lp-avatars{ display:flex; align-items:center; gap:14px; margin-top:-12px; }
+.lp-avatar-stack{ display:flex; }
+.lp-avatar-stack img{
+  width:38px; height:38px; border-radius:50%; object-fit:cover;
+  border:2px solid var(--bg); box-shadow: 0 4px 10px -4px rgba(0,0,0,0.4);
+  margin-left:-13px; background: var(--surface-strong); /* ~35% overlap */
+}
+.lp-avatar-stack img:first-child{ margin-left:0; }
+.lp-avatars-caption{ font-size:13px; color: var(--text-muted); line-height:1.4; max-width:230px; }
+
+.lp-hero-visual{
+  position:relative; z-index:3; pointer-events:auto;
+  border-radius: var(--radius-xl); overflow:hidden; min-height: 300px;
+  background: linear-gradient(165deg, var(--surface-strong), var(--bg-alt));
+  box-shadow: 0 30px 70px -30px rgba(0,0,0,0.55);
+  display:flex; flex-direction:column; justify-content:space-between;
+  padding: 24px; animation: revealIn 1s var(--ease) .1s backwards;
+  transition: filter .4s var(--ease);
+}
+/* filter:drop-shadow, not box-shadow, for the hover glow: at 901px+
+   this element is clip-path'd into the notched shape (see below), and a
+   box-shadow is clipped away along with everything else outside that
+   path, so it would never actually render. drop-shadow follows the
+   element's real painted alpha shape instead, notch included, and still
+   works as a plain shadow on the unclipped mobile rounded-rect card.
+   pointer-events flipped to auto (was none) so :hover can fire at all —
+   safe to do since the notch's cut-out area isn't just visually covered
+   by Compare's card, it's clipped out of this element's hit-test region
+   entirely, so Compare (sitting in that cut-out) still gets its own
+   clicks/hover directly rather than this element intercepting them.
+   fill-mode changed both -> backwards (this element only — the shared
+   revealIn keyframe and every other element using it are untouched):
+   revealIn animates `filter` itself (blur(10px) -> blur(0), the
+   entrance blur-in), and `both` holds that final computed value
+   (filter: blur(0)) on the element forever after the animation ends —
+   a CSS animation's held output overrides regular cascade rules for the
+   same property regardless of specificity, so this :hover rule's
+   drop-shadow could set `filter` all day and never actually paint,
+   confirmed via getComputedStyle showing blur(0) while :hover matched.
+   `backwards` still fills the delay gap before the animation starts
+   (its actual job — avoiding a flash of unanimated content in the
+   0.1s before it kicks in) but doesn't hold the end keyframe after
+   finishing, so filter reverts to plain CSS control once the entrance
+   is done and :hover can drive it normally. opacity/transform (the
+   animation's other two properties) settle to the same visual result
+   either way here, since nothing else sets them, so this is safe. */
+.lp-hero-visual:hover{ filter: drop-shadow(0 0 46px color-mix(in srgb, var(--accent) 50%, transparent)); }
+/* Desktop only: the notched silhouette from layout.svg's hero path, but
+   with genuinely round (bezier-curved) corners instead of the polygon
+   chamfer this used previously — polygon() can only draw straight
+   edges, so a "rounded" corner there is really a small flat facet,
+   which reads as faceted/boxy up close rather than soft. This instead
+   references an actual <clipPath> (see the hidden <svg> emitted at the
+   top of renderLanding's markup) built from true cubic-bezier arcs, so
+   every corner is a real curve.
+   The underlying hexagon (sharp corners, before rounding) was derived
+   from the source path's own straight-segment endpoints, then re-rounded
+   at radius 42 — up from the source file's native 28 — for a
+   noticeably softer, more custom-card feel per this pass's "soften the
+   form" request, while keeping the notch's step position and overall
+   proportions identical to the source. clipPathUnits="objectBoundingBox"
+   on that <clipPath> is what makes it scale correctly to this element's
+   actual rendered size rather than the source file's own pixel
+   dimensions. Scoped to this breakpoint deliberately: at mobile/tablet
+   the photo is a plain rounded-rect card in a stacked column, where
+   this notch motif doesn't apply. */
+@media (min-width: 901px){
+  /* Width bumped 39.47% -> 41% (+~4%, per "give the image more presence,
+     it feels slightly too thin") — height stays 100% of canvas, so this
+     changes hero's own aspect ratio slightly. Since the notch clip-path
+     is objectBoundingBox (relative to hero's own box, see the comment
+     below), the two-tier step scales proportionally with this rather
+     than needing new coordinates of its own. Every value derived from
+     hero's width in the OVERLAP MATH block further down (Discover/Dark's
+     left edge, Compare's left edge via the notch's own x-boundaries) was
+     recalculated from this new 41% base — see that comment for the
+     updated numbers. */
+  .lp-hero-visual{
+    position:absolute; left:0; top:0; width:41%; height:100%;
+    border-radius: 0; overflow: visible;
+    clip-path: url(#lpHeroNotch);
+  }
+}
+.lp-hero-photo{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position: 50% 38%;
+  z-index:0; transform: scale(1.06) translate(var(--px, 0px), var(--py, 0px));
+  transition: transform .6s var(--ease);
+}
+@media (prefers-reduced-motion: reduce){ .lp-hero-photo{ transform:none !important; } }
+/* Scrim: guarantees both captions stay readable against the photo
+   regardless of what's behind them (bright sky, dark rock, anything in
+   between) — content contrast never depends on the specific image. */
+.lp-hero-visual::before{
+  content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(4,5,8,0.92) 0%, rgba(4,5,8,0.72) 16%, rgba(4,5,8,0.3) 32%, rgba(4,5,8,0) 48%, rgba(4,5,8,0) 62%, rgba(4,5,8,0.2) 78%, rgba(4,5,8,0.8) 100%);
+}
+.lp-visual-caption{
+  position:relative; z-index:2; font-family: var(--font-mono); font-size: 12px; line-height:1.5;
+  letter-spacing: 0.04em; text-transform:uppercase; color: #F6F7FB; max-width: 60%;
+  text-shadow: 0 1px 12px rgba(0,0,0,0.5);
+}
+.lp-visual-caption-bottom{ align-self:flex-start; color: #F6F7FB; }
+
+@media (max-width: 900px){
+  .lp-hero-grid{ display:flex; flex-direction:column; gap:20px; }
+  .lp-bento-canvas{ display:flex; flex-direction:column; gap:20px; }
+  .lp-bento-canvas::before{ display:none; }
+  .lp-hero-visual{ min-height: 300px; margin-bottom:0; }
+}
+
+/* ---- Bento (Discover / Compare / Evolve) ---- */
+/* OVERLAP MATH — every position below is derived from one rule: a
+   single constant gap (2.64% of canvas WIDTH horizontally, 2.99% of
+   canvas HEIGHT vertically — the same ~20px at reference size either
+   way, just expressed against whichever axis a given seam runs along)
+   separates every module from every other one, with no exceptions.
+   That's what makes the gaps between hero/Discover, Discover/Dark,
+   Dark/Compare-row, hero/Compare, and Compare/Evolve all read as
+   identical, per explicit request ("keep equal gutters everywhere").
+   Derivation, canvas reference 760x670 (670/670=88.16%, unchanged):
+     hero width = 41% (of canvas width) — the tall photo, sized for
+       presence relative to the heading rather than tied to any other
+       module's math.
+     Discover/Dark left = hero's right edge (41%) + the horizontal gap
+       (2.64%) = 43.64%; width = 100 - 43.64 = 56.36% (flush with the
+       canvas's own right edge).
+     Compare's left is tied to the notch's own deep-tier cut boundary
+       (hero-relative x 0.5734, i.e. 41% * 0.5734 = 23.51% of canvas)
+       plus the same horizontal gap = 26.15% — closing the dead strip
+       the notch's cutout would otherwise leave uncovered, without
+       going fully flush against it (zero gap looked unintentional in
+       earlier passes; this keeps a real one). Compare/Evolve split the
+       remaining width evenly: (100 - 26.15 - 2.64)/2 = 35.605% each,
+       Evolve's left = Compare's right + the gap = 64.395%, right edge
+       flush at 100%.
+     Compare/Evolve's TOP is pinned to the notch's shallow-tier y-
+     boundary (61.98%, same value the deep-tier-fix pass years earlier
+     in this file derived) rather than to a height computed for square
+     proportions — a taller, square-derived top (59.6%) pulled Compare
+     up far enough to overlap hero's still-fully-opaque photo above the
+     notch entirely, not just the small intentional sliver the tuck
+     design overlaps within the notch itself, which read as an
+     unintentional bite taken out of the image rather than a deliberate
+     interlock (confirmed via screenshot: a visible concave notch at
+     Compare's top-left with no corresponding shape reason). Height is
+     then just 100 - 61.98 = 38.02% (bottom flush with hero's own
+     bottom, same invariant as before). Discover/Dark's split absorbs
+     the difference: 100 - 38.02 (Compare row) - 2x2.99 (both gaps) =
+     53.62% for the pair, in the same ~1.5:1 ratio they've always used —
+     Discover 32.16%, Dark 23.84% (up from 21.46%, since Compare's row
+     now starts 2.38 points lower, leaving that much more room above it
+     to redistribute rather than leaving a mismatched, oversized gap).
+   .lp-bento-row is display:contents here: it stops participating in
+   layout entirely, so Compare/Evolve position themselves directly
+   against .lp-bento-canvas (their nearest positioned ancestor) rather
+   than against the row div, while mobile below still uses it as a real
+   2-column grid wrapper. */
+@media (min-width: 901px){
+  /* h1's font-size used to be pure vw (7.2vw), which tracks the
+     VIEWPORT, not the text column's own rendered width — and those two
+     diverge here because .lp-hero-grid's left/right padding is fixed px
+     (not vw-based) and the text column has its own 340px floor
+     (minmax(340px,46fr)), so the column-width-to-viewport-width ratio
+     actually changes across the range instead of staying constant.
+     Measured result: at 1280-1440px the ratio happened to work ("Small
+     Pieces." / "A Bigger You." on 2 lines, matching the reference), but
+     at 1024-1150px the same vw formula produced a font-size that was
+     disproportionately larger relative to the (relatively narrower)
+     column, wrapping the heading into 4 lines instead of 2. Switching
+     to cqw (percent of .lp-hero-text's own inline size, via
+     container-type below) ties font-size directly to the column's
+     actual rendered width instead of the viewport, so the ratio -- and
+     therefore the line-wrap -- stays identical at every width in this
+     block, floor or fluid alike. 17.4cqw was picked to match the
+     86px-at-495px-column ratio already confirmed correct at 1280-1440px
+     (86/495 = 17.4%); the 86px max keeps that same reference size
+     unchanged above ~1307px viewport, where the column outgrows 495px
+     and this formula would otherwise push the font past it. */
+  /* container-type declared on the GRID here (not .lp-hero-text) purely
+     so .lp-hero-text can use cqw for its OWN gap below: a container
+     query container can't size its own properties off its own cqw (that
+     value is only valid for descendants querying it — self-reference
+     resolves as invalid and falls back, confirmed via getComputedStyle
+     still showing the old flat 24px when this was tried against
+     .lp-hero-text itself). Querying the grid one level up sidesteps
+     that; the coefficient (1.909cqw) is just rescaled to the grid's
+     width instead of the column's (24px target at the grid's own
+     1257px width at the 1440px reference, same target as before). */
+  .lp-hero-grid{ container-type: inline-size; }
+  .lp-hero-text{ container-type: inline-size; gap: clamp(12px, 1.909cqw, 24px); }
+  /* Matching-heights (align-items:stretch above) only works cleanly
+     where .lp-bento-canvas is naturally the taller column — below
+     roughly 1250-1300px viewport, canvas's height shrinks (pure
+     function of column width) faster than this column's own minimum
+     content height can (six children, gaps, a 2-line heading, a
+     3-4-line paragraph, a fixed-size avatar stack: there's a floor to
+     how short that stack gets). So .lp-bento-canvas keeping its own
+     correct aspect ratio (non-negotiable — see that rule's comment)
+     means text modestly overflows past the bento's bottom at those
+     narrower widths rather than the two matching exactly. Scaling this
+     gap down with cqw, plus shrinking the avatar photos and CTA button
+     padding below (same idea, applied to the two other largest fixed-
+     size contributors), measurably shrinks that overflow at every width
+     in this range — from +194px/+99px/+3px (901/1024/1280px, flat
+     values) down to +142px/+59px/+0px before the avatar/button trim,
+     and further from there. It can't fully close the gap at the
+     narrowest end (901px) since a 2-line heading and 3-4-line paragraph
+     both have real minimums, but 1200px+ (where the reference images in
+     this conversation have consistently sat) now matches within a few
+     px, and 1024px is a large, legitimate improvement over the original
+     mismatch. */
+  .lp-hero-text h1{ font-size: clamp(40px, 17.4cqw, 86px); }
+  /* Same fixed-vs-column-width mismatch as h1 above, applied to the
+     paragraph: .lp-sub was a flat 16.5px everywhere, so its line count
+     swung from 2 (wide columns) to 4 (narrow ones) as a pure side effect
+     of column width rather than a deliberate reading-width choice.
+     Tied to cqw at the same ratio confirmed correct at 1280px (16.5px /
+     495px column = 3.33%) so it reads at 3 lines at the reference's
+     ~432px column width same as the mockup, instead of 4. */
+  .lp-hero-text .lp-sub{ font-size: clamp(14px, 3.333cqw, 18px); }
+  /* Same fix again, this time for the CTA row: btn-primary's flat 270px
+     min-width (fine at 1440px, where the row is 568px wide) plus
+     Compare Two Results' own ~192px natural width added up to 476px,
+     wider than the ~432px column at the reference's width — forcing the
+     buttons to wrap onto two lines instead of sitting side by side like
+     the mockup. 47.53cqw matches the 270/568 ratio already confirmed
+     right at 1440px, so it holds that same look there and above, while
+     shrinking enough below it to fit both buttons on one row again down
+     to roughly a 400px column (~1050px viewport) before the row wraps. */
+  .lp-hero-text .cta-row .btn-primary{ min-width: clamp(190px, 47.53cqw, 270px); }
+  /* Two more fixed-size contributors to the height-matching problem
+     described above .lp-hero-text's gap rule: neither the buttons' own
+     padding nor the avatar photos had ever scaled at all. Scoped to
+     .lp-hero-text specifically (not the bare .btn/.lp-avatar-stack
+     rules, which are used elsewhere on the page and must stay fixed
+     size there) so this only affects the hero CTA row and avatar stack. */
+  .lp-hero-text .cta-row .btn{ padding: clamp(9px, 2.85cqw, 13px) clamp(16px, 5.7cqw, 26px); }
+  .lp-hero-text .lp-avatar-stack img{ width: clamp(28px, 8.4cqw, 38px); height: clamp(28px, 8.4cqw, 38px); }
+  /* Only declared in this desktop-only block (not on the bare
+     .lp-bento-canvas rule): container-type:inline-size forces layout/
+     size containment, which is exactly what the cqw-based card
+     typography further down needs, but applying it unconditionally
+     broke the <=900px stacked layout below — .lp-bento-canvas there is
+     a flex column whose width comes from its flex context, and adding
+     containment collapsed/miscalculated that width, squeezing every
+     card down to a sliver (confirmed via screenshot: single-word line
+     wraps, cards overlapping the hero image). Scoped here, it only ever
+     applies where .lp-bento-canvas already has a definite width from
+     the grid column it sits in.
+     align-self:start here is load-bearing: .lp-hero-grid switched to
+     align-items:stretch (see that rule's comment) so the TEXT column
+     can stretch to match the bento's height, but .lp-bento-canvas's own
+     height is "auto" as far as grid is concerned (it's set by its
+     ::before padding-top child, not a real height on the element
+     itself) — without opting out, stretch would just as happily pull
+     .lp-bento-canvas taller too whenever text's natural minimum height
+     (six children, 24px flex gaps) exceeds the canvas's own intrinsic
+     height, which happens at short/narrow combinations (confirmed at
+     1143x668: canvas stretched to 464px against its own correct 422px).
+     A stretched canvas breaks the padding-top aspect-ratio hack, which
+     distorts the hero photo's own width:height ratio and, with it, the
+     notch clip-path's proportions — never acceptable, so this card's
+     geometry always wins over matching text's height exactly. In the
+     more typical case (canvas naturally taller than text, e.g. any
+     reasonably tall viewport at 1440px) this changes nothing, since
+     canvas was already setting the row height either way. */
+  .lp-bento-canvas{ container-type: inline-size; align-self: start; }
+  /* Compound .lp-card.lp-card-NN selectors throughout this block: plain
+     .lp-card-01 (0,0,1,0) loses to the base button.lp-card{width:100%}
+     rule (0,0,1,1, element+class beats a lone class on width/height) by
+     specificity, not source order — confirmed via getBoundingClientRect
+     showing these buttons stuck at 100% width until compounded. */
+  .lp-card.lp-card-01{ position:absolute; left:43.64%; top:0%; width:56.36%; height:32.16%; min-height:0; }
+  .lp-card.lp-card-dark{ position:absolute; left:43.64%; top:35.15%; width:56.36%; height:26.86%; min-height:0; }
+  .lp-bento-row{ display:contents; }
+  /* z-index:2 on Compare: its left edge (26.15%) sits left of the
+     notch's shallow-tier x-boundary (41% * 0.6924 = 28.39% — see the
+     clip-path comment above), so Compare's card overlaps a small sliver
+     of hero's still-opaque shallow-tier corner. That's intentional, not
+     a bug: z-index keeps Compare painting over the photo wherever they
+     overlap, which is what lets Compare's left edge track the notch's
+     (lower, wider) deep-tier boundary instead of stopping short at the
+     narrower shallow tier and leaving a gap of its own.
+     Top pushed past the shallow tier's own y-boundary (61.98% -> 65%)
+     per explicit follow-up feedback: even with the dark-to-Compare gap
+     and the hero-to-Compare gap numerically equal (both the standard
+     2.99%/2.64%, confirmed via getBoundingClientRect at 17px/17px), the
+     dark-to-Compare seam still read as visibly tighter than the
+     hero-to-Compare one — the notch's own corner is a much larger
+     bezier radius (42) than Compare's card corner, so the curve eats
+     into the perceived gap right at that corner in a way a straight-
+     edge gap of the same numeric size doesn't. Pushing top a couple
+     more points past the shallow tier's boundary (so Compare now sits
+     entirely below both tiers, no longer overlapping the shallow tier's
+     corner at all) gives that seam more literal room, which is what
+     actually reads as "the same size" next to the hero gap once the
+     corner curvature is accounted for optically rather than numerically.
+     Dark's height absorbs the difference, same as the previous pass. */
+  .lp-card.lp-card-02{ position:absolute; left:26.15%; top:65%; width:35.605%; height:35%; min-height:0; z-index:2; }
+  .lp-card.lp-card-03{ position:absolute; left:64.395%; top:65%; width:35.605%; height:35%; min-height:0; }
+
+  /* CONTENT-FIT SCALING — the four card boxes above are percentages of
+     .lp-bento-canvas, so their pixel height shrinks in lockstep with the
+     canvas's own width (see the padding-top aspect-ratio trick). Card
+     text, however, used to sit at fixed px sizes, so as the canvas
+     narrowed (any width below roughly 1600-1700px, well within normal
+     laptop range — confirmed via scrollHeight-vs-box-height measurements
+     at 950-1440px, worst case Compare at 950px needing ~200px more than
+     its box provided) the content simply overflowed the box and clipped
+     mid-sentence. Tying padding/gap/font-size to cqw (percent of
+     .lp-bento-canvas's own inline size, via container-type: inline-size
+     above) scales content down at exactly the same rate the boxes
+     shrink, so the fit ratio established at the MAX end (matching the
+     original fixed values, unchanged at the canvas's largest sizes)
+     holds at every width in between rather than only at one reference
+     size. Scoped to .lp-bento-canvas .lp-card (not the bare .lp-card
+     base rule) since that rule is shared with nothing else on the page —
+     this only touches these four cards, never the ≤900px stacked/mobile
+     layout below, which already sizes cards to natural content height. */
+  .lp-bento-canvas .lp-card{
+    padding: clamp(14px, 4.6cqw, 28px) clamp(13px, 4cqw, 26px);
+    gap: clamp(5px, 1.6cqw, 11px);
+  }
+  .lp-bento-canvas .lp-card h3{ font-size: clamp(14px, 2.9cqw, 20px); }
+  .lp-bento-canvas .lp-card p{ font-size: clamp(10.5px, 1.85cqw, 13.5px); line-height:1.22; }
+  .lp-bento-canvas .lp-card-foot{ font-size: clamp(8px, 1.45cqw, 10.5px); line-height:1.3; }
+  .lp-bento-canvas .lp-card-num{ font-size: clamp(10.5px, 1.7cqw, 13px); }
+  .lp-bento-canvas .lp-card-arrow{ font-size: clamp(13px, 2.3cqw, 18px); }
+  .lp-bento-canvas .lp-card-dark{ gap: clamp(8px, 1.9cqw, 14px); }
+  .lp-bento-canvas .lp-plus{
+    width: clamp(26px, 5.4cqw, 36px); height: clamp(26px, 5.4cqw, 36px);
+    font-size: clamp(15px, 3cqw, 20px);
+  }
+  /* Discover/Compare/Evolve all have a heading + paragraph + footer
+     tucked into a flex column with .lp-card-foot's margin-top:auto (the
+     base rule further down) pinning the footer to the very bottom —
+     fine when the card's height roughly matches its content, but when a
+     card has real slack (as Compare/Evolve briefly did at a taller,
+     square-derived height) that auto margin dumps ALL of the slack into
+     one gap right before the footer, reading as a hollow, unfinished
+     middle rather than a bigger card. Kept this fix in place even after
+     Compare/Evolve's height came back down (their content fits with
+     little slack again) since it's harmless either way — space-between
+     with near-zero extra space just behaves like normal flow — and it
+     guards against the same issue resurfacing if their height ever
+     changes again. Scoped to just these two (not the shared .lp-card
+     base) since Discover doesn't have the problem at its own height and
+     Dark uses a different, already-centered layout. */
+  .lp-card.lp-card-02, .lp-card.lp-card-03{ justify-content: space-between; }
+  .lp-card-02 .lp-card-foot, .lp-card-03 .lp-card-foot{ margin-top: 0; }
+}
+/* The cqw floors above (padding 14px, gap 5px) are sized to stay legible,
+   but a single linear cqw ramp can't hit those floors at 1024-1150px
+   canvas widths *without* also pulling padding down below its 28px max
+   at 1366-1440px (checked algebraically: with fixed 14/28 min/max, the
+   ramp's floor-point and cap-point are always exactly 2x apart in canvas
+   width, so moving the floor down to ~450px drags the cap-point down
+   with it, below 1440's own canvas width). Rather than compromise the
+   1366-1440px reference sizing (already confirmed overflow-free), this
+   narrow second range tightens further on top of the cqw values, tight
+   line-height included, specifically where Compare/Evolve (the two
+   narrowest cards) still clipped text after the cqw pass alone —
+   measured via scrollHeight-vs-box-height at 901-1150px viewports. */
+@media (min-width: 901px) and (max-width: 1199px){
+  .lp-bento-canvas .lp-card{ padding: 9px 11px; gap: 3px; }
+  .lp-bento-canvas .lp-card p{ line-height: 1.1; }
+  .lp-bento-canvas .lp-card-foot{ line-height: 1.1; }
+}
+@media (max-width: 900px){
+  .lp-bento-row{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+}
+.lp-card{
+  position:relative; border-radius: var(--radius-xl); padding: 28px 26px; text-align:left; overflow:hidden;
+  min-height: 190px; display:flex; flex-direction:column; gap:11px;
+  border:1px solid transparent;
+  transition: transform .45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .35s var(--ease);
+}
+button.lp-card{ width:100%; }
+.lp-card:hover{ transform: translateY(-6px) scale(1.012); box-shadow: 0 28px 52px -22px rgba(0,0,0,0.4); }
+.lp-card:active{ transform: translateY(-2px) scale(.995); }
+/* A soft tint of each card's own gradient behind the lift shadow, so
+   hover reads as "this card is glowing" rather than a generic drop
+   shadow every card shares. Layered with (not replacing) the neutral
+   shadow above via a second box-shadow value. */
+.lp-card-01:hover{ box-shadow: 0 28px 52px -22px rgba(0,0,0,0.4), 0 18px 40px -18px color-mix(in srgb, var(--user-accent-1) 45%, transparent); }
+.lp-card-02:hover{ box-shadow: 0 28px 52px -22px rgba(0,0,0,0.4), 0 18px 40px -18px color-mix(in srgb, #FB7185 45%, transparent); }
+.lp-card-03:hover{ box-shadow: 0 28px 52px -22px rgba(0,0,0,0.4), 0 18px 40px -18px color-mix(in srgb, var(--mint) 45%, transparent); }
+/* Dark didn't have a tinted glow like its three siblings — it doesn't
+   have a gradient of its own to tint with, so this uses the same
+   --accent purple the "+" badge and the decorative glass shapes behind
+   it already use, tying the hover state to colors already present in
+   the card instead of introducing a new one. */
+.lp-card-dark:hover{ box-shadow: 0 28px 52px -22px rgba(0,0,0,0.4), 0 18px 40px -18px color-mix(in srgb, var(--accent) 40%, transparent); }
+/* Sized down a touch from the previous 22/14px now that the whole bento
+   canvas itself renders smaller (capped at 640px, was unbounded) — kept
+   proportionate to the now-smaller card rather than crowding it. */
+.lp-card h3{ font-size: 20px; }
+.lp-card p{ font-size:13.5px; opacity:0.9; max-width: 30ch; }
+.lp-card-top{ display:flex; align-items:center; justify-content:space-between; }
+.lp-card-num{ font-family: var(--font-mono); font-size:13px; opacity:0.7; }
+.lp-card-arrow{ font-size:18px; opacity:0.7; transition: transform .25s var(--ease); }
+.lp-card:hover .lp-card-arrow{ transform: translate(2px,-2px); }
+.lp-card-foot{ margin-top:auto; font-family: var(--font-mono); font-size:10.5px; letter-spacing:0.06em; text-transform:uppercase; opacity:0.65; }
+.lp-card-01{ background: linear-gradient(150deg, var(--user-accent-1), var(--user-accent-2)); color:#14101F; }
+/* Fixed (not theme-dependent) gradient stops rather than var(--coral)/
+   var(--peach): light theme's tokens are far more saturated than dark
+   theme's (by design, for pop against a white page), but that leaves no
+   single text color — dark or white — with enough contrast against
+   both ends of the gradient at once (measured: black text only hits
+   ~4.3:1 against light-theme coral, white text only ~2.9:1 against its
+   peach). These are the same soft values dark theme already uses
+   successfully, applied in both themes so this one card's contrast
+   never depends on which theme is active. */
+.lp-card-02{ background: linear-gradient(150deg, #FB7185, #FDBA74); color:#000000; }
+.lp-card-03{ background: linear-gradient(150deg, var(--mint), var(--sky)); color:#0A2420; }
+.lp-card-dark{
+  background: var(--surface-strong); border-color: var(--border); color: var(--text-muted);
+  justify-content:center; align-items:flex-start; gap:14px;
+}
+/* Was a bare 30px "+" glyph floating with nothing to visually tie it to
+   the caption below — reads as a small badge now instead, same 36px/
+   radius-11/tinted-background language as .lp-feature-icon further
+   down, so it looks like a deliberate icon rather than a stray
+   character. Kept the gap to the paragraph at a normal 14px (see the
+   card's own gap above) rather than stretching it: this card grew
+   taller across a few passes to match its siblings' proportions, and
+   widening the gap between the icon and the copy to fill that height
+   read as the two floating apart rather than bigger — centering this
+   tighter, self-contained icon+caption group via the card's own
+   justify-content:center puts the extra height evenly above and below
+   the pair instead. */
+.lp-plus{
+  position:relative; z-index:1; display:flex; align-items:center; justify-content:center;
+  width:36px; height:36px; border-radius:11px; flex-shrink:0;
+  background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent);
+  font-family: var(--font-display); font-size: 20px; line-height:1;
+}
+.lp-card-dark p{ position:relative; z-index:1; color: var(--text-muted); max-width: 22ch; }
+/* Translucent glass blocks: soft blur + low opacity so they read as
+   light passing through glass rather than flat colour chips. Inset
+   from every edge by the same amount (16px, matched to .lp-dark-shapes'
+   own inset below) and clipped by .lp-card's overflow:hidden, so they
+   can never spill past the card's border regardless of size — pinned
+   toward the bottom-right, clear of the "+"/copy which sit top-left. */
+.lp-dark-shapes{ position:absolute; inset:16px; z-index:0; pointer-events:none; }
+.lp-dshape{ position:absolute; border-radius:18px; opacity:0.35; filter: blur(2px); }
+.lp-dshape.ds1{
+  width:96px; height:96px; right:0; bottom:0;
+  background: linear-gradient(150deg, var(--user-accent-1), var(--user-accent-2));
+  box-shadow: 0 0 36px 2px color-mix(in srgb, var(--user-accent-1) 45%, transparent);
+}
+.lp-dshape.ds2{
+  width:64px; height:64px; right:44px; bottom:34px;
+  background: linear-gradient(150deg, var(--sky), var(--user-accent-1));
+  box-shadow: 0 0 28px 2px color-mix(in srgb, var(--sky) 40%, transparent);
+}
+.lp-dshape.ds3{
+  width:40px; height:40px; right:6px; bottom:64px;
+  background: var(--user-accent-2);
+  box-shadow: 0 0 22px 2px color-mix(in srgb, var(--user-accent-2) 40%, transparent);
+}
+@media (max-width: 760px){
+  .lp-card-dark{ display:none; }
+  .lp-bento-row{ grid-template-columns: 1fr 1fr; gap:14px; }
+  .lp-card{ min-height:160px; padding: 20px 18px; }
+}
+
+/* Entrance: these cards live inside the hero fold now (not scrolled to
+   later), so they animate in on load with the same revealIn keyframe
+   and staggered delays as the hero text/photo beside them, rather than
+   depending on scroll position. */
+.lp-card-01{ animation: revealIn .9s var(--ease) .16s both; }
+.lp-card-dark{ animation: revealIn .9s var(--ease) .22s both; }
+.lp-bento-row .lp-card-02{ animation: revealIn .9s var(--ease) .28s both; }
+.lp-bento-row .lp-card-03{ animation: revealIn .9s var(--ease) .34s both; }
+
+/* Staggered entrance for the sections still driven by scroll: they fade
+   up as a whole (via .section / setupProgressiveReveal, already used
+   elsewhere in the app), and their direct children cascade in with a
+   small delay each rather than arriving as one flat block. */
+.lp-features > *, .lp-cta-split > *{
+  transition: opacity .6s var(--ease), transform .6s var(--ease), box-shadow .35s var(--ease), background .35s var(--ease);
+}
+.section:not(.revealed) .lp-features > *,
+.section:not(.revealed) .lp-cta-split > *{ opacity:0; transform: translateY(14px); }
+.lp-features > *:nth-child(1){ transition-delay: .05s; }
+.lp-features > *:nth-child(2){ transition-delay: .11s; }
+.lp-features > *:nth-child(3){ transition-delay: .17s; }
+.lp-features > *:nth-child(4){ transition-delay: .23s; }
+.lp-cta-split > *:nth-child(1){ transition-delay: .05s; }
+.lp-cta-split > *:nth-child(2){ transition-delay: .14s; }
+
+/* ---- Feature strip ---- */
+.lp-features{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.lp-feature{
+  display:flex; align-items:flex-start; gap:12px; padding: 18px; border-radius: var(--radius-lg);
+  background: var(--surface); border:1px solid var(--border);
+  transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.lp-feature:hover{ transform: translateY(-3px); border-color: var(--border-strong); box-shadow: 0 16px 32px -20px rgba(0,0,0,0.3); }
+.lp-feature-icon{
+  width:36px; height:36px; border-radius: 11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.lp-feature:hover .lp-feature-icon{ transform: scale(1.1) rotate(-4deg); }
+.lp-feature-icon svg{ width:17px; height:17px; }
+.lp-fi-1{ background: rgba(167,139,250,0.16); color: var(--accent); }
+.lp-fi-2{ background: rgba(110,231,183,0.16); color: var(--mint); }
+.lp-fi-3{ background: rgba(253,186,116,0.16); color: var(--peach); }
+.lp-fi-4{ background: rgba(125,211,252,0.16); color: var(--sky); }
+.lp-feature h4{ font-size:14.5px; margin-bottom:2px; }
+.lp-feature p{ font-size:12.5px; color: var(--text-muted); }
+@media (max-width: 760px){ .lp-features{ grid-template-columns: 1fr 1fr; } }
+
+/* ---- CTA split (no account / optional account) ---- */
+.lp-cta-split{ display:grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.lp-cta-panel{ border-radius: var(--radius-xl); padding: 32px 28px; display:flex; flex-direction:column; gap:12px; }
+.lp-cta-panel{ transition: border-color .3s var(--ease), box-shadow .3s var(--ease), transform .3s var(--ease); }
+.lp-cta-dark{ background: var(--surface-strong); border:1px solid var(--border); }
+/* Same lavender/periwinkle/violet family as the Discover card above,
+   so this reads as belonging to that richer card group instead of a
+   flat, lesser panel — kept to low-opacity color-mix washes (not
+   Discover's bold full-strength gradient) since this card still needs
+   to hold normal --text/--text-muted body copy at readable contrast,
+   unlike Discover which sets one fixed dark text color for its whole
+   surface. */
+.lp-cta-outline{
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--user-accent-1) 20%, var(--surface)),
+      color-mix(in srgb, var(--sky) 16%, var(--surface)) 55%,
+      color-mix(in srgb, var(--user-accent-2) 18%, var(--surface))
+    );
+  border:1px solid var(--border-strong);
+}
+.lp-cta-panel:hover{ transform: translateY(-2px); box-shadow: 0 20px 40px -26px rgba(0,0,0,0.35); }
+.lp-cta-dark:hover{ border-color: var(--border-strong); }
+.lp-cta-outline:hover{ border-color: var(--accent-soft); }
+.lp-cta-panel h3{ font-size: 24px; margin-top:2px; }
+.lp-cta-panel p{ color: var(--text-muted); font-size:14.5px; }
+.lp-checklist{ list-style:none; display:flex; flex-direction:column; gap:8px; margin: 6px 0 4px; font-size:13.5px; }
+.lp-checklist li{ display:flex; align-items:center; gap:9px; }
+.lp-checklist li::before{
+  content:''; width:16px; height:16px; border-radius:50%; flex-shrink:0;
+  background: var(--success); background: linear-gradient(135deg, var(--mint), var(--sky));
+}
+.lp-checklist-muted li::before{ background: var(--surface-strong); border:1px solid var(--border-strong); }
+.lp-soon-badge{
+  font-family: var(--font-mono); font-size:10px; letter-spacing:0.08em; padding: 3px 8px; border-radius:999px;
+  background: var(--surface-strong); color: var(--text-muted); border:1px solid var(--border-strong); text-transform:uppercase;
+}
+.lp-fine-print{ font-size:12px !important; color: var(--text-muted) !important; margin-top:-4px; }
+@media (max-width: 760px){ .lp-cta-split{ grid-template-columns:1fr; } }
+
+/* ---- Footer ---- */
+.lp-footer{
+  position:relative; z-index:1; margin: 24px 0 0; padding: 28px 0 0; border-top:1px solid var(--border);
+}
+.lp-footer-inner{
+  max-width:2200px; width:100%; margin-inline:auto; padding: 0 84px 32px;
+  display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:20px;
+}
+.lp-footer-top{ display:flex; align-items:baseline; gap:10px; }
+.lp-footer-logo{ height:20px; width:auto; }
+.lp-footer-tagline{ font-size:12px; color: var(--text-dim); font-family: var(--font-mono); }
+.lp-footer .footer-nav{ justify-content:flex-end; grid-column:3; }
+@media (max-width: 760px){
+  .lp-footer-inner{ grid-template-columns: 1fr; justify-items:center; text-align:center; }
+  .lp-footer-top{ flex-direction:column; gap:4px; }
+  .lp-footer .footer-nav{ grid-column:1; }
 }
 
 /* ---------- Name capture ---------- */
@@ -498,13 +1225,14 @@ canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 .compare-inputs label{ font-size:13px; color: var(--text-muted); display:block; margin-bottom:8px; }
 
 .footer-nav{ position:relative; z-index:1; display:flex; justify-content:center; gap:18px; margin-top:56px; flex-wrap:wrap; }
-.footer-nav button{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
-.footer-nav button:hover{ color: var(--text-muted); }
+.footer-nav button, .footer-nav a{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
+.footer-nav button:hover, .footer-nav a:hover{ color: var(--text-muted); }
+.lp-footer .footer-nav{ margin-top:0; }
 
 .top-bar{
   position: sticky; top: 18px; z-index: 40;
   display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;
-  padding: 16px 26px; margin: 10px 0 32px;
+  padding: 13px 26px; margin: 10px 0 32px; /* ~64px total height */
   background: linear-gradient(180deg, rgba(23,26,34,0.5), rgba(23,26,34,0.26));
   backdrop-filter: blur(22px) saturate(150%);
   border: 1px solid var(--border);
@@ -517,24 +1245,165 @@ canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 .nav-zone{ display:flex; align-items:center; }
 .nav-left{ justify-self:start; }
 .nav-center{ justify-self:center; }
-.nav-right{ justify-self:end; gap:10px; }
+.nav-right{ justify-self:end; gap:8px; position:relative; }
 .nav-logo{ height: 22px; width:auto; display:block; }
-.nav-logo-fallback{ font-family: var(--font-display); font-weight:500; letter-spacing:-0.01em; color: var(--text); }
+.nav-logo-fallback{ font-family: var(--font-display); font-weight:500; letter-spacing:-0.01em; color: var(--text); display:flex; align-items:center; }
+.brand-dot{ color: var(--accent); }
 .icon-btn{
   width:38px; height:38px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
-  background: var(--surface); border:1px solid var(--border); font-size:16px;
+  background: var(--surface); border:1px solid var(--border); font-size:16px; flex-shrink:0;
   transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
 }
 .icon-btn:hover{ border-color: var(--border-strong); transform: scale(1.06) rotate(2deg); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
 .icon-btn:active{ transform: scale(0.94); }
 .icon-btn svg{ width:17px; height:17px; }
 
+/* ---------- Nav pill (Home) + compact Sign Up + overflow menu --------- */
+.nav-pill{
+  display:flex; align-items:center; gap:7px; height:38px; padding: 0 16px 0 12px;
+  border-radius: 999px; background: var(--surface); border:1px solid var(--border); color: var(--text);
+  font-size:13.5px; font-weight:500;
+  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+}
+.nav-pill:hover{ border-color: var(--border-strong); transform: translateY(-1px); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
+.nav-pill:active{ transform: translateY(0) scale(.97); }
+.nav-pill-icon{ display:flex; width:15px; height:15px; }
+.nav-pill-icon svg{ width:100%; height:100%; }
+.nav-pill-label{ white-space:nowrap; }
+@media (max-width: 560px){ .nav-pill-label{ display:none; } .nav-pill{ padding: 0 10px; gap:0; } }
+
+.btn-sm{ padding: 8px 16px; font-size:13px; }
+.nav-signup{ gap:6px; }
+.pill-arrow{ display:inline-block; transition: transform .25s var(--ease); }
+.nav-signup:hover .pill-arrow{ transform: translateX(3px); }
+@media (max-width: 560px){
+  /* Not enough room for Home + logo + Sign Up + menu at once on a phone
+     screen without the logo colliding with one of the side buttons, so
+     Sign Up moves into the overflow menu instead (it's still one tap
+     away) rather than crowding the bar. */
+  .nav-signup{ display:none; }
+}
+.nav-menu-item.nav-menu-signup{ display:none; }
+@media (max-width: 560px){ .nav-menu-item.nav-menu-signup{ display:flex; } }
+
+/* Dims whatever the menu overlaps instead of leaving it bare: at
+   shorter/narrower viewports this menu (theme+sound toggles, 4 links,
+   a code-lookup field, two buttons) is tall enough to reach down over
+   the hero's Discover/Compare cards, and without this, colourful card
+   edges peeking out from behind the menu's own edges read as broken
+   layout rather than an open dropdown. pointer-events:none so it never
+   blocks the existing outside-click-to-close handler (which listens on
+   document, not this element) or any other interaction underneath. */
+.nav-menu-backdrop{
+  position:fixed; inset:0; z-index:400; pointer-events:none;
+  background: rgba(6,7,11,0.45); opacity:0; transition: opacity .4s var(--ease);
+}
+[data-theme="light"] .nav-menu-backdrop{ background: rgba(100,116,139,0.35); }
+.nav-menu-backdrop.open{ opacity:1; }
+/* Used to be a flat var(--surface-strong) panel with a small generic
+   22px radius (--radius-lg) — visually nothing like .top-bar's own
+   999px glass pill just above it, so it read as an unrelated box that
+   happened to land under the header rather than a piece of the same
+   header system. Now built from the same materials as .top-bar itself
+   (translucent gradient + backdrop-filter blur/saturate, identical
+   dark/light overrides) at --radius-xl (28px) — still a rounded
+   rectangle, not literally a 999px pill (this panel is tall and holds a
+   list + an input + buttons, where a true stadium shape would look
+   broken), but rounded enough, in the same glass material, to read as
+   "the header, continued downward" instead of a separate surface.
+   display:grid + grid-template-rows is the height-animation vehicle:
+   height:auto can't be transitioned directly, but a 0fr -> 1fr row can,
+   giving a real growing-open motion (not just a fade) without having to
+   measure content height in JS. The rounded shape, blur and shadow live
+   on this outer element (so the shape itself never changes, per "keep
+   the same shape throughout the animation"); .nav-menu-inner below is
+   just the overflow:hidden clipping box + padding for the actual items. */
+.nav-menu{
+  position:absolute; top: calc(100% + 8px); right:0; z-index:500; min-width: 260px;
+  display:grid; grid-template-rows: 0fr; overflow:hidden;
+  background: linear-gradient(180deg, rgba(23,26,34,0.74), rgba(23,26,34,0.54));
+  border:1px solid var(--border); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(22px) saturate(150%);
+  transform-origin: top right;
+  opacity:0; filter: blur(10px); transform: scale(.92);
+  pointer-events:none;
+  transition: grid-template-rows .55s var(--ease), opacity .45s var(--ease), filter .45s var(--ease), transform .5s var(--ease);
+}
+[data-theme="light"] .nav-menu{
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.52));
+  box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.nav-menu.open{ grid-template-rows: 1fr; opacity:1; filter: blur(0); transform: scale(1); pointer-events:auto; }
+/* padding starts at 0 (not 8px) and animates in alongside the parent's
+   grid-template-rows: padding isn't subject to min-height:0, so a flat
+   8px here would leave a permanent 16px sliver of rounded glass visible
+   even at grid-template-rows:0fr, which is exactly what min-height:0
+   above is meant to prevent — confirmed via getComputedStyle showing
+   the row settle at 16px, not 0, before this fix. Animating together
+   means the box still reads as one continuous growing shape rather than
+   "padding pops in, then the box grows" as two separate steps. */
+.nav-menu-inner{
+  min-height:0; padding: 0 8px; display:flex; flex-direction:column; gap:2px;
+  transition: padding .55s var(--ease);
+}
+.nav-menu.open .nav-menu-inner{ padding: 8px; }
+.nav-menu-item{
+  display:flex; align-items:center; gap:10px; width:100%; padding: 10px 12px; border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--text); text-decoration:none; text-align:left;
+  transition: background .15s var(--ease);
+}
+.nav-menu-item svg{ width:16px; height:16px; flex-shrink:0; color: var(--text-muted); }
+.nav-menu-item:hover{ background: var(--surface); }
+.nav-menu-sep{ height:1px; background: var(--border); margin: 6px 4px; }
+.nav-menu-code{ padding: 6px 12px 4px; display:flex; flex-direction:column; gap:8px; }
+.nav-menu-code label{ font-size:12px; color: var(--text-muted); }
+.nav-menu-code input{
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); padding: 9px 11px; font-family: var(--font-mono); font-size:12.5px; width:100%;
+}
+.nav-menu-code input:focus-visible{ outline: 2px solid var(--accent); outline-offset:1px; }
+.nav-menu-code-row{ display:flex; gap:8px; }
+.nav-menu-code-row .btn{ flex:1; }
+
+/* ---------- Toast (inert "coming soon" feedback) ---------- */
+.toast{
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(10px);
+  z-index: 3500; max-width: min(90vw, 420px); padding: 14px 20px; border-radius: var(--radius-lg);
+  background: #14161D;
+  border: 1px solid var(--border-strong); color: var(--text);
+  font-family: var(--font-body); font-size: 13.5px; line-height:1.45;
+  box-shadow: 0 20px 50px -14px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,0,0,0.3);
+  opacity:0; pointer-events:none;
+  transition: opacity .3s var(--ease), transform .3s var(--ease);
+}
+[data-theme="light"] .toast{ background: #1D2230; color:#F6F7FB; }
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Modal (Privacy, etc.) ---------- */
+.modal-overlay{
+  position:fixed; inset:0; z-index:4000; display:flex; align-items:center; justify-content:center;
+  padding: 24px; background: rgba(6,7,11,0.55); backdrop-filter: blur(6px);
+  opacity:0; transition: opacity .22s var(--ease);
+}
+[data-theme="light"] .modal-overlay{ background: rgba(100,116,139,0.35); }
+.modal-overlay.open{ opacity:1; }
+.modal-card{
+  max-width: 440px; width:100%; padding: 32px 28px 28px; text-align:left; position:relative;
+  transform: translateY(10px) scale(.97); transition: transform .22s var(--ease);
+}
+.modal-overlay.open .modal-card{ transform: translateY(0) scale(1); }
+.modal-card h3{ font-size: 22px; margin: 10px 0 12px; }
+.modal-card p{ color: var(--text-muted); font-size:14.5px; margin-bottom:12px; }
+.modal-card .btn{ margin-top:8px; }
+.modal-close{ position:absolute; top:16px; right:16px; }
+
 .hidden{ display:none !important; }
 .center-note{ text-align:center; color: var(--text-muted); font-size:13.5px; margin-top: 20px; }
 
 /* print / PDF export */
 @media print{
-  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget{ display:none !important; }
+  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget, .nav-menu, .toast, .modal-overlay{ display:none !important; }
   body::before, body::after{ display:none !important; }
   body{ background: #0F1117; color:#F8FAFC; }
   .section{ opacity: 1 !important; transform: none !important; transition: none !important; }
@@ -4812,32 +5681,63 @@ function applyTheme(theme){
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute("content", theme === "light" ? "#FFFFFF" : "#0F1117");
 }
+let themeScanTransition = null;
 function toggleTheme(){
-  document.body.classList.add("theme-transitions");
-  applyTheme(currentTheme === "light" ? "dark" : "light");
+  // A click while the previous scan is still playing would call
+  // startViewTransition() again before the first transition has settled.
+  // Chromium responds by rejecting the in-flight transition's `ready`
+  // promise with InvalidStateError ("Transition was aborted because of
+  // invalid state") -- and since nothing held a reference to it, that
+  // rejection went unhandled. Ignoring re-entrant clicks until the current
+  // scan finishes avoids the overlap instead of just swallowing the error.
+  if (themeScanTransition) return;
+  const next = currentTheme === "light" ? "dark" : "light";
+  const applyAndRefresh = () => {
+    applyTheme(next);
+    // Only the result page has canvas-drawn pixels (radar chart, QR code)
+    // whose colors are baked in at draw time rather than read live from
+    // CSS, so it's the one screen that needs a forced re-render. Every
+    // other screen (quiz, landing, compare, party) uses CSS custom
+    // properties directly and repaints on its own, so toggling theme
+    // there never interrupts what the person is doing (e.g. mid-quiz).
+    if (lastResult && document.getElementById("radar")){ renderResult(); }
+    else { updateThemeIcon(); updateBrandLogo(); }
+  };
   click(300);
-  // Only the result page has canvas-drawn pixels (radar chart, QR code)
-  // whose colors are baked in at draw time rather than read live from
-  // CSS, so it's the one screen that needs a forced re-render. Every
-  // other screen (quiz, landing, compare, party) uses CSS custom
-  // properties directly and repaints on its own, so toggling theme there
-  // never interrupts what the person is doing (e.g. mid-quiz).
-  if (lastResult && document.getElementById("radar")){ renderResult(); }
-  else { updateThemeIcon(); updateBrandLogo(); }
+  // The bottom-to-top scan is built on the View Transitions API: it
+  // snapshots the page before/after the DOM change below and lets us
+  // reveal the "after" snapshot with a custom clip-path animation (see
+  // the ::view-transition-new(root) keyframes) instead of the browser's
+  // default cross-fade. No polyfill or manual DOM cloning needed, but
+  // it's Chromium-only today — Safari/Firefox and reduced-motion simply
+  // keep the previous instant-ish CSS-transition swap, which is a fine
+  // degradation since the scan is a delight-on-top, not a requirement.
+  if (reducedMotion() || typeof document.startViewTransition !== "function"){
+    document.body.classList.add("theme-transitions");
+    applyAndRefresh();
+    return;
+  }
+  themeScanTransition = document.startViewTransition(applyAndRefresh);
+  // `ready` can still reject for reasons outside our control (e.g. the tab
+  // being hidden mid-scan) even with the re-entrancy guard above, so it
+  // needs its own handler rather than being left to reject unheard.
+  themeScanTransition.ready.catch(() => {});
+  themeScanTransition.finished.finally(() => { themeScanTransition = null; });
 }
 function updateThemeIcon(){
-  const btn = document.querySelector('.icon-btn[aria-label="Toggle light or dark theme"]');
-  if (btn) btn.innerHTML = currentTheme === "light" ? ICONS.sun : ICONS.moon;
+  const item = document.getElementById("navThemeItem");
+  if (item) item.innerHTML = `${currentTheme === "light" ? ICONS.moon : ICONS.sun}<span>${currentTheme === "light" ? "Dark mode" : "Light mode"}</span>`;
 }
 function setPageTitle(suffix){
   document.title = suffix ? `Forge \u2022 ${suffix}` : "Forge";
 }
 
 function updateBrandLogo(){
-  const logo = document.getElementById("brandLogo");
-  if (logo) logo.src = currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg";
+  const path = currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg";
   const navLogo = document.getElementById("navLogo");
-  if (navLogo) navLogo.src = currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg";
+  if (navLogo) navLogo.src = path;
+  const footerLogo = document.getElementById("lpFooterLogo");
+  if (footerLogo) footerLogo.src = path;
 }
 let careersExpanded = false;
 let funStatsOpen = false;
@@ -5035,22 +5935,159 @@ const ICONS = {
   moon: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 12.2A6.8 6.8 0 1 1 7.8 3.5a6 6 0 0 0 8.7 8.7Z"/></svg>`,
   soundOn: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.3a4 4 0 0 1 0 5.4M15.3 5a7.2 7.2 0 0 1 0 10"/></svg>`,
   soundOff: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.5l4 5M17 7.5l-4 5"/></svg>`,
+  menu: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 6h14M3 10h14M3 14h14"/></svg>`,
+  close: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5 5 15"/></svg>`,
+  lock: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="9" width="11" height="8" rx="2.4"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9"/></svg>`,
+  wifi: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5a10 10 0 0 1 14 0M5.6 10.6a6.2 6.2 0 0 1 8.8 0M8.4 13.6a2.4 2.4 0 0 1 3.2 0"/><circle cx="10" cy="16.2" r="1" fill="currentColor" stroke="none"/></svg>`,
+  layers: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 17 8l-7 4.5L3 8z"/><path d="m4.6 10.8-1.6 1 7 4.5 7-4.5-1.6-1"/></svg>`,
+  people: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.2" cy="7" r="2.6"/><path d="M2.5 16c.5-3 2.3-4.6 4.7-4.6s4.2 1.6 4.7 4.6"/><circle cx="14.4" cy="7.4" r="2.1"/><path d="M13 11.6c2 .1 3.5 1.6 3.9 4"/></svg>`,
 };
 
 function topBar(showBack){
   return `
   <div class="top-bar">
-    <div class="nav-zone nav-left">${showBack ? `<button class="icon-btn" onclick="goHome()" aria-label="Home">${ICONS.home}</button>` : ""}</div>
+    <div class="nav-zone nav-left">
+      <button class="nav-pill" onclick="goHome()" aria-label="Go to home">
+        <span class="nav-pill-icon">${ICONS.home}</span><span class="nav-pill-label">Home</span>
+      </button>
+    </div>
     <div class="nav-zone nav-center">
       <img id="navLogo" class="nav-logo" alt="Forge" src="${currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg"}"
         onerror="this.style.display='none'; document.getElementById('navLogoFallback').style.display='inline';" />
-      <span id="navLogoFallback" class="nav-logo-fallback" style="display:none">Forge</span>
+      <span id="navLogoFallback" class="nav-logo-fallback" style="display:none">Forge<span class="brand-dot">.</span></span>
     </div>
     <div class="nav-zone nav-right">
-      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light or dark theme">${currentTheme === "light" ? ICONS.sun : ICONS.moon}</button>
-      <button class="icon-btn" onclick="toggleSound()" aria-label="Toggle sound">${soundOn ? ICONS.soundOn : ICONS.soundOff}</button>
+      <button class="btn btn-primary btn-sm nav-signup" onclick="showComingSoon('Accounts')">Sign Up<span class="pill-arrow">&rarr;</span></button>
+      <button class="icon-btn" id="navMenuBtn" onclick="toggleNavMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Open menu">${ICONS.menu}</button>
+    </div>
+    <div class="nav-menu-backdrop" id="navMenuBackdrop" hidden></div>
+    <div class="nav-menu" id="navMenu" hidden>
+     <div class="nav-menu-inner">
+      <button class="nav-menu-item nav-menu-signup" onclick="closeNavMenu();showComingSoon('Accounts')"><span>Sign Up &rarr;</span></button>
+      <button class="nav-menu-item" id="navThemeItem" onclick="toggleTheme()">${currentTheme === "light" ? ICONS.moon : ICONS.sun}<span>${currentTheme === "light" ? "Dark mode" : "Light mode"}</span></button>
+      <button class="nav-menu-item" id="navSoundItem" onclick="toggleSound()">${soundOn ? ICONS.soundOn : ICONS.soundOff}<span>Sound ${soundOn ? "on" : "off"}</span></button>
+      <div class="nav-menu-sep"></div>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('compare')"><span>Compare Results</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('party')"><span>Party Compare</span></button>
+      <a class="nav-menu-item" href="tos.html"><span>Terms of Service</span></a>
+      <button class="nav-menu-item" onclick="closeNavMenu();showPrivacyModal()"><span>Privacy</span></button>
+      <div class="nav-menu-sep"></div>
+      <div class="nav-menu-code">
+        <label for="quickCode">Have someone's code?</label>
+        <input type="text" id="quickCode" placeholder="Name-PF2-...">
+        <div class="nav-menu-code-row">
+          <button class="btn btn-ghost btn-sm" onclick="viewProfileFromCode()">View</button>
+          <button class="btn btn-ghost btn-sm" onclick="quickCompareGo()">Compare</button>
+        </div>
+      </div>
+     </div>
     </div>
   </div>`;
+}
+let navMenuOpen = false;
+function toggleNavMenu(){
+  navMenuOpen ? closeNavMenu() : openNavMenu();
+}
+function openNavMenu(){
+  const menu = document.getElementById("navMenu");
+  const btn = document.getElementById("navMenuBtn");
+  const backdrop = document.getElementById("navMenuBackdrop");
+  if (!menu || !btn) return;
+  navMenuOpen = true;
+  menu.hidden = false;
+  if (backdrop) backdrop.hidden = false;
+  requestAnimationFrame(() => { menu.classList.add("open"); if (backdrop) backdrop.classList.add("open"); });
+  btn.setAttribute("aria-expanded", "true");
+  btn.innerHTML = ICONS.close;
+  document.addEventListener("pointerdown", onNavMenuOutsideClick, true);
+  document.addEventListener("keydown", onNavMenuKey);
+}
+function closeNavMenu(){
+  const menu = document.getElementById("navMenu");
+  const btn = document.getElementById("navMenuBtn");
+  const backdrop = document.getElementById("navMenuBackdrop");
+  navMenuOpen = false;
+  document.removeEventListener("pointerdown", onNavMenuOutsideClick, true);
+  document.removeEventListener("keydown", onNavMenuKey);
+  if (backdrop) backdrop.classList.remove("open");
+  setTimeout(() => { if (!navMenuOpen && backdrop) backdrop.hidden = true; }, 400);
+  if (!menu || !btn) return;
+  menu.classList.remove("open");
+  btn.setAttribute("aria-expanded", "false");
+  btn.innerHTML = ICONS.menu;
+  // Matches .nav-menu's longest close transition (grid-template-rows,
+  // 550ms) so `hidden` lands right as the collapse finishes rather than
+  // cutting it off mid-shrink.
+  setTimeout(() => { if (!navMenuOpen && menu) menu.hidden = true; }, 550);
+}
+function onNavMenuOutsideClick(e){
+  const menu = document.getElementById("navMenu");
+  const btn = document.getElementById("navMenuBtn");
+  if (!menu || (menu.contains(e.target) || (btn && btn.contains(e.target)))) return;
+  closeNavMenu();
+}
+function onNavMenuKey(e){
+  if (e.key !== "Escape") return;
+  closeNavMenu();
+  const btn = document.getElementById("navMenuBtn");
+  if (btn) btn.focus();
+}
+
+/* ---------------- Toast + inert "coming soon" affordances --------------
+   A couple of surfaces in the redesigned marketing shell (Sign Up, the
+   optional-account panel) are intentionally not backed by any real
+   account system yet, matching Forge's no-backend, no-accounts model.
+   Rather than a dead click, they surface an honest, on-brand toast
+   instead of the browser's native alert(). */
+let toastTimer = null;
+function showToast(message){
+  let el = document.getElementById("toast");
+  if (!el){
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.classList.remove("show");
+  void el.offsetWidth;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
+}
+function showComingSoon(feature){
+  click(420);
+  showToast(`${feature} aren't built yet — Forge stays fully on-device for now. Star the repo to hear when that changes.`);
+}
+function showPrivacyModal(){
+  click(460);
+  if (document.getElementById("privacyModal")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "privacyModal";
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+      <button class="icon-btn modal-close" onclick="closePrivacyModal()" aria-label="Close">${ICONS.close}</button>
+      <div class="eyebrow accent">PRIVACY</div>
+      <h3 id="privacyModalTitle">Everything stays on your device</h3>
+      <p>Forge never uploads your personality anywhere. Answers, results, and history are stored only in this browser's local storage &mdash; nothing is sent to a server, because Forge doesn't have one.</p>
+      <p>A profile only ever leaves your device if you choose to share its code or link yourself.</p>
+      <button class="btn btn-primary" onclick="closePrivacyModal()">Got it</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add("open"));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closePrivacyModal(); });
+  document.addEventListener("keydown", onPrivacyModalKey);
+}
+function onPrivacyModalKey(e){ if (e.key === "Escape") closePrivacyModal(); }
+function closePrivacyModal(){
+  const overlay = document.getElementById("privacyModal");
+  if (!overlay) return;
+  overlay.classList.remove("open");
+  document.removeEventListener("keydown", onPrivacyModalKey);
+  setTimeout(() => overlay.remove(), 220);
 }
 function goHome(){
   if (session && !session.isComplete()){
@@ -5149,8 +6186,8 @@ function toggleSound(){
   soundOn = !soundOn;
   localStorage.setItem("pf_sound", soundOn ? "on" : "off");
   click(soundOn ? 660 : 220);
-  const btn = document.querySelector('.icon-btn[aria-label="Toggle sound"]');
-  if (btn) btn.innerHTML = soundOn ? ICONS.soundOn : ICONS.soundOff;
+  const item = document.getElementById("navSoundItem");
+  if (item) item.innerHTML = `${soundOn ? ICONS.soundOn : ICONS.soundOff}<span>Sound ${soundOn ? "on" : "off"}</span>`;
   if (bgMusic){
     if (soundOn){
       bgMusic.play().then(() => {
@@ -5169,50 +6206,209 @@ function renderLanding(){
   const saved = localStorage.getItem("pf_last_code");
   const savedQuiz = getSavedQuizProgress();
   root.innerHTML = `
-    <div class="container">${topBar(false)}</div>
-    <div class="landing">
-      <div class="logo-mark">Discover. Compare. Evolve.</div>
-      <img id="brandLogo" class="brand-logo" alt="Forge" src="${currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg"}"
-        onerror="this.style.display='none'; document.getElementById('brandLogoFallback').style.display='block';" />
-      <h1 id="brandLogoFallback" style="display:none">Forge</h1>
-      <p class="tagline">A personality read that actually adapts to you. Answer a set of scenarios, not a survey, and watch it change direction as it gets to know you. Takes about seven minutes.</p>
-      ${savedQuiz ? `
-      <div class="card glass" style="max-width:420px;text-align:center">
-        <div class="eyebrow accent" style="justify-content:center">IN PROGRESS</div>
-        <p style="margin-top:8px">${savedQuiz.name ? savedQuiz.name + ", y" : "Y"}ou answered ${savedQuiz.cursor} of ${savedQuiz.targetLength}. Pick up on question ${savedQuiz.cursor + 1}.</p>
-        <div class="cta-row" style="margin-top:14px">
-          <button class="btn btn-primary" onclick="resumeQuiz()">Continue &rarr;</button>
-          <button class="btn btn-ghost" onclick="discardSavedQuizAndStart()">Start over instead</button>
-        </div>
-      </div>
-      <button class="btn btn-ghost" style="margin-top:4px" onclick="click(380);navigate('compare')">Compare Two Results</button>
-      ` : `
-      <div class="cta-row">
-        <button class="btn btn-primary" onclick="click(520);goToNameScreen()">Begin &rarr;</button>
-        <button class="btn btn-ghost" onclick="click(380);navigate('compare')">Compare Two Results</button>
-      </div>
-      `}
-      ${saved ? `<button class="btn btn-ghost" style="margin-top:4px" onclick="click(380);loadSaved()">Reopen my last result</button>` : ""}
-      <div class="meta-row">
-        <span>Runs entirely on your device</span><span>&middot;</span><span>No account</span><span>&middot;</span><span>Works offline after first load</span>
-      </div>
+    <div class="lp-bg-flatten" aria-hidden="true"></div>
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+      <defs>
+        <clipPath id="lpHeroNotch" clipPathUnits="objectBoundingBox">
+          <path d="M1,0.0457 L1,0.5742 C1,0.5995 0.9472,0.6198 0.8815,0.6198 L0.6924,0.6198 C0.6266,0.6198 0.5734,0.6404 0.5734,0.6656 L0.5734,0.9543 C0.5734,0.9796 0.5202,1 0.4546,1 L0.119,1 C0.0533,1 0,0.9796 0,0.9543 L0,0.0457 C0,0.0204 0.0533,0 0.119,0 L0.8815,0 C0.9472,0 1,0.0204 1,0.0457 Z" />
+        </clipPath>
+      </defs>
+    </svg>
+    <div class="container lp-topbar-wrap">${topBar(false)}</div>
+    <div class="landing-v2">
 
-      <div class="quick-compare glass">
-        <label>Have someone's code? View their full profile, or compare it against your own.</label>
-        <div class="row">
-          <input type="text" id="quickCode" placeholder="Name-PF2-...">
-          <button class="btn btn-ghost" onclick="viewProfileFromCode()">View</button>
-          <button class="btn btn-ghost" onclick="quickCompareGo()">Compare</button>
+      <section class="lp-hero-grid">
+        <div class="lp-hero-text">
+          <div class="eyebrow accent">DISCOVER &middot; COMPARE &middot; EVOLVE</div>
+          <h1>Small Pieces.<br>A Bigger <span class="accent-text">You.</span></h1>
+          <p class="lp-sub">A personality read that actually adapts to you. Answer real scenarios, not a survey, and watch it change direction as it gets to know you. About seven minutes, entirely on your device.</p>
+
+          ${savedQuiz ? `
+          <div class="card glass lp-status-card">
+            <div class="eyebrow accent">IN PROGRESS</div>
+            <p>${savedQuiz.name ? savedQuiz.name + ", y" : "Y"}ou answered ${savedQuiz.cursor} of ${savedQuiz.targetLength}. Pick up on question ${savedQuiz.cursor + 1}.</p>
+            <div class="cta-row">
+              <button class="btn btn-primary" onclick="resumeQuiz()">Continue &rarr;</button>
+              <button class="btn btn-ghost" onclick="discardSavedQuizAndStart()">Start over</button>
+            </div>
+          </div>
+          <button class="btn btn-ghost lp-reopen" onclick="click(380);navigate('compare')">Compare Two Results</button>
+          ` : `
+          <div class="cta-row">
+            <button class="btn btn-primary" onclick="click(520);goToNameScreen()">Start Assessment &rarr;</button>
+            <button class="btn btn-ghost" onclick="click(380);navigate('compare')">Compare Two Results</button>
+          </div>
+          `}
+          ${saved ? `<button class="btn btn-ghost lp-reopen" onclick="click(380);loadSaved()">Reopen my last result</button>` : ""}
+
+          <div class="lp-avatars" aria-hidden="true">
+            <div class="lp-avatar-stack">
+              <img src="assets/Avatar_1.jpg" alt="" width="38" height="38" loading="lazy" />
+              <img src="assets/Avatar_2.jpg" alt="" width="38" height="38" loading="lazy" />
+              <img src="assets/Avatar_3.jpg" alt="" width="38" height="38" loading="lazy" />
+              <img src="assets/Avatar_4.jpg" alt="" width="38" height="38" loading="lazy" />
+              <img src="assets/Avatar_5.jpg" alt="" width="38" height="38" loading="lazy" />
+            </div>
+            <p class="lp-avatars-caption">For anyone curious what's actually going on in there.</p>
+          </div>
+
+          <div class="lp-trust-row">
+            <span>Runs on your device</span><span class="dot-sep"></span><span>No account needed</span><span class="dot-sep"></span><span>Works offline</span>
+          </div>
         </div>
+
+        <div class="lp-bento-canvas">
+          <div class="lp-hero-visual" aria-hidden="true">
+            <img class="lp-hero-photo" src="assets/Hero_Home.jpg" alt="" width="1328" height="1956" loading="eager" fetchpriority="high" />
+            <span class="lp-visual-caption lp-visual-caption-top">A more<br>thoughtful<br>you.</span>
+            <span class="lp-visual-caption lp-visual-caption-bottom">Not just answers.<br>A clearer tomorrow.<br>//</span>
+          </div>
+
+          <button class="lp-card lp-card-01" onclick="click(520);goToNameScreen()">
+            <div class="lp-card-top"><span class="lp-card-num">01</span><span class="lp-card-arrow">&nearr;</span></div>
+            <h3>Discover</h3>
+            <p>Answer real scenarios, not generic questions.</p>
+            <span class="lp-card-foot">Real insights. Real you.</span>
+          </button>
+          <div class="lp-card lp-card-dark">
+            <span class="lp-plus">+</span>
+            <p>Your mind is a system of connected parts.</p>
+            <div class="lp-dark-shapes" aria-hidden="true">
+              <span class="lp-dshape ds1"></span>
+              <span class="lp-dshape ds2"></span>
+              <span class="lp-dshape ds3"></span>
+            </div>
+          </div>
+
+          <div class="lp-bento-row">
+            <button class="lp-card lp-card-02" onclick="click(380);navigate('compare')">
+              <div class="lp-card-top"><span class="lp-card-num">02</span><span class="lp-card-arrow">&nearr;</span></div>
+              <h3>Compare</h3>
+              <p>See how you connect with friends, partners, and others.</p>
+              <span class="lp-card-foot">Different people. Brighter connections.</span>
+            </button>
+            <button class="lp-card lp-card-03" onclick="click(380);navigate('party')">
+              <div class="lp-card-top"><span class="lp-card-num">03</span><span class="lp-card-arrow">&nearr;</span></div>
+              <h3>Evolve</h3>
+              <p>Track your growth over time.</p>
+              <span class="lp-card-foot">Same questions. A different you.</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="lp-features section" aria-label="Why Forge">
+        <div class="lp-feature"><span class="lp-feature-icon lp-fi-1">${ICONS.lock}</span><div><h4>Private</h4><p>Your data stays on your device.</p></div></div>
+        <div class="lp-feature"><span class="lp-feature-icon lp-fi-2">${ICONS.wifi}</span><div><h4>Works Offline</h4><p>Use it anytime, anywhere.</p></div></div>
+        <div class="lp-feature"><span class="lp-feature-icon lp-fi-3">${ICONS.layers}</span><div><h4>Built for You</h4><p>Adaptive and always evolving.</p></div></div>
+        <div class="lp-feature"><span class="lp-feature-icon lp-fi-4">${ICONS.people}</span><div><h4>Made for People</h4><p>Understand yourself and others.</p></div></div>
+      </section>
+
+      <section class="lp-cta-split section">
+        <div class="lp-cta-panel lp-cta-dark">
+          <div class="eyebrow accent">NO ACCOUNT REQUIRED</div>
+          <h3>Take the assessment. Keep it simple.</h3>
+          <p>Forge works fully on your device. No sign up, no tracking, just insights.</p>
+          <ul class="lp-checklist">
+            <li>Unlimited quizzes</li>
+            <li>Local storage only</li>
+            <li>Personality timeline</li>
+            <li>Works offline</li>
+          </ul>
+          <button class="btn btn-primary" onclick="click(520);goToNameScreen()">Start Assessment &rarr;</button>
+        </div>
+        <div class="lp-cta-panel lp-cta-outline">
+          <div class="eyebrow">WANT MORE? <span class="lp-soon-badge">Coming soon</span></div>
+          <h3>An optional account, eventually.</h3>
+          <p>Forge is built to stay useful without one. If accounts ever arrive, they stay optional and add to this &mdash; never gate it.</p>
+          <ul class="lp-checklist lp-checklist-muted">
+            <li>Sync across your own devices</li>
+            <li>Saved comparisons</li>
+            <li>Early access to new features</li>
+          </ul>
+          <button class="btn btn-ghost" onclick="showComingSoon('Accounts')">Sign Up &rarr;</button>
+          <p class="lp-fine-print">Always optional. Your privacy, your choice.</p>
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="lp-footer">
+      <div class="lp-footer-inner">
+      <div class="lp-footer-top">
+        <img id="lpFooterLogo" class="lp-footer-logo" alt="Forge" src="${currentTheme === "light" ? "assets/Logo_black.svg" : "assets/Logo_white.svg"}"
+          onerror="this.style.display='none';" />
+        <p class="lp-footer-tagline">A clearer you. A brighter tomorrow.</p>
       </div>
-    </div>
-    <div class="footer-nav">
-      <button onclick="navigate('compare')">Compare page</button>
-      <button onclick="navigate('party')">Party Compare (3-5 people)</button>
-      <button onclick="alert('Everything stays on your device. Forge never uploads your personality anywhere, and nothing is stored except a code on your own device if you choose to save it.')">Privacy</button>
-    </div>
+      <nav class="footer-nav">
+        <button onclick="click(380);navigate('compare')">Compare</button>
+        <button onclick="click(380);navigate('party')">Party Compare</button>
+        <a href="tos.html">Terms of Service</a>
+        <button onclick="showPrivacyModal()">Privacy</button>
+      </nav>
+      </div>
+    </footer>
   `;
   spawnAmbience();
+  setupProgressiveReveal(document.querySelector(".landing-v2"));
+  initHeroParallax();
+  initMagneticButtons(document.querySelector(".landing-v2"));
+}
+
+/* Subtle magnetic pull on primary CTAs: the button nudges a few px
+   toward the cursor within its own bounds, springing back on leave.
+   Hover-capable pointers only, and a no-op under reduced motion.
+   Clamped to +-8px regardless of button size: uncapped, the offset
+   scaled with the button's own half-width (34px+ on a wide primary
+   button), which visibly pushed it past its container's edge since a
+   transform never reflows layout to make room for itself. */
+const MAGNET_MAX_PX = 8;
+function initMagneticButtons(container){
+  if (reducedMotion() || !window.matchMedia("(hover: hover)").matches) return;
+  (container || document).querySelectorAll(".btn-primary").forEach(btn => {
+    let raf = null;
+    btn.addEventListener("pointermove", (e) => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const rect = btn.getBoundingClientRect();
+        const x = Math.max(-MAGNET_MAX_PX, Math.min(MAGNET_MAX_PX, (e.clientX - rect.left - rect.width / 2) * 0.25));
+        const y = Math.max(-MAGNET_MAX_PX, Math.min(MAGNET_MAX_PX, (e.clientY - rect.top - rect.height / 2) * 0.35));
+        btn.style.setProperty("--magnet-x", x.toFixed(1) + "px");
+        btn.style.setProperty("--magnet-y", y.toFixed(1) + "px");
+      });
+    });
+    btn.addEventListener("pointerleave", () => {
+      btn.style.setProperty("--magnet-x", "0px");
+      btn.style.setProperty("--magnet-y", "0px");
+    });
+  });
+}
+
+/* Subtle pointer-parallax on the hero's abstract shapes, each drifting a
+   different amount so the stack reads as layered rather than flat. Pure
+   ambient motion (no content moves), and skipped entirely under
+   prefers-reduced-motion. */
+function initHeroParallax(){
+  const visual = document.querySelector(".lp-hero-visual");
+  const photo = visual && visual.querySelector(".lp-hero-photo");
+  if (!visual || !photo || reducedMotion() || !window.matchMedia("(hover: hover)").matches) return;
+  let raf = null;
+  visual.addEventListener("pointermove", (e) => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = null;
+      const rect = visual.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - 0.5;
+      const py = (e.clientY - rect.top) / rect.height - 0.5;
+      photo.style.setProperty("--px", (px * 14).toFixed(2) + "px");
+      photo.style.setProperty("--py", (py * 14).toFixed(2) + "px");
+    });
+  });
+  visual.addEventListener("pointerleave", () => {
+    photo.style.setProperty("--px", "0px");
+    photo.style.setProperty("--py", "0px");
+  });
 }
 
 function quickCompareGo(){
