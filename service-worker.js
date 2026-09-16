@@ -57,7 +57,7 @@
    stale app shell: the moment a new worker installs, it takes over and
    clears the old caches, rather than waiting for every tab to close.
    ----------------------------------------------------------------------- */
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v9";
 
 const SHELL_CACHE = `personaforge-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `personaforge-static-${CACHE_VERSION}`;
@@ -80,27 +80,49 @@ const SCOPE = self.registration.scope;
 const toURL = (path) => new URL(path, SCOPE).toString();
 
 // The app shell: the minimum needed to boot the app with zero network.
+// Every page is now a real, separately-navigable document (see the
+// multi-file refactor), so each one is listed here rather than relying on
+// a single index.html to stand in for the whole app.
 const APP_SHELL = [
   toURL("./"),
   toURL("index.html"),
+  toURL("quiz.html"),
+  toURL("result.html"),
+  toURL("compare.html"),
+  toURL("legal.html"),
   toURL("manifest.json"),
 ];
 
 /* -----------------------------------------------------------------------
-   ASSET MANIFEST — the single place to edit when icons or branding
-   assets are added, renamed, or removed. Everything under assets/ is
-   listed once, here, as scope-relative paths; nothing else in this file
-   (or manifest.json / 404.html) duplicates these strings by hand — each
-   references its own copy of the filenames it needs, so replacing an
-   icon set later means updating the filename in each file that uses it,
-   not hunting for it inside caching logic. Cached opportunistically on
-   install so the very first visit already primes the offline experience;
-   an asset missing from this list is still picked up on first request by
-   the runtime cache-first handler below, so the list doesn't need to be
-   perfectly exhaustive to keep the app working.
+   STATIC ASSET MANIFEST — the single place to edit when a shared/page CSS
+   or JS file, or an icon/branding asset, is added, renamed, or removed.
+   Every page-specific css/js file is listed here too (not just the ones
+   shared across all pages) because APP_SHELL above precaches every page's
+   HTML on install, and that HTML is useless offline without its own
+   stylesheet and script also already being cached — nothing fetches a
+   document's own <link>/<script> tags just by precaching the document
+   itself. Nothing else in this file (or manifest.json / 404.html)
+   duplicates these strings by hand — each references its own copy of the
+   filenames it needs. Cached opportunistically on install so the very
+   first visit already primes the offline experience; an entry missing
+   from this list is still picked up on first request by the runtime
+   cache-first handler below, so the list doesn't need to be perfectly
+   exhaustive to keep the app working, only to keep it working *offline
+   before that first request has happened*.
    ----------------------------------------------------------------------- */
 const STATIC_ASSETS = [
+  "css/global.css",
+  "css/pages.css",
+  "js/engine.js",
+  "js/global.js",
+  "js/pages.js",
   "assets/BG.mp3",
+  "assets/Hero_Home.jpg",
+  "assets/Avatar_1.jpg",
+  "assets/Avatar_2.jpg",
+  "assets/Avatar_3.jpg",
+  "assets/Avatar_4.jpg",
+  "assets/Avatar_5.jpg",
   "assets/Logo_black.svg",
   "assets/Logo_white.svg",
   "assets/Logo_black_192.png",
@@ -248,18 +270,21 @@ self.addEventListener("fetch", (event) => {
    STRATEGIES
    ------------------------------------------------------------------------- */
 
-// Network First, used for the HTML document / SPA navigations. Falls back
-// to the cached shell (matched by ignoring query/hash) when offline, so
-// deep links like "?code=Name-PF2-xxxx" or a path restored by 404.html
-// still boot the app — the page's own JS reads location.search /
-// location.pathname after load to restore the right profile.
+// Network First, used for the HTML document / navigations. Each page is
+// cached under its own URL (index.html, result.html, compare.html, ...)
+// rather than everything collapsing onto one shell key, since the app is
+// now several real documents, not one SPA standing in for all routes.
+// Falls back to the specific page's cached copy when offline (matched by
+// ignoring query/hash, so a deep link like "?code=Name-PF2-xxxx" or a path
+// restored by 404.html still boots the right page), and as a last resort
+// to the cached index.html shell for a page that was never visited online.
 async function networkFirstShell(request) {
   const shellCache = await caches.open(SHELL_CACHE);
 
   try {
     const fresh = await fetch(request);
     if (fresh && fresh.ok) {
-      shellCache.put(toURL("index.html"), fresh.clone());
+      shellCache.put(request, fresh.clone());
     }
     return fresh;
   } catch (err) {

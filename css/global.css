@@ -1,0 +1,659 @@
+/* =============================================================================
+   FORGE — GLOBAL DESIGN SYSTEM
+   Shared across every page: tokens, base resets, surfaces (.glass/.btn/
+   .eyebrow), the top-bar/nav-menu chrome, toast/modal, and cross-page micro-
+   interactions (card hover, progressive reveal, confetti, audio prompt).
+   Extracted from index.html's single inline <style> block — page-specific
+   rules (landing/name/quiz/result/compare/party) stay in their own files.
+   ============================================================================= */
+
+/* =========================================================================
+   PERSONAFORGE, DESIGN SYSTEM
+   Rich dark neutrals, soft pastel accents, gradients used with intention.
+   Warm, curious, premium, never aggressive or hacker-themed. Each
+   archetype layers its own two-color identity on top of this base through
+   --user-accent-1 / --user-accent-2, set dynamically at render time.
+   ========================================================================= */
+
+:root{
+  --bg: #0F1117;
+  --bg-alt: #12141C;
+  --surface: #171A22;
+  --surface-strong: #1E2230;
+  --card: #1E2230;
+  --border: rgba(167,139,250,0.14);
+  --border-strong: rgba(167,139,250,0.28);
+  --text: #F8FAFC;
+  --text-muted: #A7B0C2;
+  --text-dim: #6B7385;
+  --accent: #A78BFA;
+  --accent-soft: #C4B5FD;
+  --sky: #7DD3FC;
+  --mint: #6EE7B7;
+  --peach: #FDBA74;
+  --gold: #FACC15;
+  --coral: #FB7185;
+  --success: #34D399;
+  --silver: #A7B0C2;
+  --good: #34D399;
+  /* the current person's own archetype colors, set as inline custom
+     properties on the result page so buttons/graphs/glows adapt; these
+     are the sensible defaults everywhere else (landing, quiz, compare) */
+  --user-accent-1: var(--accent);
+  --user-accent-2: var(--sky);
+  --hue-blue: #7DD3FC;
+  --hue-purple: #A78BFA;
+  --hue-teal: #6EE7B7;
+  --hue-gold: #FACC15;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  /* Rounded-square/squircle radius shared by every button and the
+     top-bar's own internal controls (nav-pill, icon-btn) — deliberately
+     its own token rather than reusing --radius-md, since --radius-md is
+     shared with unrelated non-button surfaces (inputs, stat tiles,
+     credit cards) that this shape change isn't meant to touch. Chosen to
+     stay well under half the height of every button size it's used on
+     (~34-46px tall), so corners read as rounded-square, never a pill. */
+  --radius-btn: 14px;
+  --shadow-soft: 0 24px 60px -20px rgba(8,9,14,0.6);
+  --ease: cubic-bezier(.22,1,.36,1);
+  --font-display: 'Cabinet Grotesk', 'Space Grotesk', sans-serif;
+  --font-body: 'Cabinet Grotesk', 'Manrope', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Geist Mono', 'Courier New', monospace;
+}
+
+/* ---------- Light theme ----------------------------------------------- 
+   White background, soft pastel gradients, frosted glass cards. Dark
+   stays the default (it's what's been built and refined so far), but
+   both are fully implemented and switching is instant and saved locally. */
+[data-theme="light"]{
+  --bg: #FFFFFF;
+  --bg-alt: #F8FAFC;
+  --surface: #F1F5F9;
+  --surface-strong: #E2E8F0;
+  --card: #FFFFFF;
+  --border: rgba(100,116,139,0.16);
+  --border-strong: rgba(100,116,139,0.32);
+  --text: #0F172A;
+  --text-muted: #475569;
+  --text-dim: #64748B;
+  --accent: #8B5CF6;
+  --accent-soft: #A78BFA;
+  --sky: #0EA5E9;
+  --mint: #10B981;
+  --peach: #F97316;
+  --gold: #CA8A04;
+  --coral: #E11D48;
+  --success: #059669;
+  --silver: #475569;
+  --good: #059669;
+  --shadow-soft: 0 24px 50px -22px rgba(100,116,139,0.35);
+}
+[data-theme="light"] body::before{
+  background:
+    radial-gradient(60% 50% at 15% 0%, rgba(139,92,246,0.08), transparent 60%),
+    radial-gradient(55% 45% at 100% 10%, rgba(14,165,233,0.07), transparent 60%),
+    radial-gradient(50% 40% at 50% 100%, rgba(16,185,129,0.06), transparent 60%);
+}
+[data-theme="light"] .glass{ box-shadow: 0 8px 24px -12px rgba(100,116,139,0.18); }
+
+body.theme-transitions, body.theme-transitions .glass, body.theme-transitions .card{ transition: background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease); }
+
+/* ---------------- Dark/light scan transition ---------------------------
+   Chromium's View Transitions API snapshots the page just before and
+   just after the theme swap in toggleTheme() and stacks them as
+   ::view-transition-old(root) (the "before" bitmap, painted first) and
+   ::view-transition-new(root) (the "after" bitmap, painted on top).
+   Left alone, the browser cross-fades them with opacity. Overriding just
+   the "new" layer's animation turns that cross-fade into a scan: the old
+   theme stays put underneath, and the new one progressively covers it
+   from the bottom of the viewport up — like a beam sweeping past every
+   surface (backgrounds, cards, gradients, borders, icons, shadows,
+   glass, header, menu) in one motion, because they're all part of the
+   same bitmap rather than transitioning independently. mix-blend-mode is
+   forced to normal on both layers since the browser's default
+   (plus-lighter, for its own cross-fade math) would otherwise tint the
+   seam between them.
+   This used to reveal via clip-path (a hard inset() rectangle), which
+   gave a razor-straight, instant-on edge — functionally a wipe, but it
+   read as a mechanical cutoff rather than a "scan," since nothing about
+   a perfectly sharp line suggests something sweeping past. Swapped to
+   mask-image with a soft-edged gradient band instead: a ~26-point-tall
+   strip that fades from fully transparent to fully opaque (rather than
+   a 0-width on/off line) travels from below the viewport to above it,
+   so the boundary between revealed/unrevealed is always a gradient, not
+   an edge, and the new theme genuinely feathers in as the band passes
+   rather than snapping into place behind a moving cutoff.
+   Both keyframes keep the same 4-stop structure (opaque, opaque, clear,
+   clear) with only the stop *positions* changing, which is what lets
+   Chromium interpolate the gradient smoothly frame-to-frame instead of
+   jump-cutting between two unrelated gradients. Positions intentionally
+   run past 0%/100% (-24% up to 124%) so the band starts fully below the
+   page (nothing revealed yet) and ends fully above it (everything
+   revealed) — the out-of-range stops get clamped by the browser into a
+   fully-transparent or fully-opaque gradient at each end, which is
+   exactly the flat start/end state this needs. */
+@keyframes lp-theme-scan-reveal{
+  0%{
+    mask-image: linear-gradient(to top, white 0%, white -37%, transparent -11%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, white 0%, white -37%, transparent -11%, transparent 100%);
+  }
+  100%{
+    mask-image: linear-gradient(to top, white 0%, white 111%, transparent 137%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to top, white 0%, white 111%, transparent 137%, transparent 100%);
+  }
+}
+::view-transition-group(root){ animation-duration: 900ms; }
+::view-transition-old(root), ::view-transition-new(root){
+  animation: none; mix-blend-mode: normal;
+}
+::view-transition-new(root){
+  animation: lp-theme-scan-reveal 900ms var(--ease) both;
+}
+@media (prefers-reduced-motion: reduce){
+  ::view-transition-new(root){ animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+*{ box-sizing: border-box; margin:0; padding:0; }
+html{ scroll-behavior: smooth; background: var(--bg); height:100%; }
+body{
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* soft ambient background glow, replaces the old vignette */
+body::before{
+  content:''; position:fixed; inset:0; z-index: 0; pointer-events:none;
+  background:
+    radial-gradient(60% 50% at 15% 0%, rgba(167,139,250,0.10), transparent 60%),
+    radial-gradient(55% 45% at 100% 10%, rgba(125,211,252,0.08), transparent 60%),
+    radial-gradient(50% 40% at 50% 100%, rgba(110,231,183,0.06), transparent 60%);
+}
+
+::selection{ background: var(--accent); color:#14101F; }
+
+a{ color: inherit; }
+button{ font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible{
+  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
+}
+
+h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; }
+.career-row h4, .card h4{ font-weight: 500; }
+
+.container{ max-width: 900px; margin: 0 auto; padding: 0 28px; position:relative; z-index:1; }
+.screen{ min-height: 100vh; display:flex; flex-direction:column; padding: 32px 0 64px; }
+
+/* ---------- Floating background gradient orbs (decorative, aria-hidden) - */
+#embers{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+
+/* ---------- Premium scrollbar --------------------------------------------
+   The browser's own scrollbar is hidden outright on desktop (mouse wheel,
+   trackpad, keyboard and screen-reader scrolling all keep working — this
+   only removes its paint, never its function) and replaced with a small
+   fixed overlay: a hairline track plus a capsule thumb, both invisible at
+   rest and fading in only while scrolling, hovered, or dragged (see the
+   SCROLLBAR script block near the end of body for the fade/lerp logic).
+   Mobile keeps the real, native scrollbar/touch behavior untouched — see
+   the max-width:900px override below. */
+html{ scrollbar-width:none; }
+html::-webkit-scrollbar{ display:none; }
+@media (max-width: 900px){
+  html{ scrollbar-width:auto; }
+  html::-webkit-scrollbar{ display:block; }
+}
+:root{
+  --sb-w: 5px;         /* thumb width at rest */
+  --sb-w-active: 7px;  /* thumb width while hovered/dragging */
+  --sb-inset: 6px;     /* distance from the viewport's right edge */
+  --sb-radius: 999px;
+  --sb-fade-in: .16s;
+  --sb-fade-out: .5s;
+}
+.scrollbar-rail{
+  position: fixed; top:0; right:0; bottom:0; width: 24px;
+  z-index: 200; pointer-events: none; /* only the thumb/track opt back in below */
+}
+.scrollbar-track{
+  position:absolute; top:8px; bottom:8px; right:var(--sb-inset);
+  width: 3px; margin-right: 2px; border-radius: var(--sb-radius);
+  background: var(--border-strong);
+  opacity: 0;
+  transition: opacity var(--sb-fade-out) var(--ease);
+  pointer-events: auto; cursor: pointer;
+}
+.scrollbar-thumb{
+  position:absolute; right:var(--sb-inset); width: var(--sb-w);
+  border-radius: var(--sb-radius);
+  background: linear-gradient(180deg, var(--accent-soft), var(--accent));
+  opacity: 0;
+  pointer-events: auto; cursor: pointer; touch-action: none;
+  user-select:none; -webkit-user-select:none;
+  transition: opacity var(--sb-fade-out) var(--ease), width .18s var(--ease), right .18s var(--ease), box-shadow .2s var(--ease);
+}
+/* Scrolling: both fade in quickly (fast-in, slow-out is what makes it feel
+   calm rather than twitchy — instant to appear, gentle to disappear). */
+.scrollbar-rail.active .scrollbar-track{ opacity: .5; transition-duration: var(--sb-fade-in); }
+.scrollbar-rail.active .scrollbar-thumb{ opacity: .55; transition-duration: var(--sb-fade-in); }
+/* Hovered or actively dragged: brighten and widen slightly, growing from
+   its own centerline (width + inset move together) so it never shifts
+   sideways as it thickens. */
+.scrollbar-rail.hover .scrollbar-thumb,
+.scrollbar-rail.dragging .scrollbar-thumb{
+  opacity: .85; width: var(--sb-w-active);
+  right: calc(var(--sb-inset) - (var(--sb-w-active) - var(--sb-w)) / 2);
+}
+.scrollbar-rail.dragging .scrollbar-thumb{
+  opacity: 1;
+  box-shadow: 0 0 10px 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+@media (max-width: 900px){ .scrollbar-rail{ display:none; } }
+@media print{ .scrollbar-rail{ display:none; } }
+/* Landing-only: dampens the shared ambient glow (body::before, #embers)
+   so this page's background reads flat/quiet and color lives in the
+   cards instead — without touching those elements for every other
+   screen, which still want their full atmosphere. Sits at the same
+   z-index but later in the DOM, so it paints above them and below all
+   real landing content (z-index:1+). */
+/* Fully opaque now (was a 60%-opacity dampener over the shared ambient
+   blobs) — the reference calls for an almost-flat background with only
+   subtle radial lighting, not large colourful blobs bleeding through
+   from #embers. Colour now lives entirely inside the cards; this layer
+   just paints one quiet highlight instead. */
+.lp-bg-flatten{ position:fixed; inset:0; z-index:0; pointer-events:none; background: var(--bg); }
+.lp-bg-flatten::after{
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(60% 45% at 50% 0%, rgba(167,139,250,0.09), transparent 70%);
+}
+.blind-bar{
+  position:absolute; width:38vmax; height:38vmax; border-radius:50%; filter: blur(70px);
+  opacity:0.22; animation: floaty ease-in-out infinite;
+}
+@keyframes floaty{
+  0%,100%{ transform: translate(0,0) scale(1); }
+  50%{ transform: translate(3%, -4%) scale(1.08); }
+}
+
+/* ---------- Surfaces ---------- */
+.glass{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  box-shadow: 0 20px 44px -28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
+  position: relative; overflow: hidden;
+}
+[data-theme="light"] .glass{ box-shadow: 0 20px 44px -28px rgba(100,116,139,0.28), inset 0 1px 0 rgba(255,255,255,0.6); }
+/* a faint light reflection that drifts across the card, very slowly */
+.glass::before{
+  content:''; position:absolute; inset:-40%; pointer-events:none; z-index:0;
+  background: radial-gradient(closest-side, rgba(255,255,255,0.05), transparent 70%);
+  animation: reflectionDrift 16s ease-in-out infinite;
+}
+@keyframes reflectionDrift{
+  0%,100%{ transform: translate(-15%, -10%); }
+  50%{ transform: translate(15%, 12%); }
+}
+.glass > *{ position:relative; z-index:1; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding: 13px 26px; border-radius: var(--radius-btn); font-weight: 500; font-size: 14.5px;
+  letter-spacing: 0.01em; white-space: nowrap; flex-shrink:0; position:relative; overflow:hidden;
+  transition: transform .45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+  border: 1px solid transparent;
+}
+.btn-primary{
+  background: linear-gradient(120deg, var(--accent), var(--sky), var(--mint), var(--accent));
+  background-size: 280% 280%;
+  animation: gradientDrift 9s ease-in-out infinite;
+  color: #0A0612;
+  box-shadow: 0 14px 34px -14px rgba(167,139,250,0.55), 0 0 0 0 rgba(167,139,250,0);
+  transform: translate(var(--magnet-x, 0px), var(--magnet-y, 0px));
+}
+@keyframes gradientDrift{ 0%,100%{ background-position: 0% 50%; } 50%{ background-position: 100% 50%; } }
+.btn-primary::after{
+  content:''; position:absolute; inset:0; border-radius:inherit; opacity:0; pointer-events:none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 48%, transparent 62%);
+  background-size: 220% 100%; background-position: 140% 0;
+}
+.btn-primary:hover{ transform: translate(var(--magnet-x, 0px), calc(var(--magnet-y, 0px) - 3px)); box-shadow: 0 20px 44px -14px rgba(167,139,250,0.7); }
+.btn-primary:hover::after{ opacity:1; animation: shimmerSweep 1.1s var(--ease); }
+@keyframes shimmerSweep{ from{ background-position: 140% 0; } to{ background-position: -40% 0; } }
+.btn-primary:active{ transform: translate(var(--magnet-x, 0px), var(--magnet-y, 0px)) scale(.97); }
+.btn-ghost{
+  background: var(--surface); border:1px solid var(--border); color: var(--text);
+}
+.btn-ghost:hover{ background: var(--surface-strong); border-color: var(--border-strong); transform: translateY(-2px); }
+.btn-ghost:active{ transform: translateY(0) scale(.97); }
+.btn-accent{ background: var(--accent); color:#14101F; font-weight:700; }
+.btn-accent:hover{ background: var(--accent-soft); transform: translateY(-2px); }
+.btn-accent:active{ transform: translateY(0) scale(.97); }
+.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none !important; animation:none !important; }
+
+/* click ripple, added/removed by JS on pointerdown */
+.btn .ripple{
+  position:absolute; border-radius:50%; background: rgba(255,255,255,0.5);
+  transform: scale(0); animation: rippleOut .6s var(--ease) forwards; pointer-events:none;
+}
+@keyframes rippleOut{ to{ transform: scale(3); opacity:0; } }
+
+.eyebrow{
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-dim); display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{ content:''; width:5px; height:5px; background: var(--accent); }
+.eyebrow.accent{ color: var(--accent-soft); }
+
+
+.footer-nav{ position:relative; z-index:1; display:flex; justify-content:center; gap:18px; margin-top:56px; flex-wrap:wrap; }
+.footer-nav button, .footer-nav a{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
+.footer-nav button:hover, .footer-nav a:hover{ color: var(--text-muted); }
+.lp-footer .footer-nav{ margin-top:0; }
+
+.top-bar{
+  position: sticky; top: 18px; z-index: 40;
+  display:grid; grid-template-columns: 1fr auto 1fr; align-items:center;
+  padding: 13px 26px; margin: 10px 0 32px; /* ~64px total height */
+  background: linear-gradient(180deg, rgba(23,26,34,0.5), rgba(23,26,34,0.26));
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--border);
+  /* Rounded-square, not the stadium/pill this used to be (999px): at
+     this bar's ~64px height, --radius-lg (22px) is well under half that,
+     so the ends read as soft corners rather than full semicircles —
+     "grounded" per the design brief, not a long capsule. .nav-menu below
+     deliberately shares this same radius so the dropdown still reads as
+     the header continued downward. */
+  border-radius: var(--radius-lg);
+  box-shadow: 0 16px 36px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  animation: navFadeIn .6s var(--ease) both;
+}
+[data-theme="light"] .top-bar{ background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.34)); box-shadow: 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6); }
+@keyframes navFadeIn{ from{ opacity:0; transform: translateY(-8px); } to{ opacity:1; transform:none; } }
+.nav-zone{ display:flex; align-items:center; }
+.nav-left{ justify-self:start; }
+.nav-center{ justify-self:center; }
+.nav-right{ justify-self:end; gap:8px; position:relative; }
+.nav-logo{ height: 22px; width:auto; display:block; }
+.nav-logo-fallback{ font-family: var(--font-display); font-weight:500; letter-spacing:-0.01em; color: var(--text); display:flex; align-items:center; }
+.brand-dot{ color: var(--accent); }
+.icon-btn{
+  width:38px; height:38px; border-radius: var(--radius-btn); display:flex; align-items:center; justify-content:center;
+  background: var(--surface); border:1px solid var(--border); font-size:16px; flex-shrink:0;
+  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+}
+.icon-btn:hover{ border-color: var(--border-strong); transform: scale(1.06) rotate(2deg); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
+.icon-btn:active{ transform: scale(0.94); }
+.icon-btn svg{ width:17px; height:17px; }
+
+/* ---------- Nav pill (Home) + compact Sign Up + overflow menu --------- */
+.nav-pill{
+  display:flex; align-items:center; gap:7px; height:38px; padding: 0 16px 0 12px;
+  border-radius: var(--radius-btn); background: var(--surface); border:1px solid var(--border); color: var(--text);
+  font-size:13.5px; font-weight:500;
+  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+}
+.nav-pill:hover{ border-color: var(--border-strong); transform: translateY(-1px); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
+.nav-pill:active{ transform: translateY(0) scale(.97); }
+.nav-pill-icon{ display:flex; width:15px; height:15px; }
+.nav-pill-icon svg{ width:100%; height:100%; }
+.nav-pill-label{ white-space:nowrap; }
+@media (max-width: 560px){ .nav-pill-label{ display:none; } .nav-pill{ padding: 0 10px; gap:0; } }
+
+.btn-sm{ padding: 8px 16px; font-size:13px; }
+.nav-signup{ gap:6px; }
+.pill-arrow{ display:inline-block; transition: transform .25s var(--ease); }
+.nav-signup:hover .pill-arrow{ transform: translateX(3px); }
+@media (max-width: 560px){
+  /* Not enough room for Home + logo + Sign Up + menu at once on a phone
+     screen without the logo colliding with one of the side buttons, so
+     Sign Up moves into the overflow menu instead (it's still one tap
+     away) rather than crowding the bar. */
+  .nav-signup{ display:none; }
+}
+.nav-menu-item.nav-menu-signup{ display:none; }
+@media (max-width: 560px){ .nav-menu-item.nav-menu-signup{ display:flex; } }
+
+/* Dims whatever the menu overlaps instead of leaving it bare: at
+   shorter/narrower viewports this menu (theme+sound toggles, 4 links,
+   a code-lookup field, two buttons) is tall enough to reach down over
+   the hero's Discover/Compare cards, and without this, colourful card
+   edges peeking out from behind the menu's own edges read as broken
+   layout rather than an open dropdown. pointer-events:none so it never
+   blocks the existing outside-click-to-close handler (which listens on
+   document, not this element) or any other interaction underneath.
+   top:90px (not 0/inset:0) is deliberate, not a stray value: .top-bar
+   is a translucent glass bar sitting above this in z-index (40 vs
+   this layer's 400), so a full inset:0 rectangle painted straight over
+   it — sharp square corners showing through/around the bar's own
+   rounded corners as an unwanted dark box the instant the menu opened. .top-bar's own
+   render never needs touching (it's `position:sticky; top:18px` with
+   ~64px total height, so its bottom edge is at most 18+64=82px from the
+   viewport top); starting the backdrop a few px past that keeps it
+   clear of the header's row entirely, at any scroll position, so the
+   header's appearance genuinely never changes when the menu opens. */
+.nav-menu-backdrop{
+  position:fixed; top:90px; right:0; bottom:0; left:0; z-index:400; pointer-events:none;
+  background: rgba(6,7,11,0.45); opacity:0; transition: opacity .4s var(--ease);
+}
+[data-theme="light"] .nav-menu-backdrop{ background: rgba(100,116,139,0.35); }
+.nav-menu-backdrop.open{ opacity:1; }
+/* Built from the same materials as .top-bar itself (translucent
+   gradient + backdrop-filter blur/saturate, identical dark/light
+   overrides) at the same --radius-lg (22px) the bar now uses, so this
+   panel reads as "the header, continued downward" rather than an
+   unrelated box that happens to land underneath it.
+   display:grid + grid-template-rows is the height-animation vehicle:
+   height:auto can't be transitioned directly, but a 0fr -> 1fr row can,
+   giving a real growing-open motion (not just a fade) without having to
+   measure content height in JS. The rounded shape, blur and shadow live
+   on this outer element (so the shape itself never changes, per "keep
+   the same shape throughout the animation"); .nav-menu-inner below is
+   just the overflow:hidden clipping box + padding for the actual items. */
+.nav-menu{
+  position:absolute; top: calc(100% + 8px); right:0; z-index:500; min-width: 260px;
+  display:grid; grid-template-rows: 0fr; overflow:hidden;
+  background: linear-gradient(180deg, rgba(23,26,34,0.74), rgba(23,26,34,0.54));
+  border:1px solid var(--border); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(22px) saturate(150%);
+  transform-origin: top right;
+  opacity:0; filter: blur(10px); transform: scale(.92);
+  pointer-events:none;
+  transition: grid-template-rows .55s var(--ease), opacity .45s var(--ease), filter .45s var(--ease), transform .5s var(--ease);
+}
+[data-theme="light"] .nav-menu{
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.52));
+  box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.nav-menu.open{ grid-template-rows: 1fr; opacity:1; filter: blur(0); transform: scale(1); pointer-events:auto; }
+/* padding starts at 0 (not 8px) and animates in alongside the parent's
+   grid-template-rows: padding isn't subject to min-height:0, so a flat
+   8px here would leave a permanent 16px sliver of rounded glass visible
+   even at grid-template-rows:0fr, which is exactly what min-height:0
+   above is meant to prevent — confirmed via getComputedStyle showing
+   the row settle at 16px, not 0, before this fix. Animating together
+   means the box still reads as one continuous growing shape rather than
+   "padding pops in, then the box grows" as two separate steps. */
+.nav-menu-inner{
+  min-height:0; padding: 0 8px; display:flex; flex-direction:column; gap:2px;
+  transition: padding .55s var(--ease);
+}
+.nav-menu.open .nav-menu-inner{ padding: 8px; }
+.nav-menu-item{
+  display:flex; align-items:center; gap:10px; width:100%; padding: 10px 12px; border-radius: var(--radius-sm);
+  font-size: 13.5px; color: var(--text); text-decoration:none; text-align:left;
+  transition: background .15s var(--ease);
+}
+.nav-menu-item svg{ width:16px; height:16px; flex-shrink:0; color: var(--text-muted); }
+.nav-menu-item:hover{ background: var(--surface); }
+.nav-menu-sep{ height:1px; background: var(--border); margin: 6px 4px; }
+.nav-menu-code{ padding: 6px 12px 4px; display:flex; flex-direction:column; gap:8px; }
+.nav-menu-code label{ font-size:12px; color: var(--text-muted); }
+.nav-menu-code input{
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--radius-sm);
+  color: var(--text); padding: 9px 11px; font-family: var(--font-mono); font-size:12.5px; width:100%;
+}
+.nav-menu-code input:focus-visible{ outline: 2px solid var(--accent); outline-offset:1px; }
+.nav-menu-code-row{ display:flex; gap:8px; }
+.nav-menu-code-row .btn{ flex:1; }
+
+/* ---------- Toast (inert "coming soon" feedback) ---------- */
+.toast{
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(10px);
+  z-index: 3500; max-width: min(90vw, 420px); padding: 14px 20px; border-radius: var(--radius-lg);
+  background: #14161D;
+  border: 1px solid var(--border-strong); color: var(--text);
+  font-family: var(--font-body); font-size: 13.5px; line-height:1.45;
+  box-shadow: 0 20px 50px -14px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,0,0,0.3);
+  opacity:0; pointer-events:none;
+  transition: opacity .3s var(--ease), transform .3s var(--ease);
+}
+[data-theme="light"] .toast{ background: #1D2230; color:#F6F7FB; }
+.toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+/* ---------- Modal (Privacy, etc.) ---------- */
+.modal-overlay{
+  position:fixed; inset:0; z-index:4000; display:flex; align-items:center; justify-content:center;
+  padding: 24px; background: rgba(6,7,11,0.55); backdrop-filter: blur(6px);
+  opacity:0; transition: opacity .22s var(--ease);
+}
+[data-theme="light"] .modal-overlay{ background: rgba(100,116,139,0.35); }
+.modal-overlay.open{ opacity:1; }
+.modal-card{
+  max-width: 440px; width:100%; padding: 32px 28px 28px; text-align:left; position:relative;
+  transform: translateY(10px) scale(.97); transition: transform .22s var(--ease);
+}
+.modal-overlay.open .modal-card{ transform: translateY(0) scale(1); }
+.modal-card h3{ font-size: 22px; margin: 10px 0 12px; }
+.modal-card p{ color: var(--text-muted); font-size:14.5px; margin-bottom:12px; }
+.modal-card .btn{ margin-top:8px; }
+.modal-close{ position:absolute; top:16px; right:16px; }
+
+.hidden{ display:none !important; }
+/* Visually hidden but still reachable by screen readers — for text that
+   exists purely to announce something (e.g. "Step 2 of 3") that a
+   sighted person already gets from visual context. */
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.center-note{ text-align:center; color: var(--text-muted); font-size:13.5px; margin-top: 20px; }
+
+/* print / PDF export */
+@media print{
+  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget, .nav-menu, .toast, .modal-overlay{ display:none !important; }
+  body::before, body::after{ display:none !important; }
+  body{ background: #0F1117; color:#F8FAFC; }
+  .section{ opacity: 1 !important; transform: none !important; transition: none !important; }
+}
+
+/* card hover: gentle lift and glow, premium-depth without going neon */
+.card, .stat-tile, .career-row, .relationship-row, .option{
+  transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease), border-color .2s var(--ease);
+}
+.card:hover, .stat-tile:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px -18px rgba(167,139,250,0.3), 0 4px 14px -6px rgba(0,0,0,0.35);
+  border-color: var(--border-strong);
+}
+@media (prefers-reduced-motion: reduce){
+  .card:hover, .stat-tile:hover{ transform:none; }
+}
+
+/* progressive reveal: sections fade up into place as they enter view */
+.section{ opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+.section.revealed{ opacity: 1; transform: none; }
+
+.meta-line{ text-align:center; font-size:12.5px; color: var(--text-dim); font-family: var(--font-mono); margin-bottom:14px; }
+
+/* confetti */
+/* audio-enable prompt: subtle, dismissible, never blocks the page */
+.audio-prompt{
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+  z-index: 3500; padding: 11px 20px; border-radius: 999px;
+  background: rgba(23,26,34,0.85); backdrop-filter: blur(14px);
+  border: 1px solid var(--border-strong); color: var(--text);
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
+  box-shadow: 0 12px 30px -12px rgba(0,0,0,0.5);
+  animation: audioPromptIn .4s var(--ease) both;
+}
+[data-theme="light"] .audio-prompt{ background: rgba(255,255,255,0.9); }
+@keyframes audioPromptIn{ from{ opacity:0; transform: translateX(-50%) translateY(10px); } to{ opacity:1; transform: translateX(-50%) translateY(0); } }
+
+.confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:3000; overflow:hidden; }
+.confetti-piece{
+  position:absolute; top:20%; width:7px; height:12px; opacity:0;
+  animation: confettiFall ease-out forwards;
+}
+@keyframes confettiFall{
+  0%{ opacity:1; transform: translate(0,0) rotate(0); }
+  100%{ opacity:0; transform: translate(var(--dx), 70vh) rotate(var(--rot)); }
+}
+
+/* button micro depth */
+.btn{ will-change: transform; }
+.btn-primary:active, .btn-accent:active{ transform: translateY(1px) scale(.97); }
+
+/* =========================================================================
+   PHASE 2 ADDITIONS - primitives confirmed shared across 2+ pages
+   (result, compare, party) via direct usage grep before moving compare/
+   party/share out of index.html.
+   ========================================================================= */
+@keyframes revealIn{
+  0%{ filter: blur(10px); opacity:0; transform: translateY(10px); }
+  100%{ filter: blur(0); opacity:1; transform:none; }
+}
+.cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
+
+.calc-bars{ display:flex; gap:5px; }
+.calc-bars span{ width:3px; height:22px; background: var(--text); animation: bounce 0.9s ease-in-out infinite; }
+.calc-bars span:nth-child(2){ animation-delay: .12s; }
+.calc-bars span:nth-child(3){ animation-delay: .24s; }
+.calc-bars span:nth-child(4){ animation-delay: .36s; }
+@keyframes bounce{ 0%,100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
+
+.ingot-name{ font-size: clamp(34px,6.5vw,52px); margin-top:8px; letter-spacing: -0.01em; line-height:1.05; }
+.section{ margin-top: 46px; }
+.section-title{ font-size: 19px; margin-bottom: 16px; display:flex; flex-direction:column; gap:6px; font-weight:500; }
+.grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.grid-4{ display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+@media (max-width: 640px){ .grid-2, .grid-3, .grid-4{ grid-template-columns: 1fr 1fr; } }
+
+.card{ padding: 18px; border-radius: 24px; }
+.card h4{ font-size:13px; color: var(--text-muted); font-weight:600; margin-bottom:8px; text-transform: uppercase; letter-spacing:0.04em; }
+.card p{ font-size: 14.5px; }
+.tag-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+.tag{ font-size:12.5px; padding:5px 11px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.04); border:1px solid var(--border); }
+.stat-bar-track{ height:4px; background: rgba(255,255,255,.08); margin-top:9px; overflow:hidden; }
+.stat-bar-fill{ height:100%; background: linear-gradient(90deg, var(--accent), var(--sky)); width:0; transition: width 1s var(--ease); border-radius:999px; }
+.careers-toggle{ text-align:center; margin-top:8px; }
+.careers-toggle button{ font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); text-decoration: underline; text-underline-offset:3px; }
+.extras-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+.mini-bar-row{ display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border); }
+.mini-bar-row:last-child{ border-bottom:none; }
+.mini-bar-row span:last-child{ font-family:var(--font-mono); color:var(--text-muted); }
+
+/* =========================================================================
+   PHASE 3 ADDITION - the calc-overlay used by showCalcOverlay() (global.js),
+   shared by the main quiz and result.js's upgrade-quiz detour.
+   ========================================================================= */
+/* ---------- Calculating overlay ---------- */
+.calc-overlay{
+  position:fixed; inset:0; z-index:50; background: rgba(5,5,5,0.85); backdrop-filter: blur(4px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  animation: fadeIn .2s var(--ease) both;
+}
+@keyframes fadeIn{ from{ opacity:0;} to{ opacity:1; } }
+.calc-line{ font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; letter-spacing: 0.03em; }

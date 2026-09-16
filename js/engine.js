@@ -1,575 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#0F1117" />
-<title>PersonaForge, Discover. Compare. Evolve.</title>
-<meta name="description" content="PersonaForge: an adaptive, scenario-based personality read with a warm premium design. 100%% client-side, no accounts, works offline." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet">
-<style>
-
 /* =========================================================================
-   PERSONAFORGE, DESIGN SYSTEM
-   Rich dark neutrals, soft pastel accents, gradients used with intention.
-   Warm, curious, premium, never aggressive or hacker-themed. Each
-   archetype layers its own two-color identity on top of this base through
-   --user-accent-1 / --user-accent-2, set dynamically at render time.
+   FORGE - PERSONALITY ENGINE
+   Archetype/question/content data, scoring, QuizSession, compatibility,
+   code encode/decode, quiz-progress persistence, shared-link URL helpers.
+   No DOM access here - pure computation, shared by every page.
    ========================================================================= */
 
-:root{
-  --bg: #0F1117;
-  --bg-alt: #12141C;
-  --surface: #171A22;
-  --surface-strong: #1E2230;
-  --card: #1E2230;
-  --border: rgba(167,139,250,0.14);
-  --border-strong: rgba(167,139,250,0.28);
-  --text: #F8FAFC;
-  --text-muted: #A7B0C2;
-  --text-dim: #6B7385;
-  --accent: #A78BFA;
-  --accent-soft: #C4B5FD;
-  --sky: #7DD3FC;
-  --mint: #6EE7B7;
-  --peach: #FDBA74;
-  --gold: #FACC15;
-  --coral: #FB7185;
-  --success: #34D399;
-  --silver: #A7B0C2;
-  --good: #34D399;
-  /* the current person's own archetype colors, set as inline custom
-     properties on the result page so buttons/graphs/glows adapt; these
-     are the sensible defaults everywhere else (landing, quiz, compare) */
-  --user-accent-1: var(--accent);
-  --user-accent-2: var(--sky);
-  --hue-blue: #7DD3FC;
-  --hue-purple: #A78BFA;
-  --hue-teal: #6EE7B7;
-  --hue-gold: #FACC15;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
-  --radius-xl: 28px;
-  --shadow-soft: 0 24px 60px -20px rgba(8,9,14,0.6);
-  --ease: cubic-bezier(.22,1,.36,1);
-  --font-display: 'Cabinet Grotesk', 'Space Grotesk', sans-serif;
-  --font-body: 'Cabinet Grotesk', 'Manrope', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Geist Mono', 'Courier New', monospace;
-}
 
-/* ---------- Light theme ----------------------------------------------- 
-   White background, soft pastel gradients, frosted glass cards. Dark
-   stays the default (it's what's been built and refined so far), but
-   both are fully implemented and switching is instant and saved locally. */
-[data-theme="light"]{
-  --bg: #FFFFFF;
-  --bg-alt: #F8FAFC;
-  --surface: #F1F5F9;
-  --surface-strong: #E2E8F0;
-  --card: #FFFFFF;
-  --border: rgba(100,116,139,0.16);
-  --border-strong: rgba(100,116,139,0.32);
-  --text: #0F172A;
-  --text-muted: #475569;
-  --text-dim: #64748B;
-  --accent: #8B5CF6;
-  --accent-soft: #A78BFA;
-  --sky: #0EA5E9;
-  --mint: #10B981;
-  --peach: #F97316;
-  --gold: #CA8A04;
-  --coral: #E11D48;
-  --success: #059669;
-  --silver: #475569;
-  --good: #059669;
-  --shadow-soft: 0 24px 50px -22px rgba(100,116,139,0.35);
-}
-[data-theme="light"] body::before{
-  background:
-    radial-gradient(60% 50% at 15% 0%, rgba(139,92,246,0.08), transparent 60%),
-    radial-gradient(55% 45% at 100% 10%, rgba(14,165,233,0.07), transparent 60%),
-    radial-gradient(50% 40% at 50% 100%, rgba(16,185,129,0.06), transparent 60%);
-}
-[data-theme="light"] .glass{ box-shadow: 0 8px 24px -12px rgba(100,116,139,0.18); }
-
-body.theme-transitions, body.theme-transitions .glass, body.theme-transitions .card{ transition: background-color .35s var(--ease), border-color .35s var(--ease), color .35s var(--ease); }
-
-@media (prefers-reduced-motion: reduce){
-  *, *::before, *::after{ animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
-}
-
-*{ box-sizing: border-box; margin:0; padding:0; }
-html{ scroll-behavior: smooth; background: var(--bg); height:100%; }
-body{
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
-  min-height: 100vh;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* soft ambient background glow, replaces the old vignette */
-body::before{
-  content:''; position:fixed; inset:0; z-index: 0; pointer-events:none;
-  background:
-    radial-gradient(60% 50% at 15% 0%, rgba(167,139,250,0.10), transparent 60%),
-    radial-gradient(55% 45% at 100% 10%, rgba(125,211,252,0.08), transparent 60%),
-    radial-gradient(50% 40% at 50% 100%, rgba(110,231,183,0.06), transparent 60%);
-}
-
-::selection{ background: var(--accent); color:#14101F; }
-
-a{ color: inherit; }
-button{ font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:focus-visible{
-  outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px;
-}
-
-h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; }
-.brand-mini, .career-row h4, .card h4{ font-weight: 500; }
-
-.container{ max-width: 900px; margin: 0 auto; padding: 0 28px; position:relative; z-index:1; }
-.screen{ min-height: 100vh; display:flex; flex-direction:column; padding: 32px 0 64px; }
-
-/* ---------- Floating background gradient orbs (decorative, aria-hidden) - */
-#embers{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-.blind-bar{
-  position:absolute; width:38vmax; height:38vmax; border-radius:50%; filter: blur(70px);
-  opacity:0.22; animation: floaty ease-in-out infinite;
-}
-@keyframes floaty{
-  0%,100%{ transform: translate(0,0) scale(1); }
-  50%{ transform: translate(3%, -4%) scale(1.08); }
-}
-
-/* ---------- Surfaces ---------- */
-.glass{
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  backdrop-filter: blur(16px) saturate(130%);
-  -webkit-backdrop-filter: blur(16px) saturate(130%);
-  box-shadow: 0 20px 44px -28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.04);
-  position: relative; overflow: hidden;
-}
-[data-theme="light"] .glass{ box-shadow: 0 20px 44px -28px rgba(100,116,139,0.28), inset 0 1px 0 rgba(255,255,255,0.6); }
-/* a faint light reflection that drifts across the card, very slowly */
-.glass::before{
-  content:''; position:absolute; inset:-40%; pointer-events:none; z-index:0;
-  background: radial-gradient(closest-side, rgba(255,255,255,0.05), transparent 70%);
-  animation: reflectionDrift 16s ease-in-out infinite;
-}
-@keyframes reflectionDrift{
-  0%,100%{ transform: translate(-15%, -10%); }
-  50%{ transform: translate(15%, 12%); }
-}
-.glass > *{ position:relative; z-index:1; }
-
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding: 13px 26px; border-radius: var(--radius-md); font-weight: 500; font-size: 14.5px;
-  letter-spacing: 0.01em; white-space: nowrap; flex-shrink:0; position:relative; overflow:hidden;
-  transition: transform .45s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
-  border: 1px solid transparent;
-}
-.btn-primary{
-  background: linear-gradient(120deg, var(--accent), var(--sky), var(--mint), var(--accent));
-  background-size: 280% 280%;
-  animation: gradientDrift 9s ease-in-out infinite;
-  color: #14101F;
-  box-shadow: 0 14px 34px -14px rgba(167,139,250,0.55), 0 0 0 0 rgba(167,139,250,0);
-}
-@keyframes gradientDrift{ 0%,100%{ background-position: 0% 50%; } 50%{ background-position: 100% 50%; } }
-.btn-primary::after{
-  content:''; position:absolute; inset:0; border-radius:inherit; opacity:0; pointer-events:none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 48%, transparent 62%);
-  background-size: 220% 100%; background-position: 140% 0;
-}
-.btn-primary:hover{ transform: translateY(-3px); box-shadow: 0 20px 44px -14px rgba(167,139,250,0.7); }
-.btn-primary:hover::after{ opacity:1; animation: shimmerSweep 1.1s var(--ease); }
-@keyframes shimmerSweep{ from{ background-position: 140% 0; } to{ background-position: -40% 0; } }
-.btn-primary:active{ transform: translateY(0) scale(.97); }
-.btn-ghost{
-  background: var(--surface); border:1px solid var(--border); color: var(--text);
-}
-.btn-ghost:hover{ background: var(--surface-strong); border-color: var(--border-strong); transform: translateY(-2px); }
-.btn-ghost:active{ transform: translateY(0) scale(.97); }
-.btn-accent{ background: var(--accent); color:#14101F; font-weight:700; }
-.btn-accent:hover{ background: var(--accent-soft); transform: translateY(-2px); }
-.btn-accent:active{ transform: translateY(0) scale(.97); }
-.btn:disabled{ opacity:.35; cursor:not-allowed; transform:none !important; animation:none !important; }
-
-/* click ripple, added/removed by JS on pointerdown */
-.btn .ripple{
-  position:absolute; border-radius:50%; background: rgba(255,255,255,0.5);
-  transform: scale(0); animation: rippleOut .6s var(--ease) forwards; pointer-events:none;
-}
-@keyframes rippleOut{ to{ transform: scale(3); opacity:0; } }
-
-.eyebrow{
-  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.16em; text-transform: uppercase;
-  color: var(--text-dim); display:flex; align-items:center; gap:8px;
-}
-.eyebrow::before{ content:''; width:5px; height:5px; background: var(--accent); }
-.eyebrow.accent{ color: var(--accent-soft); }
-
-/* ---------- Landing ---------- */
-.landing{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; text-align:center; justify-content:center; flex:1; gap: 26px; padding-top: 6vh; }
-.logo-mark{ font-family: var(--font-mono); font-size: 13px; letter-spacing:0.3em; color: var(--text-dim); text-transform:uppercase; }
-.landing h1{
-  font-size: clamp(46px, 9vw, 94px); line-height: 0.95; letter-spacing: -0.02em;
-  color: var(--text);
-  animation: revealIn 1s var(--ease) both;
-}
-.landing h1 span{ color: var(--accent); }
-@keyframes revealIn{
-  0%{ filter: blur(10px); opacity:0; transform: translateY(10px); }
-  100%{ filter: blur(0); opacity:1; transform:none; }
-}
-.landing .tagline{ font-size: 17px; color: var(--text-muted); max-width: 460px; }
-.cta-row{ display:flex; gap:14px; flex-wrap:wrap; }
-.landing .cta-row{ display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top: 6px; }
-.landing .meta-row{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top: 30px; color: var(--text-dim); font-size:12.5px; font-family: var(--font-mono); }
-
-.quick-compare{ margin-top: 34px; width:100%; max-width: 480px; padding: 18px 20px; text-align:left; }
-.quick-compare label{ font-size:12.5px; color: var(--text-muted); display:block; margin-bottom:8px; }
-.quick-compare .row{ display:flex; gap:10px; flex-wrap:wrap; }
-.quick-compare input{
-  flex:1; min-width:180px; background: rgba(255,255,255,0.02); border:1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); padding: 11px 13px; font-family: var(--font-mono); font-size:13px;
-}
-
-/* ---------- Name capture ---------- */
-.name-screen{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:22px; text-align:center; padding-top:8vh; }
-.name-screen h2{ font-size: clamp(26px,4vw,36px); max-width:480px; }
-.name-screen p{ color: var(--text-muted); max-width: 420px; }
-.name-input{
-  width: 100%; max-width: 380px; background: transparent; border:none; border-bottom: 2px solid var(--border-strong);
-  color: var(--text); font-family: var(--font-display); font-size: 28px; text-align:center; padding: 10px 6px;
-  transition: border-color .2s;
-}
-.name-input:focus{ outline:none; border-color: var(--accent); }
-.name-input::placeholder{ color: var(--text-dim); }
-
-/* ---------- Quiz ---------- */
-.quiz-top{ position: sticky; top:0; z-index: 5; padding: 18px 0 10px; }
-.progress-track{ height:2px; background: rgba(255,255,255,0.08); overflow:visible; border-radius:999px; position:relative; }
-.progress-fill{
-  height:100%; background: linear-gradient(90deg, var(--accent), var(--sky));
-  transition: width .6s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius:999px; position:relative;
-  box-shadow: 0 0 12px 1px rgba(167,139,250,0.55);
-}
-.progress-fill::after{
-  content:''; position:absolute; top:50%; right:0; width:6px; height:6px; border-radius:50%;
-  background: var(--sky); transform: translate(50%,-50%); box-shadow: 0 0 8px 2px rgba(125,211,252,0.8);
-}
-.progress-pct{ font-family: var(--font-mono); color: var(--text-dim); font-size:11.5px; margin-left:6px; }
-.progress-meta{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; font-size:12.5px; color: var(--text-muted); font-family: var(--font-mono); }
-.encourage{ color: var(--accent-soft); font-family: var(--font-mono); font-size: 12px; min-height: 16px; }
-
-.question-card{ margin-top: 26px; padding: 38px clamp(20px,4vw,44px); animation: cardIn .45s var(--ease) both; }
-@keyframes cardIn{ from{ opacity:0; transform: translateY(14px); } to{ opacity:1; transform:none; } }
-.question-card.leaving{ animation: cardOut .28s var(--ease) forwards; }
-@keyframes cardOut{ to{ opacity:0; transform: translateY(-10px); } }
-.quiz-nav-row{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
-.nav-btn{ font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); display:flex; align-items:center; gap:6px; }
-.nav-btn:hover:not(:disabled){ color: var(--text); }
-.nav-btn:disabled{ opacity:.3; cursor:default; }
-.q-num{ font-family: var(--font-mono); color: var(--text-dim); font-size:12.5px; margin-bottom: 14px; }
-.q-text{ font-size: clamp(21px, 3.4vw, 27px); font-family: var(--font-display); line-height:1.3; margin-bottom: 30px; font-weight:500; }
-.options{ display:flex; flex-direction:column; gap: 10px; }
-.option{
-  text-align:left; padding: 17px 19px; border-radius: 16px; position:relative; overflow:hidden;
-  border:1px solid var(--border); background: rgba(255,255,255,0.015);
-  font-size: 15px; transition: border-color .25s var(--ease), background .25s var(--ease), transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease);
-  display:flex; align-items:center; gap:14px;
-}
-.option:hover{ border-color: var(--border-strong); background: rgba(255,255,255,0.04); transform: translateX(3px); }
-.option .opt-key{ font-family: var(--font-mono); color: var(--text-dim); font-size:12px; width:18px; flex-shrink:0; }
-.option.selected{
-  border-color: var(--accent);
-  background: linear-gradient(120deg, rgba(167,139,250,0.16), rgba(125,211,252,0.10));
-  box-shadow: 0 0 0 1px rgba(167,139,250,0.3), 0 10px 26px -14px rgba(167,139,250,0.55);
-  animation: optionSelect .4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-@keyframes optionSelect{ 0%{ transform: scale(0.98); } 60%{ transform: scale(1.015); } 100%{ transform: scale(1); } }
-.option.selected .opt-key{ color: var(--accent-soft); }
-.continue-row{ margin-top:18px; display:flex; justify-content:flex-end; }
-
-/* ---------- Calculating overlay ---------- */
-.calc-overlay{
-  position:fixed; inset:0; z-index:50; background: rgba(5,5,5,0.85); backdrop-filter: blur(4px);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
-  animation: fadeIn .2s var(--ease) both;
-}
-@keyframes fadeIn{ from{ opacity:0;} to{ opacity:1; } }
-.calc-bars{ display:flex; gap:5px; }
-.calc-bars span{ width:3px; height:22px; background: var(--text); animation: bounce 0.9s ease-in-out infinite; }
-.calc-bars span:nth-child(2){ animation-delay: .12s; }
-.calc-bars span:nth-child(3){ animation-delay: .24s; }
-.calc-bars span:nth-child(4){ animation-delay: .36s; }
-@keyframes bounce{ 0%,100%{ transform: scaleY(0.4); } 50%{ transform: scaleY(1); } }
-.calc-line{ font-family: var(--font-mono); color: var(--text-muted); font-size: 13px; letter-spacing: 0.03em; }
-
-/* ---------- Loading / forging transition ---------- */
-.forging{ display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap: 20px; text-align:center; }
-.forging .calc-bars span{ background: var(--accent); }
-.forging h2{ font-size:20px; font-weight: 500; }
-.forging p{ font-family: var(--font-mono); color: var(--text-muted); font-size:13px; }
-
-/* ---------- Result page ---------- */
-.result-hero{ position:relative; z-index:1; padding-top: 20px; }
-.name-tag{ text-align:center; font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
-
-.ingot{
-  position: relative; margin: 26px auto 10px; max-width: 520px; padding: 46px 34px 38px;
-  border: 1px solid var(--border-strong);
-  background: linear-gradient(160deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01));
-  box-shadow: var(--shadow-soft);
-  text-align:center; overflow:hidden;
-  animation: ingotReveal .8s var(--ease) both;
-}
-@keyframes ingotReveal{ from{ opacity:0; transform: translateY(14px);} to{ opacity:1; transform:none; } }
-.ingot::before{ content:''; position:absolute; top:0; left:0; right:0; height:3px; background: linear-gradient(90deg, var(--user-accent-1), var(--user-accent-2)); }
-.ingot-icon{ font-size: 46px; filter: grayscale(1) contrast(1.3); opacity: 0.92; }
-.archetype-eyebrow{ font-family: var(--font-mono); font-size:11px; letter-spacing:0.2em; color: var(--text-dim); text-transform:uppercase; margin-top:16px; }
-.ingot-name{ font-size: clamp(34px,6.5vw,52px); margin-top:8px; letter-spacing: -0.01em; line-height:1.05; }
-.ingot-title{ color: var(--text-muted); font-size:15px; margin-top:8px; font-style: italic; }
-.ingot-desc{ margin-top:20px; font-size:15px; color:var(--text); line-height:1.65; }
-.ingot-sub{ margin-top:16px; font-size:13.5px; color: var(--text-muted); line-height:1.6; border-top:1px solid var(--border); padding-top:16px; }
-.ingot-code{
-  margin-top: 24px; font-family: var(--font-mono); font-size:13px;
-  color: var(--silver); background: rgba(0,0,0,0.35); border:1px dashed var(--border-strong);
-  padding: 11px 14px; word-break: break-all; letter-spacing: 0.03em;
-}
-
-.section{ margin-top: 46px; }
-.section-title{ font-size: 19px; margin-bottom: 16px; display:flex; flex-direction:column; gap:6px; font-weight:500; }
-
-.grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
-.grid-4{ display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
-@media (max-width: 640px){ .grid-2, .grid-3, .grid-4{ grid-template-columns: 1fr 1fr; } }
-
-.card{ padding: 18px; border-radius: 24px; }
-.card h4{ font-size:13px; color: var(--text-muted); font-weight:600; margin-bottom:8px; text-transform: uppercase; letter-spacing:0.04em; }
-.card p{ font-size: 14.5px; }
-.tag-list{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
-.tag{ font-size:12.5px; padding:5px 11px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.04); border:1px solid var(--border); }
-
-.stat-tile{ padding: 15px; border-radius: var(--radius-md); text-align:center; }
-.stat-tile .stat-val{ font-family: var(--font-display); font-size: 24px; color: var(--text); }
-.stat-tile .stat-label{ font-size: 10.5px; color: var(--text-muted); margin-top:3px; text-transform:uppercase; letter-spacing:.05em; }
-.stat-bar-track{ height:4px; background: rgba(255,255,255,.08); margin-top:9px; overflow:hidden; }
-.stat-bar-fill{ height:100%; background: linear-gradient(90deg, var(--accent), var(--sky)); width:0; transition: width 1s var(--ease); border-radius:999px; }
-
-.career-row{ display:flex; align-items:center; justify-content:space-between; padding:13px 15px; border-radius: var(--radius-md); margin-bottom:8px; }
-.career-row .fit-badge{ font-size:11px; font-family: var(--font-mono); padding:4px 9px; border-radius: var(--radius-sm); white-space:nowrap; }
-.fit-excellent{ background: rgba(52,211,153,0.15); color:#6EE7B7; }
-.fit-good{ background: rgba(125,211,252,0.14); color: var(--sky); }
-.fit-avoid{ background: rgba(251,113,133,0.14); color:#FDA4AF; }
-.fit-possible{ background: rgba(255,255,255,0.06); color: var(--text-muted); }
-.careers-toggle{ text-align:center; margin-top:8px; }
-.careers-toggle button{ font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); text-decoration: underline; text-underline-offset:3px; }
-
-/* v2 additions */
-.extras-row{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
-.mix-row{ display:flex; justify-content:center; gap:18px; margin-top:18px; border-top:1px solid var(--border); padding-top:16px; }
-.mix-item{ display:flex; flex-direction:column; align-items:center; gap:2px; }
-.mix-pct{ font-family:var(--font-display); font-size:18px; color:var(--user-accent-1); }
-.mix-name{ font-size:11px; color:var(--text-dim); }
-.upgrade-note{ margin-top:14px; font-size:12px; color:var(--text-dim); font-family:var(--font-mono); }
-
-.spectrum-track{ position:relative; height:4px; background: rgba(255,255,255,0.08); margin-top:14px; }
-.spectrum-fill{ height:100%; background: var(--accent); opacity:0.3; }
-.spectrum-dot{ position:absolute; top:-4px; width:12px; height:12px; border-radius:50%; background: var(--text); transform: translateX(-50%); }
-.spectrum-labels{ display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--text-dim); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.04em; }
-
-.mini-bar-row{ display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border); }
-.mini-bar-row:last-child{ border-bottom:none; }
-.mini-bar-row span:last-child{ font-family:var(--font-mono); color:var(--text-muted); }
-
-.achievement-card{ display:flex; gap:14px; align-items:flex-start; }
-.achievement-icon{ font-size:26px; flex-shrink:0; }
-
-#qrCanvas{ max-width:220px; width:100%; height:auto; image-rendering:pixelated; border:1px solid var(--border); }
-
-.relationship-row{ display:flex; align-items:center; gap:14px; padding: 11px 0; }
-.relationship-row .r-label{ width: 130px; font-size:13.5px; flex-shrink:0; }
-.relationship-row .stat-bar-track{ flex:1; margin-top:0; }
-.relationship-row .r-score{ width:34px; text-align:right; font-family: var(--font-mono); font-size:12.5px; color: var(--text-muted); }
-
-canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
-.radar-legend{ text-align:center; font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); margin-top:10px; }
-
-.export-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 18px; justify-content:center; }
-
-/* full ranking (bottom of results) */
-.rank-row{ display:flex; align-items:center; gap:12px; padding: 9px 0; border-bottom: 1px solid var(--border); }
-.rank-row:last-child{ border-bottom:none; }
-.rank-row .rank-num{ font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); width:22px; }
-.rank-row .rank-icon{ width:22px; text-align:center; filter: grayscale(1); opacity:.85; }
-.rank-row .rank-name{ flex:1; font-size:13.5px; }
-.rank-row.primary .rank-name{ color: var(--text); font-weight:700; }
-.rank-row.primary{ background: rgba(167,139,250,0.08); margin: 0 -14px; padding: 9px 14px; border-bottom-color: transparent; }
-.rank-row .rank-bar-track{ width:90px; height:3px; background: rgba(255,255,255,.08); }
-.rank-row .rank-bar-fill{ height:100%; background: var(--silver); }
-.rank-row.primary .rank-bar-fill{ background: var(--user-accent-1); }
-
-/* ---------- Inline compare widget (on result page, near top) ---------- */
-.compare-widget{ margin-top: 30px; padding: 20px; }
-.compare-widget h4{ font-size:14px; margin-bottom:4px; }
-.compare-widget p.hint{ font-size:13px; color: var(--text-muted); margin-bottom:14px; }
-.compare-widget .row{ display:flex; gap:10px; flex-wrap:wrap; }
-.compare-widget input{
-  flex:1; min-width:220px; background: rgba(255,255,255,0.02); border:1px solid var(--border); border-radius: var(--radius-sm);
-  color: var(--text); padding: 12px 13px; font-family: var(--font-mono); font-size:13px;
-}
-
-/* ---------- Compare page ---------- */
-.compare-inputs{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 640px){ .compare-inputs{ grid-template-columns: 1fr; } }
-.compare-inputs textarea{
-  width:100%; min-height:90px; background: rgba(255,255,255,0.02); border:1px solid var(--border);
-  border-radius: var(--radius-md); color: var(--text); padding: 14px; font-family: var(--font-mono); font-size:13px; resize:vertical;
-}
-.compare-inputs label{ font-size:13px; color: var(--text-muted); display:block; margin-bottom:8px; }
-
-.footer-nav{ position:relative; z-index:1; display:flex; justify-content:center; gap:18px; margin-top:56px; flex-wrap:wrap; }
-.footer-nav button{ font-size:13px; color: var(--text-dim); text-decoration: underline; text-underline-offset:3px; }
-.footer-nav button:hover{ color: var(--text-muted); }
-
-.top-bar{
-  position: sticky; top: 14px; z-index: 40;
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 12px 18px; margin: 6px 0 26px;
-  background: linear-gradient(180deg, rgba(23,26,34,0.55), rgba(23,26,34,0.32));
-  backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  box-shadow: 0 12px 30px -18px rgba(0,0,0,0.5);
-  animation: navFadeIn .6s var(--ease) both;
-}
-[data-theme="light"] .top-bar{ background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.4)); }
-@keyframes navFadeIn{ from{ opacity:0; transform: translateY(-8px); } to{ opacity:1; transform:none; } }
-.brand-mini{ display:flex; align-items:center; gap:8px; font-family:var(--font-display); font-weight:500; letter-spacing:-0.01em; }
-.brand-mini .dot{ width:6px; height:6px; background: var(--accent); border-radius:50%; }
-.icon-btn{
-  width:38px; height:38px; border-radius: 12px; display:flex; align-items:center; justify-content:center;
-  background: var(--surface); border:1px solid var(--border); font-size:16px;
-  transition: transform .35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .25s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
-}
-.icon-btn:hover{ border-color: var(--border-strong); transform: scale(1.06) rotate(2deg); box-shadow: 0 6px 18px -8px rgba(167,139,250,0.4); }
-.icon-btn:active{ transform: scale(0.94); }
-.icon-btn svg{ width:17px; height:17px; }
-
-.hidden{ display:none !important; }
-.center-note{ text-align:center; color: var(--text-muted); font-size:13.5px; margin-top: 20px; }
-
-/* print / PDF export */
-@media print{
-  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget{ display:none !important; }
-  body::before, body::after{ display:none !important; }
-  body{ background: #0F1117; color:#F8FAFC; }
-  .section{ opacity: 1 !important; transform: none !important; transition: none !important; }
-}
-
-/* =========================================================================
-   V4 ADDITIONS
-   Micro-interactions, onboarding extras, framework badges, duo crest,
-   confetti, progressive reveal. Nothing above this line changes.
-   ========================================================================= */
-
-/* card hover: gentle lift and glow, premium-depth without going neon */
-.card, .stat-tile, .career-row, .relationship-row, .option{
-  transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s var(--ease), border-color .2s var(--ease);
-}
-.card:hover, .stat-tile:hover{
-  transform: translateY(-3px);
-  box-shadow: 0 18px 42px -18px rgba(167,139,250,0.3), 0 4px 14px -6px rgba(0,0,0,0.35);
-  border-color: var(--border-strong);
-}
-@media (prefers-reduced-motion: reduce){
-  .card:hover, .stat-tile:hover{ transform:none; }
-}
-
-/* progressive reveal: sections fade up into place as they enter view */
-.section{ opacity: 0; transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
-.section.revealed{ opacity: 1; transform: none; }
-
-/* onboarding extra details */
-.extra-details{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:380px; margin-top:10px; }
-.extra-details.hidden{ display:none; }
-.name-input.small{ font-size:16px; padding:8px 4px; }
-.extra-note{ font-size:11.5px; color: var(--text-dim); text-align:center; margin-top:4px; }
-.meta-line{ text-align:center; font-size:12.5px; color: var(--text-dim); font-family: var(--font-mono); margin-bottom:14px; }
-
-/* PF1 upgrade banner */
-.upgrade-banner{ margin-top:18px; padding-top:16px; border-top:1px solid var(--border); text-align:center; }
-.upgrade-banner p{ font-size:13px; color: var(--text-muted); margin-top:4px; }
-.upgrade-banner p:first-child{ margin-top:0; color: var(--text); font-weight:600; }
-
-/* framework badges: the one place accent hues from the update spec show up */
-.framework-card h4{ margin-bottom:10px; }
-.framework-mbti{ border-left: 2px solid var(--hue-blue); }
-.framework-enneagram{ border-left: 2px solid var(--hue-purple); }
-.framework-disc{ border-left: 2px solid var(--hue-teal); }
-.framework-bigfive{ border-left: 2px solid var(--hue-gold); }
-
-/* duo crest for the compare page */
-.duo-crest{
-  border-radius: var(--radius-lg); padding: 28px 20px; text-align:center; margin-bottom:14px;
-  position:relative; overflow:hidden;
-}
-.duo-crest::after{ content:''; position:absolute; inset:0; background: rgba(5,5,5,0.55); }
-.duo-icons{ position:relative; z-index:1; font-size:32px; display:flex; align-items:center; justify-content:center; gap:14px; }
-.duo-x{ font-size:18px; opacity:0.7; }
-.duo-title{ position:relative; z-index:1; font-family: var(--font-display); font-size:22px; margin-top:10px; color:#fff; letter-spacing:-0.01em; }
-
-/* compatibility band tag, color reflects the band */
-.band-tag{ font-family: var(--font-mono); font-weight:600; }
-
-/* confetti */
-.confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:3000; overflow:hidden; }
-.confetti-piece{
-  position:absolute; top:20%; width:7px; height:12px; opacity:0;
-  animation: confettiFall ease-out forwards;
-}
-@keyframes confettiFall{
-  0%{ opacity:1; transform: translate(0,0) rotate(0); }
-  100%{ opacity:0; transform: translate(var(--dx), 70vh) rotate(var(--rot)); }
-}
-
-/* button micro depth */
-.btn{ will-change: transform; }
-.btn-primary:active, .btn-accent:active{ transform: translateY(1px) scale(.97); }
-
-/* compatibility-check loading card */
-.compat-loading{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:40px 20px; text-align:center; }
-.compat-loading .calc-bars span{ background: var(--accent); }
-.compat-loading p{ font-family: var(--font-mono); color: var(--text-muted); font-size:13px; }
-
-/* party compare */
-.party-inputs{ grid-template-columns: 1fr 1fr 1fr; }
-@media (max-width: 640px){ .party-inputs{ grid-template-columns: 1fr; } }
-
-
-</style>
-</head>
-<body>
-<div id="embers" aria-hidden="true"></div>
-<div id="app"></div>
-<audio id="bgMusic" src="BG.mp3" loop preload="auto"></audio>
-
-<script>
 
 /* =========================================================================
    PERSONAFORGE, DATA MODULE
@@ -609,14 +45,14 @@ function emptyDims(){
 }
 
 /* ---- Question bank -----------------------------------------------------
-   10 clusters x 6 questions = 60 authored scenarios. Every question has
+   10 clusters x 20 questions = 200 authored scenarios. Every question has
    exactly 3 answers, each nudging 3-5 dimensions by -2..+2.
-   The adaptive engine (see engine.js) guarantees the first 4 of every
-   cluster (40 baseline questions), then fills the remaining 10 slots from
-   the 2-3 clusters the person is trending strongest in, for 50 total.
-   This structure is built to scale: add more objects to any cluster array
-   and raise BASELINE_PER_CLUSTER / TOTAL_QUESTIONS in engine.js to reach
-   the full 150/50 spec without changing any other code.
+   The adaptive engine (see engine.js) asks a fixed 15-question core set
+   first (CORE_QUESTION_IDS), then two batches of 10 chosen by
+   information value against the accumulated answers (26-35), then
+   continues one question at a time only if confidence isn't there yet,
+   up to 50 total. Adding more questions to any cluster array just grows
+   the pool the adaptive stages pick from; no other code needs to change.
 ------------------------------------------------------------------------- */
 
 const QUESTION_BANK = {
@@ -1484,6 +920,7 @@ const QUESTIONS = Object.entries(QUESTION_BANK).flatMap(([cluster, qs]) =>
 const ARCHETYPES = [
   { id:"ember-strategist", name:"The Ember Strategist", title:"Calculated Fire", icon:"🔥",
     colors:["#FB7185","#FACC15"],
+    image:"assets/archetypes/webp/01-ember-strategist.webp",
     signature:[{dim:"logic",w:2},{dim:"drive",w:2},{dim:"planning",w:1}],
     description:"You burn slow and deliberate, turning ambition into a plan before you turn it into action. People underestimate how much fire is underneath the calm.",
     strengths:["Strategic thinking","Focused ambition","Composure under pressure"],
@@ -1505,6 +942,7 @@ const ARCHETYPES = [
 
   { id:"quiet-architect", name:"The Quiet Architect", title:"Builder of Systems", icon:"🏛️",
     colors:["#34D399","#CBD5E1"],
+    image:"assets/archetypes/webp/02-quiet-architect.webp",
     signature:[{dim:"planning",w:2},{dim:"discipline",w:2},{dim:"independence",w:1}],
     description:"You think in structures, the invisible frameworks that hold everything else up. You'd rather build the system than be the center of attention within it.",
     strengths:["Long-term planning","Reliability","Clear-headed problem solving"],
@@ -1526,6 +964,7 @@ const ARCHETYPES = [
 
   { id:"wildfire", name:"The Wildfire", title:"Unstoppable Momentum", icon:"⚡",
     colors:["#FB923C","#FACC15"],
+    image:"assets/archetypes/webp/03-wildfire.webp",
     signature:[{dim:"risk",w:2},{dim:"confidence",w:2},{dim:"socialEnergy",w:1}],
     description:"You move first and figure out the rest while already in motion. Rooms get louder and faster when you walk in, that's not an accident.",
     strengths:["Bold initiative","Magnetic energy","Fast adaptation"],
@@ -1547,6 +986,7 @@ const ARCHETYPES = [
 
   { id:"anchor", name:"The Anchor", title:"Unshaken Ground", icon:"⚓",
     colors:["#60A5FA","#2DD4BF"],
+    image:"assets/archetypes/webp/04-anchor.webp",
     signature:[{dim:"patience",w:2},{dim:"resilience",w:2},{dim:"trust",w:1}],
     description:"When everything around you is moving too fast, you're the fixed point people orient themselves by. Calm isn't your mood, it's your default state.",
     strengths:["Steadiness under pressure","Dependability","Emotional regulation"],
@@ -1568,6 +1008,7 @@ const ARCHETYPES = [
 
   { id:"cartographer", name:"The Cartographer", title:"Mapper of Ideas", icon:"🧭",
     colors:["#7DD3FC","#CBD5E1"],
+    image:"assets/archetypes/webp/05-cartographer.webp",
     signature:[{dim:"curiosity",w:2},{dim:"independence",w:1},{dim:"adaptability",w:1}],
     description:"You collect ideas, places, and people the way others collect souvenirs. What matters most to you is having seen it, understood it, mapped it for yourself.",
     strengths:["Insatiable curiosity","Broad knowledge","Comfortable with the unknown"],
@@ -1589,6 +1030,7 @@ const ARCHETYPES = [
 
   { id:"alchemist", name:"The Alchemist", title:"Turns Ideas Into Gold", icon:"⚗️",
     colors:["#FDBA74","#C084FC"],
+    image:"assets/archetypes/webp/06-alchemist.webp",
     signature:[{dim:"creativity",w:2},{dim:"risk",w:1},{dim:"curiosity",w:1}],
     description:"You take things nobody else would combine and make something that works. Half experiment, half instinct, your process looks like chaos until it isn't.",
     strengths:["Original thinking","Comfort with ambiguity","Fast iteration"],
@@ -1610,6 +1052,7 @@ const ARCHETYPES = [
 
   { id:"sentinel", name:"The Sentinel", title:"Quiet Protector", icon:"🛡️",
     colors:["#34D399","#60A5FA"],
+    image:"assets/archetypes/webp/07-sentinel.webp",
     signature:[{dim:"trust",w:2},{dim:"kindness",w:2},{dim:"discipline",w:1}],
     description:"You notice who's missing from the group photo. Protecting the people around you isn't a role you were assigned, it's just what you do.",
     strengths:["Fierce loyalty","Reliability","Notices what others miss"],
@@ -1631,6 +1074,7 @@ const ARCHETYPES = [
 
   { id:"comet", name:"The Comet", title:"Bright and Fast", icon:"☄️",
     colors:["#FB923C","#F472B6"],
+    image:"assets/archetypes/webp/08-comet.webp",
     signature:[{dim:"drive",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
     description:"You appear, you're spectacular, and you move on before anyone quite catches up. Ambition isn't a phase for you, it's your natural orbit.",
     strengths:["Relentless drive","Fast execution","Inspires urgency in others"],
@@ -1652,6 +1096,7 @@ const ARCHETYPES = [
 
   { id:"hearth-keeper", name:"The Hearth Keeper", title:"Warmth in Human Form", icon:"🕯️",
     colors:["#FDBA74","#FACC15"],
+    image:"assets/archetypes/webp/09-hearth-keeper.webp",
     signature:[{dim:"kindness",w:2},{dim:"empathy",w:2},{dim:"patience",w:1}],
     description:"Wherever you are becomes the place people gather. You make warmth without trying, a steady, generous presence that people build memories around.",
     strengths:["Deep empathy","Natural nurturing instinct","Makes others feel safe"],
@@ -1673,6 +1118,7 @@ const ARCHETYPES = [
 
   { id:"puzzle-box", name:"The Puzzle Box", title:"Layers Within Layers", icon:"🧩",
     colors:["#C084FC","#818CF8"],
+    image:"assets/archetypes/webp/10-puzzle-box.webp",
     signature:[{dim:"logic",w:2},{dim:"selfAwareness",w:1},{dim:"independence",w:1}],
     description:"There's more going on beneath the surface than you show, and that's exactly how you like it. People take longer to fully understand you, and you find that fair.",
     strengths:["Deep, private intelligence","Hard to rattle","Sees what others overlook"],
@@ -1694,6 +1140,7 @@ const ARCHETYPES = [
 
   { id:"storm-caller", name:"The Storm Caller", title:"Commands the Room", icon:"🌩️",
     colors:["#818CF8","#7DD3FC"],
+    image:"assets/archetypes/webp/11-storm-caller.webp",
     signature:[{dim:"leadership",w:2},{dim:"confidence",w:2},{dim:"drive",w:1}],
     description:"When decisions need making and no one else will make them, you do. Not out of ego, because someone has to, and you've never been afraid of that weight.",
     strengths:["Decisive leadership","Commands attention naturally","Thrives under pressure"],
@@ -1715,6 +1162,7 @@ const ARCHETYPES = [
 
   { id:"lantern", name:"The Lantern", title:"Guiding Light", icon:"🏮",
     colors:["#FACC15","#FDBA74"],
+    image:"assets/archetypes/webp/12-lantern.webp",
     signature:[{dim:"optimism",w:2},{dim:"empathy",w:1},{dim:"leadership",w:1}],
     description:"You have a rare gift for making dark moments feel survivable. Not through denial, through steady, genuine hope that things can still work out.",
     strengths:["Contagious optimism","Emotionally steadying presence","Encourages others naturally"],
@@ -1736,6 +1184,7 @@ const ARCHETYPES = [
 
   { id:"undercurrent", name:"The Undercurrent", title:"Quiet Influence", icon:"🌊",
     colors:["#2DD4BF","#60A5FA"],
+    image:"assets/archetypes/webp/13-undercurrent.webp",
     signature:[{dim:"selfAwareness",w:2},{dim:"patience",w:1},{dim:"independence",w:1}],
     description:"You rarely lead from the front, but somehow the direction of the group often traces back to something you said quietly, once, and meant completely.",
     strengths:["Subtle influence","Emotional intelligence","Thoughtful timing"],
@@ -1757,6 +1206,7 @@ const ARCHETYPES = [
 
   { id:"tinkerer", name:"The Tinkerer", title:"Hands-On Problem Solver", icon:"🔧",
     colors:["#CBD5E1","#FB923C"],
+    image:"assets/archetypes/webp/14-tinkerer.webp",
     signature:[{dim:"curiosity",w:1},{dim:"logic",w:1},{dim:"adaptability",w:2}],
     description:"You understand things by taking them apart. Theory only gets you so far, you trust what you've built, broken, and fixed with your own hands.",
     strengths:["Practical problem-solving","Resourcefulness","Learns fast by doing"],
@@ -1778,6 +1228,7 @@ const ARCHETYPES = [
 
   { id:"mirror", name:"The Mirror", title:"Self-Aware Observer", icon:"🪞",
     colors:["#7DD3FC","#A78BFA"],
+    image:"assets/archetypes/webp/15-mirror.webp",
     signature:[{dim:"selfAwareness",w:2},{dim:"empathy",w:1},{dim:"curiosity",w:1}],
     description:"You've done more self-reflection than most people do in a decade, and it shows in how calmly you handle other people's chaos. You know exactly who you are.",
     strengths:["Deep self-knowledge","Emotional regulation","Honest with themselves"],
@@ -1799,6 +1250,7 @@ const ARCHETYPES = [
 
   { id:"ronin", name:"The Ronin", title:"Independent Wanderer", icon:"🗡️",
     colors:["#CBD5E1","#FB7185"],
+    image:"assets/archetypes/webp/16-ronin.webp",
     signature:[{dim:"independence",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
     description:"You answer to your own code, not the crowd's. Groups are fine in small doses, but your center of gravity has always been your own judgment.",
     strengths:["Self-reliant","Principled","Comfortable being alone"],
@@ -1820,6 +1272,7 @@ const ARCHETYPES = [
 
   { id:"beacon", name:"The Beacon", title:"Inspiring Communicator", icon:"🗼",
     colors:["#FACC15","#F472B6"],
+    image:"assets/archetypes/webp/17-beacon.webp",
     signature:[{dim:"leadership",w:1},{dim:"humor",w:1},{dim:"socialEnergy",w:2}],
     description:"You have a way of putting words to things other people were only feeling. Rooms brighten and conversations pick up energy when you're in them.",
     strengths:["Natural communicator","Inspires others easily","High social energy"],
@@ -1841,6 +1294,7 @@ const ARCHETYPES = [
 
   { id:"glacier", name:"The Glacier", title:"Patient Force", icon:"🧊",
     colors:["#7DD3FC","#CBD5E1"],
+    image:"assets/archetypes/webp/18-glacier.webp",
     signature:[{dim:"patience",w:2},{dim:"discipline",w:2},{dim:"resilience",w:1}],
     description:"You move slowly, deliberately, and completely reshape the landscape without anyone noticing until it's done. Rushing has never been your language.",
     strengths:["Unmatched patience","Consistency over time","Rarely reactive"],
@@ -1862,6 +1316,7 @@ const ARCHETYPES = [
 
   { id:"spark", name:"The Spark", title:"Instant Connector", icon:"✨",
     colors:["#FACC15","#FB923C"],
+    image:"assets/archetypes/webp/19-spark.webp",
     signature:[{dim:"humor",w:2},{dim:"socialEnergy",w:1},{dim:"adaptability",w:1}],
     description:"You lower the temperature of any tense room just by being in it. Humor isn't a deflection for you, it's how you show people you actually see them.",
     strengths:["Quick wit","Puts people at ease","Naturally likeable"],
@@ -1883,6 +1338,7 @@ const ARCHETYPES = [
 
   { id:"vault", name:"The Vault", title:"Private and Trustworthy", icon:"🔒",
     colors:["#818CF8","#CBD5E1"],
+    image:"assets/archetypes/webp/20-vault.webp",
     signature:[{dim:"trust",w:2},{dim:"discipline",w:1},{dim:"independence",w:1}],
     description:"People tell you things they haven't told anyone else, and it never once occurs to them to worry about it. Discretion, for you, isn't effort, it's identity.",
     strengths:["Absolute discretion","Steady reliability","Deep loyalty"],
@@ -1904,6 +1360,7 @@ const ARCHETYPES = [
 
   { id:"pathfinder", name:"The Pathfinder", title:"First Through the Door", icon:"🧗",
     colors:["#34D399","#FDBA74"],
+    image:"assets/archetypes/webp/21-pathfinder.webp",
     signature:[{dim:"risk",w:2},{dim:"curiosity",w:1},{dim:"independence",w:1}],
     description:"Uncharted territory doesn't scare you, it's the whole point. You'd rather take the unfamiliar route once than the safe one a hundred times.",
     strengths:["Bold exploration","Comfortable with uncertainty","Resourceful under pressure"],
@@ -1925,6 +1382,7 @@ const ARCHETYPES = [
 
   { id:"weaver", name:"The Weaver", title:"Social Connector", icon:"🧵",
     colors:["#F472B6","#A78BFA"],
+    image:"assets/archetypes/webp/22-weaver.webp",
     signature:[{dim:"empathy",w:1},{dim:"socialEnergy",w:2},{dim:"trust",w:1}],
     description:"You remember how people are connected to each other better than they do. Left alone in any group, you'll have found the common thread within minutes.",
     strengths:["Natural relationship-building","Reads group dynamics well","Bridges people together"],
@@ -1946,6 +1404,7 @@ const ARCHETYPES = [
 
   { id:"foundry", name:"The Foundry", title:"Disciplined Builder", icon:"⚒️",
     colors:["#FB923C","#CBD5E1"],
+    image:"assets/archetypes/webp/23-foundry.webp",
     signature:[{dim:"discipline",w:2},{dim:"drive",w:1},{dim:"planning",w:1}],
     description:"Consistency is your entire strategy. While others chase bursts of motivation, you show up, every day, and let the compounding do the rest.",
     strengths:["Unshakeable discipline","Reliable output","Strong work ethic"],
@@ -1967,6 +1426,7 @@ const ARCHETYPES = [
 
   { id:"mirage", name:"The Mirage", title:"Creative Dreamer", icon:"🌫️",
     colors:["#C084FC","#7DD3FC"],
+    image:"assets/archetypes/webp/24-mirage.webp",
     signature:[{dim:"creativity",w:2},{dim:"optimism",w:1},{dim:"independence",w:1}],
     description:"You live half in the world everyone shares and half in the one you're building in your head. The line between them is thinner than people assume.",
     strengths:["Rich imagination","Original perspective","Comfortable in ambiguity"],
@@ -1988,6 +1448,7 @@ const ARCHETYPES = [
 
   { id:"compass", name:"The Compass", title:"Principled Decider", icon:"🧭",
     colors:["#2DD4BF","#FACC15"],
+    image:"assets/archetypes/webp/25-compass.webp",
     signature:[{dim:"logic",w:1},{dim:"trust",w:1},{dim:"selfAwareness",w:2}],
     description:"You know exactly what you value, and it shows in every choice you make, even the small ones. People trust your decisions because they know what they're built on.",
     strengths:["Strong personal values","Consistent integrity","Clear-headed under pressure"],
@@ -2009,6 +1470,7 @@ const ARCHETYPES = [
 
   { id:"firefly", name:"The Firefly", title:"Playful Spontaneity", icon:"🌟",
     colors:["#FACC15","#6EE7B7"],
+    image:"assets/archetypes/webp/26-firefly.webp",
     signature:[{dim:"humor",w:1},{dim:"risk",w:1},{dim:"adaptability",w:2}],
     description:"You move through life catching the good moments as they appear, without much of a plan for the next one. Spontaneity isn't a flaw for you, it's how joy finds you.",
     strengths:["Lives fully in the moment","Highly adaptable","Infectious playfulness"],
@@ -2030,6 +1492,7 @@ const ARCHETYPES = [
 
   { id:"bastion", name:"The Bastion", title:"Resilient Under Fire", icon:"🏰",
     colors:["#FB7185","#34D399"],
+    image:"assets/archetypes/webp/27-bastion.webp",
     signature:[{dim:"resilience",w:2},{dim:"discipline",w:1},{dim:"confidence",w:1}],
     description:"Pressure doesn't break you, it reveals you. You've been through enough that very little rattles you anymore, and people can feel that steadiness nearby.",
     strengths:["Unshakeable resilience","Handles crisis calmly","Reliable under pressure"],
@@ -2051,6 +1514,7 @@ const ARCHETYPES = [
 
   { id:"tide", name:"The Tide", title:"Adaptable Flow", icon:"🌙",
     colors:["#60A5FA","#22D3EE"],
+    image:"assets/archetypes/webp/28-tide.webp",
     signature:[{dim:"adaptability",w:2},{dim:"optimism",w:1},{dim:"patience",w:1}],
     description:"You don't fight the current, you find a way to move with it that still gets you where you're going. Change rarely rattles you; you've adjusted before.",
     strengths:["Effortless adaptability","Goes with change gracefully","Rarely rigid"],
@@ -2072,6 +1536,7 @@ const ARCHETYPES = [
 
   { id:"oracle", name:"The Oracle", title:"Intuitive Thinker", icon:"🔮",
     colors:["#C084FC","#818CF8"],
+    image:"assets/archetypes/webp/29-oracle.webp",
     signature:[{dim:"curiosity",w:1},{dim:"empathy",w:1},{dim:"selfAwareness",w:2}],
     description:"You sense the undercurrent of a situation before anyone else names it out loud. Not psychic, just deeply attuned, to people, patterns, and meaning.",
     strengths:["Sharp intuition","Sees patterns others miss","Comfortable with big questions"],
@@ -2093,6 +1558,7 @@ const ARCHETYPES = [
 
   { id:"catalyst", name:"The Catalyst", title:"Change Igniter", icon:"🌋",
     colors:["#FB923C","#FB7185"],
+    image:"assets/archetypes/webp/30-catalyst.webp",
     signature:[{dim:"drive",w:1},{dim:"leadership",w:1},{dim:"risk",w:2}],
     description:"Rooms change when you enter them, not because you're loud, but because you make stagnant things feel possible to fix. You're allergic to 'that's just how it is'.",
     strengths:["Sparks momentum in others","Comfortable disrupting the status quo","Energizing presence"],
@@ -2754,6 +2220,73 @@ const ENNEAGRAM_TYPES = [
   { name:"Type 8, The Challenger", signature:[{dim:"confidence",w:1},{dim:"leadership",w:1},{dim:"competitiveness",w:1}] },
   { name:"Type 9, The Peacemaker", signature:[{dim:"patience",w:2},{dim:"adaptability",w:1}] },
 ];
+/* ---- Human Values --------------------------------------------------------
+   A motivational layer, separate from archetype/frameworks: not "what
+   type are you" but "what seems to move you when you decide things".
+   Each value is a weighted signature over the same 25 measured
+   dimensions, scored the same way archetype signatures are, so nothing
+   new is being invented, just a different lens on the same evidence.
+   Explicitly PersonaForge's interpretation, not a validated instrument. */
+const HUMAN_VALUES = [
+  { id:"determination", name:"Determination", icon:"\uD83D\uDCAA",
+    signature:[{dim:"drive",w:2},{dim:"persistence",w:2},{dim:"discipline",w:1}],
+    why:"how much you push through rather than let go" },
+  { id:"justice", name:"Justice", icon:"\u2696\uFE0F",
+    signature:[{dim:"responsibility",w:2},{dim:"logic",w:1},{dim:"trust",w:1}],
+    why:"how much fairness and accountability shape your calls" },
+  { id:"compassion", name:"Compassion", icon:"\uD83E\uDEC2",
+    signature:[{dim:"empathy",w:2},{dim:"kindness",w:2}],
+    why:"how readily you feel and respond to what others are going through" },
+  { id:"curiosity", name:"Curiosity", icon:"\uD83D\uDD0D",
+    signature:[{dim:"curiosity",w:2},{dim:"openMindedness",w:1}],
+    why:"how much unanswered questions pull at you" },
+  { id:"bravery", name:"Bravery", icon:"\uD83E\uDDA1",
+    signature:[{dim:"risk",w:2},{dim:"confidence",w:1},{dim:"resilience",w:1}],
+    why:"how willing you are to act despite the odds or the fear" },
+  { id:"integrity", name:"Integrity", icon:"\uD83E\uDEA8",
+    signature:[{dim:"trust",w:2},{dim:"selfAwareness",w:1},{dim:"responsibility",w:1}],
+    why:"how consistent you stay between what you believe and what you do" },
+  { id:"hope", name:"Hope", icon:"\u2728",
+    signature:[{dim:"optimism",w:2},{dim:"resilience",w:1}],
+    why:"how much you expect things to work out, even under pressure" },
+  { id:"wisdom", name:"Wisdom", icon:"\uD83E\uDD89",
+    signature:[{dim:"selfAwareness",w:2},{dim:"logic",w:1},{dim:"openMindedness",w:1}],
+    why:"how much reflection shapes your judgment before you act" },
+  { id:"kindness", name:"Kindness", icon:"\uD83D\uDC9E",
+    signature:[{dim:"kindness",w:2},{dim:"empathy",w:1},{dim:"patience",w:1}],
+    why:"how naturally you extend warmth without being asked" },
+  { id:"creativity", name:"Creativity", icon:"\uD83C\uDFA8",
+    signature:[{dim:"creativity",w:2},{dim:"openMindedness",w:1},{dim:"curiosity",w:1}],
+    why:"how much you reach for a new angle instead of the obvious one" },
+  { id:"discipline", name:"Discipline", icon:"\uD83C\uDFAF",
+    signature:[{dim:"discipline",w:2},{dim:"planning",w:1},{dim:"persistence",w:1}],
+    why:"how consistently you follow through on your own structure" },
+  { id:"loyalty", name:"Loyalty", icon:"\uD83E\uDD1D",
+    signature:[{dim:"trust",w:2},{dim:"patience",w:1},{dim:"responsibility",w:1}],
+    why:"how much you stay committed once you're in" },
+  { id:"freedom", name:"Freedom", icon:"\uD83E\uDD85",
+    signature:[{dim:"independence",w:2},{dim:"adaptability",w:1},{dim:"risk",w:1}],
+    why:"how much you protect your own room to choose" },
+  { id:"responsibility", name:"Responsibility", icon:"\uD83E\uDEA2",
+    signature:[{dim:"responsibility",w:2},{dim:"discipline",w:1},{dim:"planning",w:1}],
+    why:"how seriously you treat the things you're accountable for" },
+];
+
+/* ---- Seven Sins / Heavenly Virtues (fun profile) --------------------------
+   A playful, explicitly non-serious lens: each axis is one measured
+   dimension read two ways. The Sin reading and the Virtue reading are
+   opposite ends of the exact same evidence, nothing is recalculated,
+   only the label and direction flip. */
+const SIN_VIRTUE_AXES = [
+  { dim:"confidence", sinLabel:"Pride", virtueLabel:"Humility", sinIsHigh:true },
+  { dim:"competitiveness", sinLabel:"Greed", virtueLabel:"Charity", sinIsHigh:true },
+  { dim:"patience", sinLabel:"Wrath", virtueLabel:"Patience", sinIsHigh:false },
+  { dim:"kindness", sinLabel:"Envy", virtueLabel:"Kindness", sinIsHigh:false },
+  { dim:"risk", sinLabel:"Lust", virtueLabel:"Chastity", sinIsHigh:true },
+  { dim:"discipline", sinLabel:"Gluttony", virtueLabel:"Temperance", sinIsHigh:false },
+  { dim:"drive", sinLabel:"Sloth", virtueLabel:"Diligence", sinIsHigh:false },
+];
+
 const MBTI_AXES = [
   { letters:["E","I"], posDims:["socialEnergy"], negDims:[] },
   { letters:["N","S"], posDims:["openMindedness","curiosity"], negDims:["discipline","planning"] },
@@ -2861,8 +2394,6 @@ const COFFEE_ORDERS = [
 ];
 
 
-</script>
-<script>
 
 /* =========================================================================
    PERSONAFORGE, ENGINE MODULE
@@ -2870,72 +2401,143 @@ const COFFEE_ORDERS = [
    ========================================================================= */
 
 const CLUSTERS = Object.keys(QUESTION_BANK);
-const BASELINE_PER_CLUSTER = 3;    // guaranteed questions per cluster
-const MIN_QUESTIONS = 35;          // never ends before this many
+const MIN_QUESTIONS = 35;          // Stages 1-3 always run to exactly this many
 const MAX_QUESTIONS = 50;          // never exceeds this many
-const CHECKPOINT_STEP = 5;         // re-evaluate confidence every 5 past the minimum
 const CONFIDENCE_TARGET = 95;      // stop early once this confident
 const CONFIDENCE_SCALE = 7;        // score-gap that counts as "fully confident", tuned against real score distributions
-// NOTE ON SCALING: the question bank now holds 200 questions across 10
-// clusters (20 each). Every run answers at least MIN_QUESTIONS, then the
-// engine checks its own confidence every CHECKPOINT_STEP questions after
-// that and keeps going only if the top two archetype candidates are still
-// close, up to MAX_QUESTIONS. Raise either constant, or add more questions
-// per cluster, and this all keeps working unchanged.
+// NOTE ON SCALING: the question bank holds 200 questions across 10
+// clusters (20 each). Stages 1-3 (see below) always run to exactly
+// MIN_QUESTIONS. From there, Stage 4/5 re-checks confidence after every
+// answer and keeps going only if the top two archetype candidates are
+// still close, up to MAX_QUESTIONS.
 
-/* ---- Which clusters most affect which dimension, precomputed once ------
-   Used by the disambiguation step below: when two archetypes are close,
-   this tells the engine which clusters are most likely to contain
-   questions that actually separate them. */
-function computeDimensionClusterWeights(){
+/* ---- Which dimensions matter most to the framework projections ---------
+   Same idea as the old cluster-weight table, but for MBTI/Big
+   Five/DISC/Enneagram instead of clusters. Used by the info-value
+   question ranking below so "improves framework confidence" is a real,
+   computed signal rather than a hand-authored tag. */
+function computeFrameworkDimensionWeights(){
   const weights = {};
-  DIMENSIONS.forEach(d => weights[d] = {});
-  CLUSTERS.forEach(cluster => {
-    QUESTION_BANK[cluster].forEach(q => {
-      q.options.forEach(opt => {
-        Object.keys(opt.d).forEach(dim => {
-          if (!weights[dim]) return;
-          weights[dim][cluster] = (weights[dim][cluster] || 0) + Math.abs(opt.d[dim]);
-        });
-      });
-    });
+  DIMENSIONS.forEach(d => weights[d] = 0);
+  MBTI_AXES.forEach(axis => {
+    axis.posDims.concat(axis.negDims).forEach(d => { weights[d] = (weights[d] || 0) + 1; });
   });
+  BIG_FIVE_CATEGORIES.forEach(cat => cat.dims.forEach(d => { weights[d] = (weights[d] || 0) + 1; }));
+  DISC_CATEGORIES.forEach(cat => cat.dims.forEach(d => { weights[d] = (weights[d] || 0) + 1; }));
+  ENNEAGRAM_TYPES.forEach(type => type.signature.forEach(s => { weights[s.dim] = (weights[s.dim] || 0) + Math.abs(s.w); }));
   return weights;
 }
-const DIMENSION_CLUSTER_WEIGHTS = computeDimensionClusterWeights();
+const FRAMEWORK_DIMENSION_WEIGHTS = computeFrameworkDimensionWeights();
+
+const QUESTIONS_BY_ID = {};
+QUESTIONS.forEach(q => { QUESTIONS_BY_ID[q.id] = q; });
+
+/* ---- Stage 1: the fixed core set ----------------------------------------
+   Every user gets exactly these 15 questions, in this order, first. No
+   seed, no shuffle. Chosen offline by a greedy set-cover pass over the
+   full question bank: together they touch all 25 dimensions at least
+   once and all 10 clusters at least once, in as few questions as
+   possible, so Stage 1 is a genuine broad foundation rather than an
+   arbitrary first slice of the bank. */
+const CORE_QUESTION_IDS = ["ana6","ana8","pla4","amb13","cre18","soc3","phi17","cau2","emp3","imp4","lea12","pla1","amb16","ana1","cre5"];
 
 /* -------------------------------------------------------------------------
-   ALGORITHM: Adaptive question selection
-   1. Every cluster contributes its first BASELINE_PER_CLUSTER questions
-      up front, in a shuffled cluster order, so early answers sample every
-      trait area (this is what lets the engine detect emerging tendencies).
-   2. After the baseline round, running "cluster affinity" is computed as
-      the sum of |dimension delta| contributed by answers whose question
-      belonged to that cluster, i.e. how strongly that area is resonating,
-      regardless of direction.
-   3. Remaining slots are filled from the two to three highest-affinity
-      clusters' remaining (5th/6th) questions, the "go deeper" behavior
-      the spec asks for. If a cluster has no remaining questions, the next
-      highest-affinity cluster is used instead.
-   4. Selection order is decided progressively (re-ranked every 5 answers)
-      so it keeps adapting throughout the test, not just once.
+   ALGORITHM: Deterministic staged adaptive question selection
+   Five stages, replacing the old seed-shuffled baseline. The engine now
+   depends only on accumulated answers, never on wall-clock time, so two
+   people who answer identically get identical questions at every stage.
+
+   Stage 1 (Q1-15): CORE_QUESTION_IDS, fixed, identical for every user.
+   Stage 2 (Q16-25): one batch of 10, picked by _pickInformativeBatch()
+     against the state after Q15. Same first 15 answers -> same 16-25.
+   Stage 3 (Q26-35): another batch of 10, against the state after Q25.
+     Same first 25 answers -> same 26-35.
+   Stage 4 (after Q35): confidence check using the evidence-based
+     computeAssessmentConfidence(). Stops here if the target is met.
+   Stage 5 (Q36-50): only if Stage 4 wasn't confident enough. Unlike
+     Stages 2-3, this re-checks confidence after every single answer
+     (not in batches of 5) and stops the instant the target is reached,
+     since minimizing extra questions matters most this late in the
+     quiz. Still hard-capped at 50.
+
+   Question selection itself (_pickInformativeBatch) ranks every unused
+   question by computeQuestionInfoValue(): how much it addresses
+   currently-uncertain dimensions, how well it separates the current
+   top-2 archetype candidates, how relevant it is to the framework
+   projections, minus a penalty for overlapping dimensions already
+   asked about. All four signals are computed from data the app already
+   has (archetype signatures, framework dimension maps, running answer
+   history), nothing was hand-tagged onto the question bank.
+
+   this.clusterAffinity/clusterAsked are still tracked on every answer,
+   the same running per-cluster signal the old cluster-ranked picker
+   used, since encouragement() and save/resume format both read them and
+   there's no reason to discard a working, harmless signal.
 ------------------------------------------------------------------------- */
 
-function shuffledClusters(seed){
-  const arr = [...CLUSTERS];
-  let s = seed;
-  for (let i = arr.length - 1; i > 0; i--){
-    s = (s * 9301 + 49297) % 233280;
-    const j = Math.floor((s / 233280) * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+/* Every signal here is derived from data that already exists (question
+   deltas, archetype signatures, framework dimension maps, running answer
+   history) - nothing new was authored onto the question bank.
+     - uncertainty:  favors dimensions this session has the least evidence
+                     for yet (getDimensionConfidence), weighted by how
+                     strongly this question would move that dimension
+     - separation:   favors questions whose dimension profile lines up
+                     with what currently separates the top-2 archetype
+                     candidates (same signature-diff idea the old
+                     disambiguation boost used, applied per-question)
+     - framework:    favors dimensions that matter to MBTI/Big Five/DISC/
+                     Enneagram, a small signal so framework confidence
+                     improves alongside archetype confidence
+     - redundancy:   penalizes overlap with dimensions already answered
+                     about a lot, so the same ground isn't covered twice */
+function computeQuestionInfoValue(q, session, top, second){
+  const dimSet = new Set();
+  q.options.forEach(opt => Object.keys(opt.d).forEach(d => dimSet.add(d)));
+  const avgMag = (d) => q.options.reduce((s,o) => s + Math.abs(o.d[d] || 0), 0) / q.options.length;
+
+  let uncertainty = 0;
+  dimSet.forEach(d => {
+    const confidence = getDimensionConfidence(session, d); // 0-1, lower = less evidence so far
+    uncertainty += (1 - confidence) * avgMag(d);
+  });
+
+  let separation = 0;
+  if (top && second){
+    const diff = {};
+    top.signature.forEach(s => { diff[s.dim] = (diff[s.dim] || 0) + s.w; });
+    second.signature.forEach(s => { diff[s.dim] = (diff[s.dim] || 0) - s.w; });
+    dimSet.forEach(d => { separation += Math.abs(diff[d] || 0) * avgMag(d); });
   }
-  return arr;
+
+  let framework = 0;
+  dimSet.forEach(d => { framework += (FRAMEWORK_DIMENSION_WEIGHTS[d] || 0) * 0.3; });
+
+  let redundancy = 0;
+  session.answers.forEach(a => {
+    if (!a) return;
+    dimSet.forEach(d => { if (d in a.d) redundancy += Math.min(Math.abs(a.d[d]), 1); });
+  });
+
+  return uncertainty * 1.0 + separation * 0.8 + framework * 0.2 - redundancy * 0.35;
 }
 
 class QuizSession {
-  constructor(seed = Date.now() % 100000, name = ""){
+  // questionMode comes from the "Your Experience" onboarding step's one
+  // depth choice: "15"/"35"/"50" all pin the assessment to exactly that
+  // many questions (never extended). "adaptive" isn't offered by that
+  // screen at all — it's only the fallback for someone who skipped
+  // onboarding entirely (the name screen's "Skip for now"), preserving
+  // the app's original default behavior: start at MIN_QUESTIONS and let
+  // _maybeAdjustLength() extend up to MAX_QUESTIONS when confidence is
+  // still low. See _maybeAdjustLength()'s own guard for the other half
+  // of this.
+  constructor(seed = Date.now() % 100000, name = "", questionMode = "adaptive"){
+    // seed is kept only for the save/resume payload shape (harmless,
+    // unused for question selection now) so older in-progress saves in
+    // a person's browser still deserialize without a format change.
     this.seed = seed;
     this.name = name;
+    this.questionMode = questionMode || "adaptive";
     this.dims = emptyDims();
     this.answers = [];              // sparse: index-aligned with this.plan, entries or null
     this.clusterAffinity = {};
@@ -2943,23 +2545,15 @@ class QuizSession {
     this.clusterAsked = {};
     CLUSTERS.forEach(c => this.clusterAsked[c] = 0);
     this.usedIds = new Set();
-    this.order = shuffledClusters(seed);
-    this.plan = this._buildBaseline();
+    this.order = [...CLUSTERS];
+    this.plan = CORE_QUESTION_IDS.map(id => QUESTIONS_BY_ID[id]).filter(Boolean);
     this.cursor = 0;
-    this.targetLength = MIN_QUESTIONS;
+    this.targetLength = this.questionMode === "15" ? 15
+      : this.questionMode === "35" ? 35
+      : this.questionMode === "50" ? 50
+      : MIN_QUESTIONS;
     this.confidencePct = 0;
     this.justExtended = false;
-  }
-
-  _buildBaseline(){
-    const plan = [];
-    for (let i = 0; i < BASELINE_PER_CLUSTER; i++){
-      this.order.forEach(cluster => {
-        const q = QUESTION_BANK[cluster][i];
-        if (q) plan.push({ ...q, cluster });
-      });
-    }
-    return plan;
   }
 
   totalLength(){ return this.targetLength; }
@@ -2968,7 +2562,11 @@ class QuizSession {
   current(){
     if (this.cursor >= this.targetLength) return null;
     if (this.cursor >= this.plan.length){
-      this.plan.push(this._pickAdaptive());
+      if (this.plan.length === 15 || this.plan.length === 25){
+        this.plan.push(...this._pickInformativeBatch(10));
+      } else {
+        this.plan.push(...this._pickInformativeBatch(1));
+      }
     }
     return this.plan[this.cursor];
   }
@@ -2977,63 +2575,45 @@ class QuizSession {
     return this.answers[this.cursor] || null;
   }
 
-  _pickAdaptive(){
-    const ranked = [...CLUSTERS].sort((a, b) => this.clusterAffinity[b] - this.clusterAffinity[a]);
-    for (const cluster of ranked){
-      const bank = QUESTION_BANK[cluster];
-      const nextIdx = this.clusterAsked[cluster];
-      if (nextIdx < bank.length && !this.usedIds.has(bank[nextIdx].id)){
-        return { ...bank[nextIdx], cluster };
-      }
-    }
-    // fallback: any unused question anywhere
-    const fallback = QUESTIONS.find(q => !this.usedIds.has(q.id));
-    return fallback || QUESTIONS[0];
-  }
-
-  /* ---- Confidence estimate, usable mid-quiz -----------------------------
-     Confidence is how far ahead the leading archetype's score is over the
-     runner-up, scaled against CONFIDENCE_SCALE. A wide gap means the two
-     leading candidates are clearly different people; a narrow gap means
-     the engine genuinely isn't sure yet and more questions would help. */
-  currentConfidence(){
+  /* Stage 2/3/5 selection: rank every not-yet-used, not-already-planned
+     question by information value against the state right now, take the
+     top `count`. Deterministic given the running answer history, since
+     nothing here reads the clock or the seed. */
+  _pickInformativeBatch(count){
     const nd = this.normalizedDims();
     const match = matchArchetype(nd);
-    const gap = match.ranked[0].score - match.ranked[1].score;
-    const pct = Math.max(0, Math.min(100, Math.round((gap / CONFIDENCE_SCALE) * 100)));
-    return { pct, top: match.ranked[0].archetype, second: match.ranked[1].archetype };
+    const top = match.ranked[0].archetype, second = match.ranked[1].archetype;
+    const planned = new Set(this.plan.map(p => p.id));
+    const candidates = QUESTIONS.filter(q => !this.usedIds.has(q.id) && !planned.has(q.id));
+    const scored = candidates.map(q => ({ q, score: computeQuestionInfoValue(q, this, top, second) }));
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, count).map(x => x.q);
   }
 
-  /* ---- Disambiguation: bias future picks toward whatever separates the
-     two closest candidates, instead of continuing to ask generically. --- */
-  _boostForDisambiguation(top, second){
-    const dimScore = {};
-    DIMENSIONS.forEach(d => dimScore[d] = 0);
-    top.signature.forEach(s => dimScore[s.dim] += s.w);
-    second.signature.forEach(s => dimScore[s.dim] -= s.w);
-    const separating = DIMENSIONS
-      .map(d => ({ d, diff: Math.abs(dimScore[d]) }))
-      .filter(x => x.diff > 0)
-      .sort((a, b) => b.diff - a.diff)
-      .slice(0, 4);
-    separating.forEach(({ d }) => {
-      const clusterWeights = DIMENSION_CLUSTER_WEIGHTS[d] || {};
-      Object.entries(clusterWeights).forEach(([cluster, w]) => {
-        this.clusterAffinity[cluster] = (this.clusterAffinity[cluster] || 0) + w * 0.15;
-      });
-    });
-  }
-
-  /* Called right after an answer is recorded. Only re-evaluates exactly at
-     a checkpoint (35, 40, 45), so this runs at most 3 times per quiz. */
+  /* ---- Stage 4/5: confidence check and continued questioning -----------
+     Stages 1-3 (questions 1-35) always run to completion regardless of
+     confidence, per the fixed/batch design above. From question 35
+     onward this runs after every single answer (not in batches of 5, the
+     old checkpoint cadence), using the evidence-based
+     computeAssessmentConfidence() rather than the old archetype-gap-only
+     measure, and stops the instant the target is reached instead of
+     always committing to another full batch. The old
+     _boostForDisambiguation step is gone as a separate method, its idea
+     (bias toward whatever separates the top-2 candidates) now lives
+     directly inside computeQuestionInfoValue's separation term, computed
+     fresh per question rather than as a one-time affinity nudge. */
   _maybeAdjustLength(){
-    if (this.cursor !== this.targetLength) return;
-    if (this.targetLength >= MAX_QUESTIONS){ this.targetLength = MAX_QUESTIONS; return; }
-    const conf = this.currentConfidence();
-    this.confidencePct = conf.pct;
-    if (conf.pct >= CONFIDENCE_TARGET) return; // confident enough, stop here
-    this._boostForDisambiguation(conf.top, conf.second);
-    this.targetLength = Math.min(MAX_QUESTIONS, this.targetLength + CHECKPOINT_STEP);
+    // Fixed-length modes ("15"/"35") never extend past their chosen
+    // length regardless of confidence — only "adaptive" does.
+    if (this.questionMode !== "adaptive") return;
+    if (this.cursor < MIN_QUESTIONS) return;
+    if (this.cursor >= MAX_QUESTIONS){ this.targetLength = MAX_QUESTIONS; return; }
+    const nd = this.normalizedDims();
+    const match = matchArchetype(nd);
+    const conf = computeAssessmentConfidence(match.ranked, nd, this, false);
+    this.confidencePct = conf.overall;
+    if (conf.overall >= CONFIDENCE_TARGET){ this.targetLength = this.cursor; return; }
+    this.targetLength = Math.min(MAX_QUESTIONS, this.cursor + 1);
     this.justExtended = true;
   }
 
@@ -3136,6 +2716,7 @@ class QuizSession {
     return {
       seed: this.seed,
       name: this.name,
+      questionMode: this.questionMode,
       meta: this.meta || {},
       dims: this.dims,
       answers: this.answers,
@@ -3156,6 +2737,7 @@ function restoreQuizSession(saved){
   const s = Object.create(QuizSession.prototype);
   s.seed = saved.seed;
   s.name = saved.name || "";
+  s.questionMode = saved.questionMode || "adaptive";
   s.meta = saved.meta || {};
   s.dims = saved.dims;
   s.answers = saved.answers;
@@ -3294,6 +2876,39 @@ function computeMeasuredTraits(normDims){
     "Growth Mindset": clamp((g("selfAwareness") + g("curiosity") + g("optimism")) / 3),
     "Communication Clarity": clamp((g("logic") + g("confidence") + g("empathy")) / 3),
     "Stress Recovery": clamp((g("resilience") + g("optimism") + g("patience")) / 3),
+  };
+}
+
+/* "Life Balance" is a presentational grouping, not a separate measured
+   instrument: it recombines the same 25 scored dimensions used everywhere
+   else into 5 familiar buckets (Work/Social/Personal/Learning/Wellbeing),
+   the same way computeMeasuredTraits() above turns raw dims into
+   friendlier composite names. No new data is collected or invented for
+   this — see the result page's Life Balance card for the same disclosure
+   shown to the person. */
+function computeLifeBalance(normDims){
+  const clamp = v => Math.max(1, Math.min(100, Math.round(v)));
+  const g = k => pct(normDims[k] || 0);
+  return {
+    "Work": clamp((g("drive") + g("discipline") + g("responsibility") + g("persistence")) / 4),
+    "Social": clamp((g("socialEnergy") + g("empathy") + g("kindness")) / 3),
+    "Personal": clamp((g("selfAwareness") + g("independence") + g("patience")) / 3),
+    "Learning": clamp((g("curiosity") + g("openMindedness") + g("adaptability")) / 3),
+    "Wellbeing": clamp((g("emotionalStability") + g("resilience") + g("optimism")) / 3),
+  };
+}
+
+/* Same idea as computeLifeBalance() just above: recombines real scored
+   dims into 4 motivation-flavored facets so the Motivation card has
+   actual numbers to show, not just the single MOTIVATION_STYLES name. */
+function computeMotivationFacets(normDims){
+  const clamp = v => Math.max(1, Math.min(100, Math.round(v)));
+  const g = k => pct(normDims[k] || 0);
+  return {
+    "Purpose": clamp(g("responsibility")),
+    "Ambition": clamp(g("drive")),
+    "Consistency": clamp(g("persistence")),
+    "Exploration": clamp((g("curiosity") + g("openMindedness")) / 2),
   };
 }
 
@@ -4102,6 +3717,47 @@ function computeMBTI(normDims){
   });
   return type;
 }
+/* -------------------------------------------------------------------------
+   ALGORITHM: Human Values
+   Scores every value in HUMAN_VALUES the same way archetype matching
+   scores a signature: weighted sum over the relevant dimensions,
+   normalized against the maximum that signature could possibly reach
+   (so a value with a heavier signature isn't unfairly favored), returns
+   the top 5. Each result carries which measured dimensions it came from
+   and their actual values, so the explanation can point at real
+   evidence instead of a generic sentence. */
+function computeHumanValues(normDims){
+  const scored = HUMAN_VALUES.map(v => {
+    const raw = v.signature.reduce((s,x) => s + getDimensionScore(normDims, x.dim) * x.w, 0);
+    const maxPossible = v.signature.reduce((s,x) => s + 10 * x.w, 0);
+    const pct = Math.max(0, Math.min(100, Math.round(((raw + maxPossible) / (2 * maxPossible)) * 100)));
+    const topDim = [...v.signature].sort((a,b) => Math.abs(getDimensionScore(normDims,b.dim)) - Math.abs(getDimensionScore(normDims,a.dim)))[0];
+    return { value: v, pct, topDim: topDim.dim, topDimPct: getDimensionPercent(normDims, topDim.dim) };
+  });
+  scored.sort((a,b) => b.pct - a.pct);
+  return scored.slice(0, 5).map(s => ({
+    id: s.value.id, name: s.value.name, icon: s.value.icon, pct: s.pct,
+    explanation: `${s.pct}% reflects ${s.value.why}, most visibly in your ${DIM_LABELS[s.topDim]} (${s.topDimPct}%).`,
+    inferredFrom: s.value.signature.map(x => DIM_LABELS[x.dim]),
+  }));
+}
+
+/* -------------------------------------------------------------------------
+   ALGORITHM: Seven Sins / Heavenly Virtues (fun, non-serious)
+   Each of the 7 axes is one measured dimension read two directions.
+   Nothing is recomputed between modes, the same normDims values just get
+   read as either the sin-side or virtue-side percentage depending on
+   sinIsHigh, so "only the interpretation changes" holds literally, not
+   just in spirit. */
+function computeSinVirtueProfile(normDims){
+  return SIN_VIRTUE_AXES.map(axis => {
+    const raw = getDimensionPercent(normDims, axis.dim);
+    const sinPct = axis.sinIsHigh ? raw : 100 - raw;
+    const virtuePct = 100 - sinPct;
+    return { dim: axis.dim, sinLabel: axis.sinLabel, virtueLabel: axis.virtueLabel, sinPct, virtuePct };
+  });
+}
+
 function computeFrameworkApproximations(normDims){
   return {
     bigFive: computeBigFive(normDims),
@@ -4190,661 +3846,7 @@ class UpgradeQuizSession {
 }
 
 
-</script>
-<script>
 
-/* =========================================================================
-   PERSONAFORGE, MINI QR ENCODER
-   A from-scratch QR code generator (no external library, per the
-   zero-dependency requirement). Supports byte-mode encoding, error
-   correction level L, versions 1 through 5 (up to 108 bytes of data,
-   comfortably more than a PersonaForge share URL needs). Implements the
-   ISO/IEC 18004 structure: Reed-Solomon error correction over GF(256),
-   finder/timing/alignment/dark-module placement, zigzag data placement,
-   all 8 mask patterns scored by the standard 4 penalty rules, and BCH
-   format-info encoding.
-   Renders straight to a <canvas>, nothing here touches the DOM until
-   drawQR() is called.
-   ========================================================================= */
-
-const QR = (function(){
-
-  /* ---- GF(256) tables, primitive polynomial 0x11D ---------------------- */
-  const GF_EXP = new Array(512);
-  const GF_LOG = new Array(256);
-  (function buildTables(){
-    let x = 1;
-    for (let i = 0; i < 255; i++){
-      GF_EXP[i] = x;
-      GF_LOG[x] = i;
-      x <<= 1;
-      if (x & 0x100) x ^= 0x11D;
-    }
-    for (let i = 255; i < 512; i++) GF_EXP[i] = GF_EXP[i - 255];
-  })();
-  function gfMul(a, b){
-    if (a === 0 || b === 0) return 0;
-    return GF_EXP[GF_LOG[a] + GF_LOG[b]];
-  }
-
-  /* ---- Reed-Solomon generator polynomial and encoding ------------------- */
-  function buildGenerator(ecCount){
-    let poly = [1];
-    for (let i = 0; i < ecCount; i++){
-      const term = [1, GF_EXP[i]];
-      const next = new Array(poly.length + 1).fill(0);
-      for (let a = 0; a < poly.length; a++){
-        for (let b = 0; b < term.length; b++){
-          next[a + b] ^= gfMul(poly[a], term[b]);
-        }
-      }
-      poly = next;
-    }
-    return poly;
-  }
-  function rsEncode(dataBytes, ecCount){
-    const generator = buildGenerator(ecCount);
-    const remainder = dataBytes.slice();
-    for (let i = 0; i < dataBytes.length; i++) remainder.push(0);
-    for (let i = 0; i < dataBytes.length; i++){
-      const coef = remainder[i];
-      if (coef === 0) continue;
-      for (let j = 0; j < generator.length; j++){
-        remainder[i + j] ^= gfMul(generator[j], coef);
-      }
-    }
-    return remainder.slice(dataBytes.length, dataBytes.length + ecCount);
-  }
-
-  /* ---- Version capacity table, ECC level L, single block ---------------- */
-  const VERSIONS = [
-    { v:1, size:21, dataCodewords:19, ecCodewords:7 },
-    { v:2, size:25, dataCodewords:34, ecCodewords:10, align:[6,18] },
-    { v:3, size:29, dataCodewords:55, ecCodewords:15, align:[6,22] },
-    { v:4, size:33, dataCodewords:80, ecCodewords:20, align:[6,26] },
-    { v:5, size:37, dataCodewords:108, ecCodewords:26, align:[6,30] },
-  ];
-
-  function pickVersion(byteLength){
-    // 4 bits mode + 8 bits count indicator + 8*len data, needs to fit with
-    // room for the terminator inside the version's data codeword capacity.
-    for (const ver of VERSIONS){
-      const capacityBits = ver.dataCodewords * 8;
-      const neededBits = 4 + 8 + byteLength * 8;
-      if (neededBits <= capacityBits) return ver;
-    }
-    return null; // caller should shorten the payload
-  }
-
-  /* ---- Bit buffer build (byte mode) -------------------------------------- */
-  function buildDataCodewords(text, ver){
-    const bytes = Array.from(new TextEncoder().encode(text));
-    const bits = [];
-    const pushBits = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >> i) & 1); };
-    pushBits(0b0100, 4);           // byte mode indicator
-    pushBits(bytes.length, 8);     // character count (versions 1-9)
-    bytes.forEach(b => pushBits(b, 8));
-
-    const capacityBits = ver.dataCodewords * 8;
-    const termLen = Math.min(4, capacityBits - bits.length);
-    for (let i = 0; i < termLen; i++) bits.push(0);
-    while (bits.length % 8 !== 0) bits.push(0);
-
-    const codewords = [];
-    for (let i = 0; i < bits.length; i += 8){
-      let byte = 0;
-      for (let j = 0; j < 8; j++) byte = (byte << 1) | bits[i + j];
-      codewords.push(byte);
-    }
-    const padBytes = [0xEC, 0x11];
-    let p = 0;
-    while (codewords.length < ver.dataCodewords){
-      codewords.push(padBytes[p % 2]);
-      p++;
-    }
-    return codewords;
-  }
-
-  function bytesToBits(bytes){
-    const bits = [];
-    bytes.forEach(b => { for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1); });
-    return bits;
-  }
-
-  /* ---- Matrix construction ------------------------------------------------ */
-  function makeEmptyGrid(size){
-    return Array.from({ length: size }, () => new Array(size).fill(0));
-  }
-  function makeReservedGrid(size){
-    return Array.from({ length: size }, () => new Array(size).fill(false));
-  }
-
-  function placeFinder(matrix, reserved, r0, c0){
-    for (let r = -1; r <= 7; r++){
-      for (let c = -1; c <= 7; c++){
-        const R = r0 + r, C = c0 + c;
-        if (R < 0 || C < 0 || R >= matrix.length || C >= matrix.length) continue;
-        reserved[R][C] = true;
-        const inCore = r >= 0 && r <= 6 && c >= 0 && c <= 6;
-        if (!inCore){ matrix[R][C] = 0; continue; }
-        const isBorder = r === 0 || r === 6 || c === 0 || c === 6;
-        const isCenter = r >= 2 && r <= 4 && c >= 2 && c <= 4;
-        matrix[R][C] = (isBorder || isCenter) ? 1 : 0;
-      }
-    }
-  }
-  function placeAlignment(matrix, reserved, r0, c0){
-    for (let r = -2; r <= 2; r++){
-      for (let c = -2; c <= 2; c++){
-        const R = r0 + r, C = c0 + c;
-        reserved[R][C] = true;
-        const isBorder = r === -2 || r === 2 || c === -2 || c === 2;
-        const isCenter = r === 0 && c === 0;
-        matrix[R][C] = (isBorder || isCenter) ? 1 : 0;
-      }
-    }
-  }
-  function placeTiming(matrix, reserved, size){
-    for (let i = 8; i < size - 8; i++){
-      if (!reserved[6][i]){ matrix[6][i] = i % 2 === 0 ? 1 : 0; reserved[6][i] = true; }
-      if (!reserved[i][6]){ matrix[i][6] = i % 2 === 0 ? 1 : 0; reserved[i][6] = true; }
-    }
-  }
-  function reserveFormatAreas(reserved, size){
-    for (let i = 0; i <= 8; i++){ reserved[8][i] = true; reserved[i][8] = true; }
-    for (let i = 0; i < 8; i++){ reserved[8][size - 1 - i] = true; reserved[size - 1 - i][8] = true; }
-  }
-
-  const MASKS = [
-    (r,c) => (r + c) % 2 === 0,
-    (r,c) => r % 2 === 0,
-    (r,c) => c % 3 === 0,
-    (r,c) => (r + c) % 3 === 0,
-    (r,c) => (Math.floor(r/2) + Math.floor(c/3)) % 2 === 0,
-    (r,c) => ((r*c) % 2) + ((r*c) % 3) === 0,
-    (r,c) => (((r*c) % 2) + ((r*c) % 3)) % 2 === 0,
-    (r,c) => (((r+c) % 2) + ((r*c) % 3)) % 2 === 0,
-  ];
-
-  function placeData(matrix, reserved, size, dataBits){
-    let bitIndex = 0;
-    let row = size - 1;
-    let col = size - 1;
-    let dirUp = true;
-    while (col > 0){
-      if (col === 6) col = 5;
-      // eslint-disable-next-line no-constant-condition
-      while (true){
-        for (let cc = 0; cc < 2; cc++){
-          const c = col - cc;
-          if (!reserved[row][c]){
-            const bit = bitIndex < dataBits.length ? dataBits[bitIndex] : 0;
-            matrix[row][c] = bit;
-            bitIndex++;
-          }
-        }
-        if (dirUp){
-          if (row === 0){ dirUp = false; break; }
-          row--;
-        } else {
-          if (row === size - 1){ dirUp = true; break; }
-          row++;
-        }
-      }
-      col -= 2;
-    }
-  }
-
-  function applyMask(matrix, reserved, size, maskFn){
-    const out = makeEmptyGrid(size);
-    for (let r = 0; r < size; r++){
-      for (let c = 0; c < size; c++){
-        out[r][c] = reserved[r][c] ? matrix[r][c] : (matrix[r][c] ^ (maskFn(r,c) ? 1 : 0));
-      }
-    }
-    return out;
-  }
-
-  function penalty(matrix, size){
-    let score = 0;
-    // Rule 1: runs of 5+ same color, rows then columns
-    for (let r = 0; r < size; r++){
-      let run = 1;
-      for (let c = 1; c < size; c++){
-        if (matrix[r][c] === matrix[r][c-1]) run++;
-        else { if (run >= 5) score += 3 + (run - 5); run = 1; }
-      }
-      if (run >= 5) score += 3 + (run - 5);
-    }
-    for (let c = 0; c < size; c++){
-      let run = 1;
-      for (let r = 1; r < size; r++){
-        if (matrix[r][c] === matrix[r-1][c]) run++;
-        else { if (run >= 5) score += 3 + (run - 5); run = 1; }
-      }
-      if (run >= 5) score += 3 + (run - 5);
-    }
-    // Rule 2: 2x2 blocks
-    for (let r = 0; r < size - 1; r++){
-      for (let c = 0; c < size - 1; c++){
-        const v = matrix[r][c];
-        if (v === matrix[r][c+1] && v === matrix[r+1][c] && v === matrix[r+1][c+1]) score += 3;
-      }
-    }
-    // Rule 3: finder-like 1:1:3:1:1 patterns with 4-module light run
-    const patternA = [1,0,1,1,1,0,1,0,0,0,0];
-    const patternB = [0,0,0,0,1,0,1,1,1,0,1];
-    const matchAt = (arr, start, pattern) => {
-      for (let i = 0; i < pattern.length; i++) if (arr[start+i] !== pattern[i]) return false;
-      return true;
-    };
-    for (let r = 0; r < size; r++){
-      const row = matrix[r];
-      for (let c = 0; c <= size - 11; c++){
-        if (matchAt(row, c, patternA) || matchAt(row, c, patternB)) score += 40;
-      }
-    }
-    for (let c = 0; c < size; c++){
-      const col = matrix.map(row => row[c]);
-      for (let r = 0; r <= size - 11; r++){
-        if (matchAt(col, r, patternA) || matchAt(col, r, patternB)) score += 40;
-      }
-    }
-    // Rule 4: dark/light balance
-    let dark = 0;
-    for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) if (matrix[r][c]) dark++;
-    const percent = (dark / (size*size)) * 100;
-    const deviation = Math.floor(Math.abs(percent - 50) / 5);
-    score += deviation * 10;
-    return score;
-  }
-
-  /* ---- BCH format info ---------------------------------------------------- */
-  function bchFormat(data5){
-    let d = data5 << 10;
-    const g = 0b10100110111; // generator, degree 10
-    for (let i = 14; i >= 10; i--){
-      if ((d >> i) & 1) d ^= (g << (i - 10));
-    }
-    const format = (data5 << 10) | d;
-    return format ^ 0b101010000010010;
-  }
-  function placeFormatInfo(matrix, size, maskId){
-    const eccBits = 0b01; // level L
-    const data5 = (eccBits << 3) | maskId;
-    const format = bchFormat(data5);
-    const bit = i => (format >> i) & 1;
-    for (let i = 0; i <= 5; i++) matrix[i][8] = bit(i);
-    matrix[7][8] = bit(6);
-    matrix[8][8] = bit(7);
-    matrix[8][7] = bit(8);
-    for (let i = 9; i <= 14; i++) matrix[8][14 - i] = bit(i);
-    for (let i = 0; i <= 7; i++) matrix[8][size - 1 - i] = bit(i);
-    for (let i = 8; i <= 14; i++) matrix[size - 15 + i][8] = bit(i);
-    matrix[size - 8][8] = 1; // dark module
-  }
-
-  /* ---- Top-level encode: text -> boolean matrix --------------------------- */
-  function encode(text){
-    const byteLen = new TextEncoder().encode(text).length;
-    const ver = pickVersion(byteLen);
-    if (!ver) return null;
-    const dataCodewords = buildDataCodewords(text, ver);
-    const ecCodewords = rsEncode(dataCodewords, ver.ecCodewords);
-    const allCodewords = dataCodewords.concat(ecCodewords);
-    const dataBits = bytesToBits(allCodewords);
-
-    const size = ver.size;
-    const matrix = makeEmptyGrid(size);
-    const reserved = makeReservedGrid(size);
-
-    placeFinder(matrix, reserved, 0, 0);
-    placeFinder(matrix, reserved, 0, size - 7);
-    placeFinder(matrix, reserved, size - 7, 0);
-    if (ver.align){
-      const [ar, ac] = ver.align;
-      placeAlignment(matrix, reserved, ar, ac);
-    }
-    placeTiming(matrix, reserved, size);
-    reserveFormatAreas(reserved, size);
-    reserved[size - 8][8] = true; // dark module cell
-
-    placeData(matrix, reserved, size, dataBits);
-
-    let best = null, bestScore = Infinity, bestMaskId = 0;
-    for (let m = 0; m < MASKS.length; m++){
-      const masked = applyMask(matrix, reserved, size, MASKS[m]);
-      placeFormatInfo(masked, size, m);
-      const score = penalty(masked, size);
-      if (score < bestScore){ bestScore = score; best = masked; bestMaskId = m; }
-    }
-    return { matrix: best, size, version: ver.v, maskId: bestMaskId };
-  }
-
-  /* ---- Render to canvas ---------------------------------------------------- */
-  function drawToCanvas(canvas, text, options){
-    const result = encode(text);
-    if (!result) return false;
-    const opts = options || {};
-    const scale = opts.scale || 8;
-    const margin = opts.margin != null ? opts.margin : 4;
-    const dark = opts.dark || "#0F1117";
-    const light = opts.light || "#F8FAFC";
-    const size = result.size;
-    const total = size + margin * 2;
-    canvas.width = total * scale;
-    canvas.height = total * scale;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = light;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = dark;
-    for (let r = 0; r < size; r++){
-      for (let c = 0; c < size; c++){
-        if (result.matrix[r][c]){
-          ctx.fillRect((c + margin) * scale, (r + margin) * scale, scale, scale);
-        }
-      }
-    }
-    return true;
-  }
-
-  return {
-    encode, drawToCanvas, pickVersion,
-    _internal: { makeEmptyGrid, makeReservedGrid, placeFinder, placeAlignment, placeTiming,
-      reserveFormatAreas, VERSIONS, GF_EXP, GF_LOG, gfMul, rsEncode, buildGenerator,
-      bchFormat, MASKS },
-  };
-})();
-
-
-</script>
-<script>
-
-/* =========================================================================
-   PERSONAFORGE, APP MODULE
-   Renders every screen into #app. No framework, no build step.
-   ========================================================================= */
-
-const root = document.getElementById("app");
-let session = null;
-let lastResult = null;
-let pendingName = "";
-let soundOn = localStorage.getItem("pf_sound") !== "off";
-let currentTheme = localStorage.getItem("pf_theme") === "light" ? "light" : "dark";
-
-/* ---------------- theme (light / dark) ------------------------------------
-   Dark is the default since that's the theme that's been built and
-   refined so far, but light mode is fully implemented too. Switching is
-   instant via a CSS attribute (everything else uses CSS custom
-   properties so it repaints on its own), except canvas-drawn pixels
-   (radar chart, QR code) which need an explicit redraw since their
-   colors are baked in at draw time, not read live from CSS. */
-function applyTheme(theme){
-  currentTheme = theme;
-  document.documentElement.dataset.theme = theme;
-  localStorage.setItem("pf_theme", theme);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", theme === "light" ? "#FFFFFF" : "#0F1117");
-}
-function toggleTheme(){
-  document.body.classList.add("theme-transitions");
-  applyTheme(currentTheme === "light" ? "dark" : "light");
-  click(300);
-  // Only the result page has canvas-drawn pixels (radar chart, QR code)
-  // whose colors are baked in at draw time rather than read live from
-  // CSS, so it's the one screen that needs a forced re-render. Every
-  // other screen (quiz, landing, compare, party) uses CSS custom
-  // properties directly and repaints on its own, so toggling theme there
-  // never interrupts what the person is doing (e.g. mid-quiz).
-  if (lastResult && document.getElementById("radar")){ renderResult(); }
-  else { updateThemeIcon(); }
-}
-function updateThemeIcon(){
-  const btn = document.querySelector('.icon-btn[aria-label="Toggle light or dark theme"]');
-  if (btn) btn.innerHTML = currentTheme === "light" ? ICONS.sun : ICONS.moon;
-}
-let careersExpanded = false;
-let funStatsOpen = false;
-
-/* ---------------- tiny sound (optional, WebAudio, no assets) ---------- */
-let audioCtx = null;
-function click(freq = 440, dur = 0.045){
-  if (!soundOn) return;
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-    o.frequency.value = freq; o.type = "sine";
-    g.gain.setValueAtTime(0.05, audioCtx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); o.stop(audioCtx.currentTime + dur);
-  } catch(e){ /* audio unsupported, fail silently */ }
-}
-
-/* ---------------- background music -------------------------------------
-   BG.mp3 lives next to index.html (same GitHub Pages root), loaded via
-   the <audio id="bgMusic"> element outside #app so it keeps playing
-   across every screen re-render instead of restarting. The same speaker
-   icon that mutes the tiny click sounds controls this too. Browsers
-   block audio autoplay until a real user gesture, so playback is
-   attempted on the first interaction anywhere on the page, once. */
-const bgMusic = document.getElementById("bgMusic");
-if (bgMusic){
-  bgMusic.volume = 0.35;
-  bgMusic.addEventListener("error", () => {
-    // BG.mp3 missing or failed to load: fail silently, never break the app
-  });
-  const startMusicOnce = () => {
-    if (soundOn) bgMusic.play().catch(() => {});
-    document.removeEventListener("pointerdown", startMusicOnce);
-  };
-  document.addEventListener("pointerdown", startMusicOnce);
-}
-
-/* ---------------- decorative venetian blind bars ----------------------*/
-/* ---------------- micro-interactions -------------------------------------*/
-const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-function animateCountUp(el, target, duration){
-  if (reducedMotion() || !el){ if (el) el.textContent = target + (el.dataset.suffix || ""); return; }
-  const start = performance.now();
-  const suffix = el.dataset.suffix || "";
-  function tick(now){
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.round(target * eased) + suffix;
-    if (t < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-function initCountUps(container){
-  (container || document).querySelectorAll(".count-up[data-target]").forEach(el => {
-    const target = parseFloat(el.dataset.target);
-    if (Number.isNaN(target)) return;
-    animateCountUp(el, target, 900 + Math.random() * 300);
-  });
-}
-
-function setupProgressiveReveal(container){
-  if (reducedMotion()){
-    (container || document).querySelectorAll(".section").forEach(s => s.classList.add("revealed"));
-    return;
-  }
-  const sections = (container || document).querySelectorAll(".section");
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting){
-        entry.target.classList.add("revealed");
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
-  sections.forEach(s => observer.observe(s));
-}
-
-function fireConfetti(){
-  if (reducedMotion()) return;
-  const colors = ["#A78BFA", "#7DD3FC", "#6EE7B7", "#FDBA74", "#FACC15"];
-  const layer = document.createElement("div");
-  layer.className = "confetti-layer";
-  document.body.appendChild(layer);
-  const count = 46;
-  for (let i = 0; i < count; i++){
-    const piece = document.createElement("span");
-    piece.className = "confetti-piece";
-    piece.style.left = (45 + Math.random() * 10) + "%";
-    piece.style.background = colors[i % colors.length];
-    piece.style.setProperty("--dx", (Math.random() * 2 - 1) * 220 + "px");
-    piece.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
-    piece.style.animationDelay = (Math.random() * 0.15) + "s";
-    piece.style.animationDuration = (1.1 + Math.random() * 0.6) + "s";
-    layer.appendChild(piece);
-  }
-  setTimeout(() => layer.remove(), 2200);
-}
-
-/* ---------------- per-archetype accent theming ---------------------------
-   Buttons, graphs, gradients and glows subtly shift to match the current
-   person's own archetype colors on the result page, and reset to the
-   default lavender/sky brand colors everywhere else. */
-function setAccentColors(c1, c2){
-  document.documentElement.style.setProperty("--user-accent-1", c1 || "#A78BFA");
-  document.documentElement.style.setProperty("--user-accent-2", c2 || "#7DD3FC");
-}
-
-function spawnAmbience(){
-  const layer = document.getElementById("embers");
-  if (!layer || layer.dataset.done) return;
-  layer.dataset.done = "1";
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (reduce) return;
-  const orbColors = [
-    "radial-gradient(circle, #A78BFA, transparent 70%)",
-    "radial-gradient(circle, #7DD3FC, transparent 70%)",
-    "radial-gradient(circle, #6EE7B7, transparent 70%)",
-    "radial-gradient(circle, #FDBA74, transparent 70%)",
-  ];
-  const positions = [
-    { left:"-10%", top:"-8%" },
-    { left:"65%", top:"5%" },
-    { left:"10%", top:"55%" },
-    { left:"70%", top:"60%" },
-  ];
-  positions.forEach((pos, i) => {
-    const orb = document.createElement("div");
-    orb.className = "blind-bar";
-    orb.style.left = pos.left;
-    orb.style.top = pos.top;
-    orb.style.background = orbColors[i % orbColors.length];
-    orb.style.animationDuration = (16 + i * 3) + "s";
-    orb.style.animationDelay = (i * 1.4) + "s";
-    layer.appendChild(orb);
-  });
-}
-
-function pickLines(n, sourcePool){
-  const pool = [...(sourcePool || CALC_LINES)];
-  const out = [];
-  for (let i = 0; i < n && pool.length; i++){
-    const idx = Math.floor(Math.random() * pool.length);
-    out.push(pool.splice(idx, 1)[0]);
-  }
-  return out;
-}
-
-/* ---------------- routing ---------------------------------------------*/
-function navigate(view){
-  window.scrollTo(0, 0);
-  if (view === "landing") renderLanding();
-  else if (view === "compare") renderCompare();
-  else if (view === "party") renderParty();
-}
-
-/* ---------------- shared chrome ---------------------------------------*/
-/* ---------------- icon set -------------------------------------------
-   One consistent hand-authored line-icon family (1.6px stroke, rounded
-   caps/joins, 20x20 grid), replacing the emoji glyphs. No external icon
-   library, since this environment has no live network access to fetch
-   one, but the visual language stays cohesive across every use. */
-const ICONS = {
-  home: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 10 3l7 6.5"/><path d="M5 8.5V17h10V8.5"/><path d="M8 17v-5h4v5"/></svg>`,
-  sun: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="10" r="3.4"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1 4.7 4.7"/></svg>`,
-  moon: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 12.2A6.8 6.8 0 1 1 7.8 3.5a6 6 0 0 0 8.7 8.7Z"/></svg>`,
-  soundOn: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.3a4 4 0 0 1 0 5.4M15.3 5a7.2 7.2 0 0 1 0 10"/></svg>`,
-  soundOff: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5h3l4-3.2v11.4l-4-3.2H3z"/><path d="M13 7.5l4 5M17 7.5l-4 5"/></svg>`,
-};
-
-function topBar(showBack){
-  return `
-  <div class="top-bar">
-    <div class="brand-mini">${showBack ? `<button class="icon-btn" onclick="goHome()" aria-label="Home">${ICONS.home}</button>` : ""}<span class="dot"></span><span>PersonaForge</span></div>
-    <div style="display:flex;gap:8px">
-      <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle light or dark theme">${currentTheme === "light" ? ICONS.sun : ICONS.moon}</button>
-      <button class="icon-btn" onclick="toggleSound()" aria-label="Toggle sound">${soundOn ? ICONS.soundOn : ICONS.soundOff}</button>
-    </div>
-  </div>`;
-}
-function goHome(){
-  if (session && !session.isComplete()){
-    saveQuizProgress();
-  }
-  click(340);
-  navigate("landing");
-}
-
-/* ---------------- PF1 UPGRADE QUIZ ---------------------------------------
-   A short, fixed 9-question flow that only asks about the 5 dimensions
-   added since PF1, drawn from real existing content rather than anything
-   new. On completion, re-encodes as a full PF2 code. */
-let upgradeSession = null;
-function startUpgradeQuiz(){
-  if (!lastResult || !lastResult.decodedProfile) return;
-  upgradeSession = new UpgradeQuizSession(lastResult.decodedProfile);
-  click(500);
-  renderUpgradeQuiz();
-}
-function renderUpgradeQuiz(){
-  const q = upgradeSession.current();
-  if (!q){ finishUpgradeQuiz(); return; }
-  const { cursor } = upgradeSession;
-  const total = upgradeSession.totalLength();
-  root.innerHTML = `
-    <div class="container">
-      <div class="quiz-top">
-        ${topBar(true)}
-        <div class="progress-track"><div class="progress-fill" style="width:${Math.round((cursor/total)*100)}%"></div></div>
-        <div class="progress-meta">
-          <span>Upgrade question ${cursor + 1} of ${total}</span>
-          <span class="encourage">Unlocking the newer profile sections</span>
-        </div>
-      </div>
-      <div class="question-card glass">
-        <div class="q-num">UPGRADE ${String(cursor + 1).padStart(2,"0")}</div>
-        <div class="q-text">${q.text}</div>
-        <div class="options">
-          ${q.options.map((opt,i) => `<button class="option" onclick="selectUpgradeOption(${i})"><span class="opt-key">${String.fromCharCode(65+i)}</span><span>${opt.text}</span></button>`).join("")}
-        </div>
-      </div>
-    </div>
-  `;
-}
-function selectUpgradeOption(idx){
-  click(420 + idx * 60);
-  upgradeSession.answer(idx);
-  showCalcOverlay(1, () => {
-    if (upgradeSession.isComplete()) finishUpgradeQuiz();
-    else renderUpgradeQuiz();
-  });
-}
-function finishUpgradeQuiz(){
-  const finalDims = upgradeSession.finalNormDims();
-  const match = matchArchetype(finalDims);
-  const code = encodeCode(match.primary.id, finalDims, upgradeSession.name);
-  lastResult = buildResultFromDecoded({ archetype: match.primary, normDims: finalDims, name: upgradeSession.name, version: CODE_VERSION, upgraded: false }, code);
-  localStorage.setItem("pf_last_code", code);
-  upgradeSession = null;
-  renderResult();
-}
 
 /* ---------------- QUIZ PROGRESS PERSISTENCE ------------------------------
    Going home mid-quiz (or just closing the tab) never throws answers away.
@@ -4865,287 +3867,71 @@ function getSavedQuizProgress(){
 function clearQuizProgress(){
   try{ localStorage.removeItem(QUIZ_PROGRESS_KEY); } catch(e){ /* ignore */ }
 }
-function resumeQuiz(){
-  const saved = getSavedQuizProgress();
-  if (!saved){ goToNameScreen(); return; }
-  session = restoreQuizSession(saved);
-  click(500);
-  renderQuiz();
-}
-function discardSavedQuizAndStart(){
-  clearQuizProgress();
-  click(360);
-  goToNameScreen();
-}
-function toggleSound(){
-  soundOn = !soundOn;
-  localStorage.setItem("pf_sound", soundOn ? "on" : "off");
-  click(soundOn ? 660 : 220);
-  const btn = document.querySelector('.icon-btn[aria-label="Toggle sound"]');
-  if (btn) btn.innerHTML = soundOn ? ICONS.soundOn : ICONS.soundOff;
-  if (bgMusic){
-    if (soundOn) bgMusic.play().catch(() => {});
-    else bgMusic.pause();
-  }
+
+/* ---------------- shareable profile links --------------------------------
+   The QR already encodes a URL with ?code=..., but until now nothing on
+   load ever read that parameter back out, so scanning it just opened a
+   blank landing page. This closes that loop: on boot, and whenever a
+   result is shown, the address bar carries the code, so the QR, a copied
+   link, and the browser's own URL bar are all the same shareable thing.
+   Query-param format (?code=...) is the primary, fully-supported form
+   since it works on any static host with zero extra setup. A trailing
+   path segment that looks like a code (e.g. /PersonaForge/Yota-PF2-...)
+   is also read as a best-effort fallback, but actually serving that path
+   on GitHub Pages needs a 404->index.html redirect set up in the repo;
+   without it, only the ?code= form will reach the app at all. */
+function getProfileCodeFromURL(){
+  const params = new URLSearchParams(location.search);
+  const fromQuery = params.get("code");
+  if (fromQuery) return decodeURIComponent(fromQuery);
+  const segments = location.pathname.split("/").filter(Boolean);
+  const last = segments[segments.length - 1] || "";
+  if (/-PF[12]-/.test(last)) return decodeURIComponent(last);
+  return null;
 }
 
-/* ---------------- LANDING ---------------------------------------------*/
-function renderLanding(){
-  setAccentColors();
-  const saved = localStorage.getItem("pf_last_code");
-  const savedQuiz = getSavedQuizProgress();
-  root.innerHTML = `
-    ${topBar(false)}
-    <div class="landing">
-      <div class="logo-mark">Discover. Compare. Evolve.</div>
-      <h1>Persona<span>Forge</span></h1>
-      <p class="tagline">A personality read that actually adapts to you. Answer a set of scenarios, not a survey, and watch it change direction as it gets to know you. Takes about seven minutes.</p>
-      ${savedQuiz ? `
-      <div class="card glass" style="max-width:420px;text-align:center">
-        <div class="eyebrow accent" style="justify-content:center">IN PROGRESS</div>
-        <p style="margin-top:8px">${savedQuiz.name ? savedQuiz.name + ", y" : "Y"}ou answered ${savedQuiz.cursor} of ${savedQuiz.targetLength}. Pick up on question ${savedQuiz.cursor + 1}.</p>
-        <div class="cta-row" style="margin-top:14px">
-          <button class="btn btn-primary" onclick="resumeQuiz()">Continue &rarr;</button>
-          <button class="btn btn-ghost" onclick="discardSavedQuizAndStart()">Start over instead</button>
-        </div>
-      </div>
-      <button class="btn btn-ghost" style="margin-top:4px" onclick="click(380);navigate('compare')">Compare Two Results</button>
-      ` : `
-      <div class="cta-row">
-        <button class="btn btn-primary" onclick="click(520);goToNameScreen()">Begin &rarr;</button>
-        <button class="btn btn-ghost" onclick="click(380);navigate('compare')">Compare Two Results</button>
-      </div>
-      `}
-      ${saved ? `<button class="btn btn-ghost" style="margin-top:4px" onclick="click(380);loadSaved()">Reopen my last result</button>` : ""}
-      <div class="meta-row">
-        <span>Runs entirely on your device</span><span>&middot;</span><span>No account</span><span>&middot;</span><span>Works offline after first load</span>
-      </div>
-
-      <div class="quick-compare glass">
-        <label>Have someone's code? View their full profile, or compare it against your own.</label>
-        <div class="row">
-          <input type="text" id="quickCode" placeholder="Name-PF2-...">
-          <button class="btn btn-ghost" onclick="viewProfileFromCode()">View</button>
-          <button class="btn btn-ghost" onclick="quickCompareGo()">Compare</button>
-        </div>
-      </div>
-    </div>
-    <div class="footer-nav">
-      <button onclick="navigate('compare')">Compare page</button>
-      <button onclick="navigate('party')">Party Compare (3-5 people)</button>
-      <button onclick="alert('PersonaForge runs entirely in your browser. Nothing you answer is sent anywhere, and nothing is stored except a code on your own device if you choose to save it.')">Privacy</button>
-    </div>
-  `;
-  spawnAmbience();
+function setShareableURL(code){
+  if (!code || !window.history || !history.pushState) return;
+  const url = new URL(location.href);
+  url.search = "";
+  url.searchParams.set("code", code);
+  history.pushState({ code }, "", url.toString());
 }
 
-function quickCompareGo(){
-  const val = document.getElementById("quickCode").value.trim();
-  if (!val) return;
-  sessionStorage.setItem("pf_prefill_b", val);
-  click(420);
-  navigate("compare");
+function clearShareableURL(){
+  if (!window.history || !history.pushState) return;
+  const url = new URL(location.href);
+  url.search = "";
+  history.pushState({}, "", url.toString());
 }
 
-function viewProfileFromCode(){
-  const val = document.getElementById("quickCode").value.trim();
-  if (!val) return;
-  const decoded = decodeCode(val);
-  if (!decoded){ alert("That code doesn't look right. Check for typos and try again."); return; }
-  lastResult = buildResultFromDecoded(decoded, val);
-  careersExpanded = false;
-  funStatsOpen = false;
-  click(500);
-  renderResult();
+let pendingSharedCode = null;
+let pendingSharedProfile = null;
+
+function tryLoadProfileFromURL(){
+  const code = getProfileCodeFromURL();
+  if (!code) return false;
+  const decoded = decodeCode(code);
+  if (!decoded) return false;
+  pendingSharedCode = code;
+  pendingSharedProfile = decoded;
+  renderSharedLinkInterstitial();
+  return true;
 }
 
-function loadSaved(){
-  const code = localStorage.getItem("pf_last_code");
-  const decoded = code && decodeCode(code);
-  if (!decoded){ alert("No valid saved result found on this device."); return; }
-  lastResult = buildResultFromDecoded(decoded, code);
-  renderResult();
-}
-
-/* ---------------- NAME CAPTURE -----------------------------------------*/
-function goToNameScreen(){
-  setAccentColors();
-  root.innerHTML = `
-    ${topBar(true)}
-    <div class="name-screen">
-      <div class="eyebrow accent">BEFORE WE START</div>
-      <h2>Who am I reading?</h2>
-      <p>Your name goes at the front of your result and your personality code, so it's clearly yours if you ever share it.</p>
-      <input type="text" id="nameField" class="name-input" placeholder="Your name" maxlength="20" autocomplete="off" />
-
-      <button class="btn btn-ghost" style="margin-top:4px" onclick="toggleExtraDetails()" id="extraToggleBtn">+ Add more details (optional)</button>
-      <div id="extraDetails" class="hidden extra-details">
-        <input type="text" id="dobField" class="name-input small" placeholder="Date of birth" maxlength="20" autocomplete="off" />
-        <input type="text" id="occupationField" class="name-input small" placeholder="Occupation" maxlength="30" autocomplete="off" />
-        <input type="text" id="countryField" class="name-input small" placeholder="Country" maxlength="30" autocomplete="off" />
-        <p class="extra-note">Used only to personalize your report. No information ever leaves your device.</p>
-      </div>
-
-      <button class="btn btn-primary" onclick="confirmName()" style="margin-top:22px">Continue &rarr;</button>
-      <p style="font-size:12.5px;color:var(--text-dim)">You can also skip this and stay anonymous.</p>
-      <button class="btn btn-ghost" onclick="click(360);startQuiz('')" style="margin-top:-6px">Skip for now</button>
-    </div>
-  `;
-  spawnAmbience();
-  setTimeout(() => {
-    const f = document.getElementById("nameField");
-    if (f){ f.focus(); f.onkeydown = (e) => { if (e.key === "Enter") confirmName(); }; }
-  }, 50);
-}
-function toggleExtraDetails(){
-  const el = document.getElementById("extraDetails");
-  const btn = document.getElementById("extraToggleBtn");
-  const showing = !el.classList.contains("hidden");
-  el.classList.toggle("hidden");
-  btn.textContent = showing ? "+ Add more details (optional)" : "\u2212 Hide extra details";
-  click(360);
-}
-function confirmName(){
-  const val = document.getElementById("nameField").value.trim();
-  const meta = {
-    dob: (document.getElementById("dobField")?.value || "").trim(),
-    occupation: (document.getElementById("occupationField")?.value || "").trim(),
-    country: (document.getElementById("countryField")?.value || "").trim(),
-  };
-  click(500);
-  startQuiz(val, meta);
-}
-
-/* ---------------- QUIZ --------------------------------------------------*/
-function startQuiz(name, meta){
-  pendingName = name || "";
-  clearQuizProgress();
-  session = new QuizSession(Date.now() % 100000, pendingName);
-  session.meta = meta || {};
-  renderQuiz();
-}
-
-function renderQuiz(){
-  if (!session){ session = new QuizSession(Date.now() % 100000, pendingName); }
-  const q = session.current();
-  if (!q){ renderForging(); return; }
-  const { current, total, max } = session.progress();
-  const pctDone = Math.round((current / max) * 100);
-  const existing = session.currentAnswer();
-  root.innerHTML = `
-    <div class="container">
-      <div class="quiz-top">
-        ${topBar(true)}
-        <div class="progress-track"><div class="progress-fill" style="width:${pctDone}%"></div></div>
-        <div class="progress-meta">
-          <span>Question ${current + 1} of ${total}${total < max ? ` (up to ${max})` : ""} <span class="progress-pct count-up" data-target="${pctDone}" data-suffix="%">0%</span></span>
-          <span class="encourage">${session.encouragement()}</span>
-        </div>
-      </div>
-      <div class="question-card glass" id="qcard">
-        <div class="quiz-nav-row">
-          <button class="nav-btn" onclick="goBackQuestion()" ${session.canGoBack() ? "" : "disabled"}>&larr; Back</button>
-          <div class="q-num">SCENARIO ${String(current + 1).padStart(2,"0")}</div>
-          <span></span>
-        </div>
-        <div class="q-text">${q.text}</div>
-        <div class="options" role="listbox" aria-label="Answer options">
-          ${q.options.map((opt, i) => `
-            <button class="option ${existing && existing.optionIndex === i ? "selected" : ""}" role="option" onclick="selectOption(${i})">
-              <span class="opt-key">${String.fromCharCode(65+i)}</span>
-              <span>${opt.text}</span>
-            </button>`).join("")}
-        </div>
-        ${existing ? `<div class="continue-row"><button class="btn btn-ghost" onclick="continueForward()">Keep this answer, continue &rarr;</button></div>` : ""}
-      </div>
-    </div>
-  `;
-  spawnAmbience();
-  attachKeyHandler();
-  initCountUps(root);
-}
-
-function attachKeyHandler(){
-  document.onkeydown = (e) => {
-    if (["1","2","3"].includes(e.key)){
-      const idx = parseInt(e.key, 10) - 1;
-      const opts = document.querySelectorAll(".option");
-      if (opts[idx]) selectOption(idx);
-    } else if (e.key === "ArrowLeft" && session.canGoBack()){
-      goBackQuestion();
-    } else if (e.key === "ArrowRight" && session.canSkipForward()){
-      continueForward();
-    }
-  };
-}
-
-function goBackQuestion(){
-  click(300);
-  session.goBack();
-  renderQuiz();
-}
-function continueForward(){
-  click(460);
-  session.goForward();
-  if (session.isComplete()) renderForging();
-  else renderQuiz();
-}
-
-function selectOption(idx){
-  const opts = document.querySelectorAll(".option");
-  opts.forEach(o => o.classList.remove("selected"));
-  if (opts[idx]) opts[idx].classList.add("selected");
-  click(420 + idx * 60);
-  session.answer(idx);
-  saveQuizProgress();
-  const card = document.getElementById("qcard");
-  if (card) card.classList.add("leaving");
-  showCalcOverlay(1, () => {
-    if (session.isComplete()) renderForging();
-    else renderQuiz();
-  });
-}
-
-function showCalcOverlay(count, done){
-  document.onkeydown = null;
-  const overlay = document.createElement("div");
-  overlay.className = "calc-overlay";
-  const line = pickLines(1)[0] || "Processing";
-  overlay.innerHTML = `<div class="calc-bars"><span></span><span></span><span></span><span></span></div><div class="calc-line">${line}...</div>`;
-  document.body.appendChild(overlay);
-  setTimeout(() => {
-    overlay.remove();
-    done();
-  }, 480);
-}
-
-/* ---------------- FORGING (brief transition + compute) -----------------*/
-function renderForging(){
-  document.onkeydown = null;
-  const lines = ["Forging Personality...", "Analyzing Patterns...", ...pickLines(2), "Almost Finished..."];
-  root.innerHTML = `
-    <div class="forging">
-      <div class="calc-bars"><span></span><span></span><span></span><span></span></div>
-      <h2>Putting it together</h2>
-      <p id="forge-line">${lines[0]}</p>
-    </div>`;
-  let i = 0;
-  const int = setInterval(() => {
-    i++;
-    const el = document.getElementById("forge-line");
-    if (el && lines[i]) el.textContent = lines[i];
-  }, 420);
-  setTimeout(() => {
-    clearInterval(int);
-    computeResult();
-    renderResult();
-    fireConfetti();
-  }, 2200);
-}
-
+/* =========================================================================
+   FORGE - RESULT BUILDING
+   Used both for a freshly completed quiz and for viewing a shared/saved
+   code: builds the full profile-extras bundle and the final result
+   object, plus the small local history log.
+   ========================================================================= */
 function buildProfileExtras(normDims, archetype, ranked, session, upgradedFromV1){
   return {
     mix: computePersonalityMix(ranked),
+    humanValues: computeHumanValues(normDims),
+    lifeBalance: computeLifeBalance(normDims),
+    motivationFacets: computeMotivationFacets(normDims),
+    sinVirtue: computeSinVirtueProfile(normDims),
     narrativeRole: computeNarrativeRole(normDims),
     social: computeSocialProfile(normDims),
     relationship: computeRelationshipProfile(normDims),
@@ -5181,11 +3967,14 @@ function buildProfileExtras(normDims, archetype, ranked, session, upgradedFromV1
   };
 }
 
-function computeResult(){
+/* Takes the session explicitly (rather than reading a global) since this
+   runs on quiz.html, where the quiz session lives, and its result then
+   travels to result.html for display. */
+function computeResult(session){
   const normDims = session.normalizedDims();
   const match = matchArchetype(normDims);
   const code = encodeCode(match.primary.id, normDims, session.name);
-  lastResult = {
+  const result = {
     name: session.name || "",
     meta: session.meta || {},
     normDims,
@@ -5202,9 +3991,9 @@ function computeResult(){
     ...buildProfileExtras(normDims, match.primary, match.ranked, session, false),
   };
   localStorage.setItem("pf_last_code", code);
-  saveToTimeline(lastResult);
+  saveToTimeline(result);
   clearQuizProgress();
-  careersExpanded = false;
+  return result;
 }
 
 /* ---------------- TIMELINE -----------------------------------
@@ -5257,992 +4046,3 @@ function buildResultFromDecoded(decoded, code){
   };
 }
 
-/* ---------------- RESULT -------------------------------------------------*/
-function renderResult(){
-  const r = lastResult;
-  const a = r.archetype;
-  setAccentColors(a.colors[0], a.colors[1]);
-  const topCareers = careersExpanded ? r.careers : r.careers.slice(0, 8);
-  const previousTimeline = getPreviousTimelineEntry();
-  root.innerHTML = `
-    <div class="container result-hero">
-      ${topBar(true)}
-      ${r.name ? `<div class="name-tag">${r.name}'s Result</div>` : `<div class="name-tag">Your Result</div>`}
-      ${r.meta && (r.meta.occupation || r.meta.country || r.meta.dob) ? `<p class="meta-line">${[r.meta.occupation, r.meta.country, r.meta.dob ? "born " + r.meta.dob : ""].filter(Boolean).join(" \u00b7 ")}</p>` : ""}
-      <div class="ingot glass">
-        <div class="ingot-icon">${a.icon}</div>
-        <div class="archetype-eyebrow">Primary Archetype</div>
-        <h2 class="ingot-name">${a.name}</h2>
-        <div class="ingot-title">${a.title}</div>
-        <p class="ingot-desc">${a.description}</p>
-        <p class="ingot-sub">${r.subProfile}</p>
-        <div class="extras-row">
-          <span class="tag">${r.extras.animal}</span>
-          <span class="tag">${r.extras.element}</span>
-          <span class="tag">${r.extras.symbol} Symbol</span>
-        </div>
-        <div class="mix-row">
-          ${r.mix.map((m,i) => `<div class="mix-item"><span class="mix-pct count-up" data-target="${m.pct}" data-suffix="%">0%</span><span class="mix-name">${m.archetype.icon} ${i===0?"":m.archetype.name}</span></div>`).join("")}
-        </div>
-        <div class="ingot-code">${r.code}</div>
-        ${r.upgradedFromV1 ? `
-        <div class="upgrade-banner">
-          <p>Your profile was created using PersonaForge Version 1.</p>
-          <p>PersonaForge has improved. Your original 20 traits carried over exactly, the 5 newer ones default to neutral for now.</p>
-          <button class="btn btn-accent" style="margin-top:10px" onclick="startUpgradeQuiz()">Answer ${UPGRADE_QUESTION_COUNT} questions to unlock the newer profile sections</button>
-        </div>` : ""}
-      </div>
-      <div class="export-row">
-        <button class="btn btn-ghost" onclick="exportPNG('story')">Export Story</button>
-        <button class="btn btn-ghost" onclick="exportPNG('post')">Export Post</button>
-        <button class="btn btn-ghost" onclick="window.print()">Save as PDF</button>
-        <button class="btn btn-ghost" onclick="copyCode()">Copy Code</button>
-      </div>
-
-      <div class="compare-widget glass">
-        <h4>Compare with someone else</h4>
-        <p class="hint">Paste a friend's PersonaForge code to see how well you'd actually get along.</p>
-        <div class="row">
-          <input type="text" id="inlineCompareCode" placeholder="Name-PF1-...">
-          <button class="btn btn-accent" onclick="runInlineCompare()">Compare</button>
-        </div>
-        <div id="inlineCompareOut"></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Hidden Trait Radar</span></div>
-        <canvas id="radar" width="520" height="520" role="img" aria-label="Radar chart of 20 hidden personality dimensions"></canvas>
-        <div class="radar-legend">25 dimensions, measured from your answers, never shown to you during the test</div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Strengths and Growth Edges</span></div>
-        <div class="grid-2">
-          <div class="card glass"><h4>Strengths</h4><div class="tag-list">${a.strengths.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-          <div class="card glass"><h4>Watch-outs</h4><div class="tag-list">${a.weaknesses.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-          <div class="card glass"><h4>Hidden Strengths</h4><div class="tag-list">${r.hidden.hiddenStrengths.length ? r.hidden.hiddenStrengths.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>Nothing standing out beyond the type itself</span>"}</div><p style="margin-top:8px;font-size:12.5px;color:var(--text-dim)">Traits outside ${a.name}'s usual signature that showed up strongly anyway.</p></div>
-          <div class="card glass"><h4>Hidden Weaknesses</h4><div class="tag-list">${r.hidden.hiddenWeaknesses.length ? r.hidden.hiddenWeaknesses.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>Nothing standing out beyond the type itself</span>"}</div></div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>Match Confidence</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.confidence.confidencePct}%"></div></div><p style="margin-top:8px;font-size:12.5px;color:var(--text-dim)">How clearly ${a.name} beat the runner-up.</p></div>
-          <div class="card glass"><h4>Personality Stability</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.confidence.stabilityPct}%"></div></div><p style="margin-top:8px;font-size:12.5px;color:var(--text-dim)">How far ahead your top type is from the field overall, not just the runner-up.</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">How You Operate</span></div>
-        <div class="grid-2">
-          <div class="card glass"><h4>Work Style</h4><p>${a.workStyle}</p></div>
-          <div class="card glass"><h4>Under Stress</h4><p>${a.stressResponse}</p></div>
-          <div class="card glass"><h4>Friendship</h4><p>${a.friendshipStyle}</p></div>
-          <div class="card glass"><h4>Dating</h4><p>${a.datingStyle}</p></div>
-          <div class="card glass"><h4>Leadership</h4><p>${a.leadershipStyle}</p></div>
-          <div class="card glass"><h4>Learning</h4><p>${a.learningStyle}</p></div>
-          <div class="card glass"><h4>Communication</h4><p>${a.communicationStyle}</p></div>
-          <div class="card glass"><h4>Decision Making</h4><p>${a.decisionMaking}</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Ideal Environments and Hobbies</span></div>
-        <div class="grid-2">
-          <div class="card glass"><h4>Ideal Environments</h4><div class="tag-list">${a.idealEnvironments.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-          <div class="card glass"><h4>Favorite Hobbies</h4><div class="tag-list">${a.hobbies.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-        </div>
-        <div class="card glass" style="margin-top:12px"><h4>Growth Advice</h4><p>${a.growthAdvice}</p></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Perfect vs Worst Teammate</span></div>
-        <div class="grid-2">
-          <div class="card glass"><h4>Perfect Teammate</h4><p>${a.bestTeammate}</p></div>
-          <div class="card glass"><h4>Worst Teammate</h4><p>${a.worstTeammate}</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Measured Traits</span></div>
-        <div class="grid-4" id="traits">
-          ${Object.entries(r.traits).map(([k,v]) => `
-            <div class="stat-tile glass">
-              <div class="stat-val count-up" data-target="${v}">0</div>
-              <div class="stat-label">${k}</div>
-              <div class="stat-bar-track"><div class="stat-bar-fill" data-w="${v}"></div></div>
-            </div>`).join("")}
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Career Matches</span></div>
-        ${topCareers.map(c => `
-          <div class="career-row glass">
-            <span>${c.name}</span>
-            <span class="fit-badge fit-${c.tier === "Excellent Match" ? "excellent" : c.tier === "Good Match" ? "good" : c.tier === "Possible Match" ? "possible" : "avoid"}">${c.tier}, ${c.fit}%</span>
-          </div>`).join("")}
-        <div class="careers-toggle"><button onclick="toggleCareers()">${careersExpanded ? "Show fewer" : `Show all ${r.careers.length}`}</button></div>
-        <p class="center-note" style="text-align:left">${r.careers[0].why}</p>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Relationship Styles</span></div>
-        <div class="card glass">
-          ${r.relationships.map(rel => `
-            <div class="relationship-row">
-              <span class="r-label">${rel.label}</span>
-              <div class="stat-bar-track"><div class="stat-bar-fill" data-w="${rel.score}"></div></div>
-              <span class="r-score">${rel.score}</span>
-            </div>`).join("")}
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Full Archetype Ranking</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
-        <div class="card glass" style="margin-top:12px">
-          ${r.ranked.map((row, i) => {
-            const maxScore = r.ranked[0].score || 1;
-            const width = Math.max(4, Math.round((row.score / maxScore) * 100));
-            return `
-            <div class="rank-row ${i===0 ? "primary" : ""}">
-              <span class="rank-num">${String(i+1).padStart(2,"0")}</span>
-              <span class="rank-icon">${row.archetype.icon}</span>
-              <span class="rank-name">${row.archetype.name}</span>
-              <div class="rank-bar-track"><div class="rank-bar-fill" style="width:${width}%"></div></div>
-            </div>`;
-          }).join("")}
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Life Quote</span></div>
-        <div class="card glass" style="text-align:center; font-family:var(--font-display); font-size:19px; font-style:italic;">"${a.quote}"</div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Narrative Role</span></div>
-        <div class="card glass">
-          <h4>${r.narrativeRole.primary.icon} ${r.narrativeRole.primary.name}</h4>
-          <p>${r.narrativeRole.primary.description}</p>
-          <p style="margin-top:10px;color:var(--text-dim);font-size:13px">Runner-up: ${r.narrativeRole.runnerUp.icon} ${r.narrativeRole.runnerUp.name}</p>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Fantasy Role</span></div>
-        <div class="card glass">
-          <h4>${r.fantasyRole.icon} ${r.fantasyRole.name}</h4>
-          <p>${r.fantasyRole.description}</p>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>Weapon</h4><p>${r.fantasyWeapon.name}</p></div>
-          <div class="card glass"><h4>Companion</h4><p>${r.fantasyCompanion.name}</p></div>
-          <div class="card glass" style="grid-column:1/-1"><h4>Kingdom</h4><p>${r.fantasyKingdom.name}</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Answer Consistency</span></div>
-        ${r.consistency ? `
-        <div class="card glass">
-          <div class="stat-val count-up" style="font-size:36px;text-align:center" data-target="${r.consistency.pct}" data-suffix="%">0%</div>
-          <p style="text-align:center;margin-top:6px">You answered consistently across multiple situations.</p>
-          <p style="text-align:center;margin-top:6px;font-size:12px;color:var(--text-dim)">${r.consistency.note}</p>
-        </div>` : `<p class="center-note" style="text-align:left">Not tracked for a viewed or upgraded profile, only for a freshly taken test.</p>`}
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Other Frameworks</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">Approximate, for reference only, if you're familiar with these systems. Your PersonaForge archetype above is still the primary read.</p>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass framework-card framework-mbti"><h4>Closest MBTI</h4><p style="font-size:22px;font-family:var(--font-display)">${r.frameworks.mbti}</p></div>
-          <div class="card glass framework-card framework-enneagram"><h4>Closest Enneagram</h4><p>${r.frameworks.enneagram.name}</p></div>
-        </div>
-        <div class="card glass framework-card framework-disc" style="margin-top:12px">
-          <h4>Closest DISC</h4>
-          ${r.frameworks.disc.map(d => `<div class="mini-bar-row"><span>${d.name}</span><span>${d.pct}%</span></div>`).join("")}
-        </div>
-        <div class="card glass framework-card framework-bigfive" style="margin-top:12px">
-          <h4>Closest Big Five</h4>
-          ${r.frameworks.bigFive.map(d => `<div class="relationship-row"><span class="r-label">${d.name}</span><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${d.pct}%"></div></div><span class="r-score">${d.pct}</span></div>`).join("")}
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Friendship Profile</span></div>
-        <div class="card glass">
-          <h4>${r.friendship.type.name}</h4>
-        </div>
-        <div class="grid-3" style="margin-top:12px">
-          <div class="card glass"><h4>Reliable</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.reliableScore}%"></div></div></div>
-          <div class="card glass"><h4>Comfort</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.comfortScore}%"></div></div></div>
-          <div class="card glass"><h4>Chaos</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.chaosScore}%"></div></div></div>
-          <div class="card glass"><h4>Listening</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.listeningSkill}%"></div></div></div>
-          <div class="card glass"><h4>Advice</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.adviceSkill}%"></div></div></div>
-          <div class="card glass"><h4>Planning</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.friendship.planningSkill}%"></div></div></div>
-        </div>
-        <div class="card glass" style="margin-top:12px"><h4>What Motivates You</h4><p>${r.motivation.name}</p></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">A Few More Reads</span></div>
-        <div class="extras-row" style="justify-content:flex-start">
-          <span class="tag">${r.mythicalCreature.name}</span>
-          <span class="tag">${r.season.name}</span>
-          <span class="tag">${r.timeOfDay.name}</span>
-          <span class="tag">${r.chessPiece.name}</span>
-          <span class="tag">${r.flower.name}</span>
-          <span class="tag">${r.planet.name}</span>
-          <span class="tag">${r.constellation.name}</span>
-          <span class="tag">${r.gemstone.name}</span>
-          <span class="tag">${r.weather.name}</span>
-        </div>
-        <div class="card glass" style="margin-top:12px"><h4>Coffee Order</h4><p>${r.coffeeOrder.name}</p></div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Social Profile</span></div>
-        <div class="card glass">
-          <h4>${r.social.category}</h4>
-          <div class="spectrum-track"><div class="spectrum-fill" style="width:${r.social.spectrumPct}%"></div><div class="spectrum-dot" style="left:${r.social.spectrumPct}%"></div></div>
-          <div class="spectrum-labels"><span>Introvert</span><span>Ambivert</span><span>Extrovert</span></div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>Social Battery</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.social.socialBattery}%"></div></div></div>
-          <div class="card glass"><h4>Group Size Preference</h4><p>${r.social.groupSizePreference}</p></div>
-          <div class="card glass"><h4>Conversation Style</h4><p>${r.social.conversationStyle}</p></div>
-          <div class="card glass"><h4>Communication Style</h4><p>${r.social.communicationStyle}</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Relationship Profile</span></div>
-        <div class="card glass">
-          <h4>Love Language Mix</h4>
-          ${r.relationship.loveLanguages.map(l => `
-            <div class="relationship-row">
-              <span class="r-label">${l.name}</span>
-              <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${l.pct}%"></div></div>
-              <span class="r-score">${l.pct}%</span>
-            </div>`).join("")}
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>Attachment Style</h4><p><strong>${r.relationship.attachmentStyle.name}.</strong> ${r.relationship.attachmentStyle.description}</p></div>
-          <div class="card glass"><h4>Conflict Style</h4><p><strong>${r.relationship.conflictStyle.name}.</strong> ${r.relationship.conflictStyle.description}</p></div>
-          <div class="card glass"><h4>Trust Level</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.relationship.trustLevel}%"></div></div></div>
-          <div class="card glass"><h4>Jealousy Level</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.relationship.jealousyLevel}%"></div></div></div>
-          <div class="card glass"><h4>Personal Space Needed</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.relationship.personalSpace}%"></div></div></div>
-          <div class="card glass"><h4>Emotional Intimacy</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${r.relationship.emotionalIntimacy}%"></div></div></div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>Romantic Style</h4><p>${a.datingStyle}</p></div>
-          <div class="card glass"><h4>Relationship Dynamic</h4><p>${r.relationship.relationshipDynamic}</p></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Thinking, Learning, and Decisions</span></div>
-        <div class="grid-3">
-          <div class="card glass">
-            <h4>Thinking Style</h4>
-            ${r.thinking.map(t => `<div class="mini-bar-row"><span>${t.name}</span><span>${t.pct}%</span></div>`).join("")}
-          </div>
-          <div class="card glass">
-            <h4>Learning Style</h4>
-            ${r.learning.map(t => `<div class="mini-bar-row"><span>${t.name}</span><span>${t.pct}%</span></div>`).join("")}
-          </div>
-          <div class="card glass">
-            <h4>Decision Style</h4>
-            ${r.decision.map(t => `<div class="mini-bar-row"><span>${t.name}</span><span>${t.pct}%</span></div>`).join("")}
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Stress Response and Environment</span></div>
-        <div class="grid-2">
-          <div class="card glass">
-            <h4>Under Stress, In Order</h4>
-            ${r.stress.map((s,i) => `<p style="margin-top:${i?8:0}px"><strong>${i+1}. ${s.name}.</strong> ${s.description}</p>`).join("")}
-          </div>
-          <div class="card glass">
-            <h4>Ideal Environments</h4>
-            <div class="tag-list">${r.environments.map(e => `<span class="tag">${e}</span>`).join("")}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Achievements Unlocked</span></div>
-        ${r.achievements.length ? `
-        <div class="grid-2">
-          ${r.achievements.map(ach => `
-            <div class="card glass achievement-card">
-              <div class="achievement-icon">${ach.icon}</div>
-              <div><h4 style="margin-bottom:2px">${ach.name}</h4><p style="font-size:13px">${ach.description}</p></div>
-            </div>`).join("")}
-        </div>` : `<p class="center-note" style="text-align:left">No badges unlocked this run, your traits are more balanced than extreme, which is its own kind of interesting.</p>`}
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Aesthetic and Entertainment</span></div>
-        <div class="card glass">
-          <h4>${r.aesthetic.name}</h4>
-          <div class="grid-2" style="margin-top:8px">
-            <p><strong>Colors:</strong> ${r.aesthetic.colors}</p>
-            <p><strong>Fonts:</strong> ${r.aesthetic.fontPairing}</p>
-            <p><strong>Clothing:</strong> ${r.aesthetic.clothing}</p>
-            <p><strong>Room:</strong> ${r.aesthetic.room}</p>
-          </div>
-        </div>
-        <div class="grid-2" style="margin-top:12px">
-          <div class="card glass"><h4>${r.entertainment.primary.name}</h4>
-            <p><strong>Music:</strong> ${r.entertainment.primary.music}</p>
-            <p><strong>Movies:</strong> ${r.entertainment.primary.movie}</p>
-            <p><strong>TV:</strong> ${r.entertainment.primary.tv}</p>
-            <p><strong>Books:</strong> ${r.entertainment.primary.book}</p>
-          </div>
-          <div class="card glass"><h4>Also worth trying: ${r.entertainment.secondary.name}</h4>
-            <p><strong>Music:</strong> ${r.entertainment.secondary.music}</p>
-            <p><strong>Movies:</strong> ${r.entertainment.secondary.movie}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Just for Fun</span></div>
-        <p class="center-note" style="text-align:left;margin-top:0">Playful, not a real assessment, unlike everything above.</p>
-        <div class="careers-toggle" style="margin-bottom:10px"><button onclick="toggleFunStats()">${funStatsOpen ? "Hide" : "Show"} the fun stats</button></div>
-        ${funStatsOpen ? `
-        <div class="grid-4">
-          ${Object.entries(r.funStats).map(([k,v]) => `
-            <div class="stat-tile glass">
-              <div class="stat-val count-up" data-target="${v}">0</div>
-              <div class="stat-label">${k}</div>
-              <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${v}%"></div></div>
-            </div>`).join("")}
-        </div>` : ""}
-      </div>
-
-      ${previousTimeline ? renderTimelineDelta(r, previousTimeline) : ""}
-
-      <div class="section">
-        <div class="section-title"><span class="eyebrow">Scan to Share</span></div>
-        <div class="card glass" style="text-align:center">
-          <canvas id="qrCanvas"></canvas>
-          <p style="margin-top:10px;font-size:13px;color:var(--text-muted)">Scans to a link that loads this exact result, no app required.</p>
-          <button class="btn btn-ghost" style="margin-top:10px" onclick="downloadQR()">Download QR</button>
-        </div>
-      </div>
-
-      <div class="section">
-        <p class="center-note">Everything stays on your device. No servers, no accounts, no data collection. Your personality belongs to you.</p>
-      </div>
-
-      <div class="footer-nav">
-        <button onclick="click(400);goToNameScreen()">Retake the test</button>
-        <button onclick="click(400);navigate('compare')">Compare with someone</button>
-      </div>
-    </div>
-  `;
-  requestAnimationFrame(() => {
-    document.querySelectorAll(".stat-bar-fill").forEach(el => {
-      el.style.width = (el.dataset.w || el.style.width) + (el.dataset.w ? "%" : "");
-    });
-    drawRadar(document.getElementById("radar"), r.normDims, r.archetype.colors[0]);
-    const qrCanvas = document.getElementById("qrCanvas");
-    if (qrCanvas){
-      const shareUrl = `https://yota321.github.io/PersonaForge/?code=${encodeURIComponent(r.code)}`;
-      const ok = QR.drawToCanvas(qrCanvas, shareUrl, { scale: 6, margin: 3 });
-      if (!ok) QR.drawToCanvas(qrCanvas, r.code, { scale: 6, margin: 3 });
-    }
-    initCountUps(root);
-    setupProgressiveReveal(root);
-  });
-}
-
-function renderTimelineDelta(r, prev){
-  const deltas = ["confidence","leadership","creativity","socialEnergy","resilience"].map(dim => {
-    const before = prev.normDims ? prev.normDims[dim] : 0;
-    const after = r.normDims[dim];
-    return { dim, before: pct(before), after: pct(after) };
-  });
-  return `
-    <div class="section">
-      <div class="section-title"><span class="eyebrow">Since Last Time</span></div>
-      <p class="center-note" style="text-align:left;margin-top:0">Compared with your previous run on this device, ${new Date(prev.timestamp).toLocaleDateString()}.</p>
-      <div class="card glass">
-        ${deltas.map(d => `
-          <div class="relationship-row">
-            <span class="r-label">${DIM_LABELS[d.dim]}</span>
-            <span style="font-family:var(--font-mono);font-size:13px;color:var(--text-muted)">${d.before} &rarr; ${d.after}</span>
-          </div>`).join("")}
-      </div>
-    </div>`;
-}
-
-function toggleFunStats(){
-  funStatsOpen = !funStatsOpen;
-  renderResult();
-}
-
-function downloadQR(){
-  const canvas = document.getElementById("qrCanvas");
-  if (!canvas) return;
-  const link = document.createElement("a");
-  link.download = "personaforge-qr.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-  click(700);
-}
-
-function toggleCareers(){
-  careersExpanded = !careersExpanded;
-  renderResult();
-}
-
-function copyCode(){
-  navigator.clipboard?.writeText(lastResult.code).then(() => {
-    click(700); alert("Personality code copied.");
-  }).catch(() => alert(lastResult.code));
-}
-
-let compareCategoriesExpanded = false;
-let compareState = null;
-let partyState = null;
-
-/* ---------------- COMPATIBILITY LOADING TRANSITION ------------------------
-   A brief "calculating" beat before a compare result appears, matching the
-   forging screen's rhythm so checking compatibility feels like its own
-   real moment rather than an instant lookup. */
-function showCompatibilityLoading(out, done){
-  const lines = pickLines(4, COMPATIBILITY_CALC_LINES);
-  out.innerHTML = `
-    <div class="section revealed">
-      <div class="card glass compat-loading">
-        <div class="calc-bars"><span></span><span></span><span></span><span></span></div>
-        <p id="compat-loading-line">${lines[0]}...</p>
-      </div>
-    </div>`;
-  let i = 0;
-  const interval = setInterval(() => {
-    i++;
-    const el = document.getElementById("compat-loading-line");
-    if (el && lines[i]) el.textContent = lines[i] + "...";
-  }, 380);
-  setTimeout(() => {
-    clearInterval(interval);
-    done();
-  }, 1650);
-}
-
-function runInlineCompare(){
-  const codeStr = document.getElementById("inlineCompareCode").value;
-  const other = decodeCode(codeStr);
-  const out = document.getElementById("inlineCompareOut");
-  if (!other){
-    out.innerHTML = `<p class="center-note" style="text-align:left">That code doesn't look right. Check for typos and try again.</p>`;
-    return;
-  }
-  const mine = { normDims: lastResult.normDims };
-  compareCategoriesExpanded = false;
-  compareState = { profileA: mine, archA: lastResult.archetype, nameA: lastResult.name, profileB: other, archB: other.archetype, nameB: other.name, target: "inlineCompareOut" };
-  click(420);
-  showCompatibilityLoading(out, () => {
-    out.innerHTML = renderCompareResult();
-    initCountUps(out);
-  });
-}
-
-/* ---------------- Radar chart (canvas, no library) ---------------------*/
-function hexToRgba(hex, alpha){
-  const h = (hex || "#A78BFA").replace("#","");
-  const full = h.length === 3 ? h.split("").map(c=>c+c).join("") : h;
-  const r = parseInt(full.substring(0,2),16) || 0;
-  const g = parseInt(full.substring(2,4),16) || 0;
-  const b = parseInt(full.substring(4,6),16) || 0;
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-
-function drawRadar(canvas, normDims, accentColor){
-  if (!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const dpr = window.devicePixelRatio || 1;
-  const dims = DIMENSIONS;
-  const n = dims.length;
-  const labels = dims.map(d => RADAR_LABELS[d] || d);
-  const color = accentColor || "#A78BFA";
-
-  // Measure the widest label at the font size we intend to use, so the
-  // margin is always exactly as big as it needs to be, on any screen.
-  const fontSize = Math.max(9, Math.min(11, root.clientWidth / 42));
-  ctx.font = `${fontSize}px Manrope, sans-serif`;
-  let maxLabelWidth = 0;
-  labels.forEach(l => { maxLabelWidth = Math.max(maxLabelWidth, ctx.measureText(l).width); });
-
-  const available = Math.min(560, root.clientWidth - 24);
-  const margin = Math.min(available * 0.34, maxLabelWidth + 22);
-  const size = available;
-  canvas.width = size * dpr; canvas.height = size * dpr;
-  canvas.style.width = size + "px"; canvas.style.height = size + "px";
-  ctx.scale(dpr, dpr);
-  const cx = size/2, cy = size/2, R = Math.max(60, size/2 - margin);
-  ctx.clearRect(0,0,size,size);
-
-  const isLight = document.documentElement.dataset.theme === "light";
-  const gridColor = isLight ? "rgba(15,23,42,0.10)" : "rgba(255,255,255,0.08)";
-  const spokeColor = isLight ? "rgba(15,23,42,0.07)" : "rgba(255,255,255,0.06)";
-  const labelColor = isLight ? "rgba(15,23,42,0.68)" : "rgba(248,250,252,0.62)";
-  const dotColor = isLight ? "#0F172A" : "#F8FAFC";
-
-  ctx.strokeStyle = gridColor;
-  ctx.lineWidth = 1;
-  for (let ring = 1; ring <= 4; ring++){
-    ctx.beginPath();
-    for (let i = 0; i <= n; i++){
-      const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-      const r = (R * ring)/4;
-      const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    }
-    ctx.stroke();
-  }
-  ctx.fillStyle = labelColor;
-  ctx.font = `${fontSize}px Manrope, sans-serif`;
-  ctx.textBaseline = "middle";
-  dims.forEach((d, i) => {
-    const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-    const x = cx + Math.cos(angle) * R, y = cy + Math.sin(angle) * R;
-    ctx.strokeStyle = spokeColor;
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
-    const cosA = Math.cos(angle);
-    const lx = cx + cosA * (R + 14), ly = cy + Math.sin(angle) * (R + 14);
-    ctx.textAlign = cosA > 0.15 ? "left" : cosA < -0.15 ? "right" : "center";
-    ctx.fillText(labels[i], lx, ly);
-  });
-
-  // The data polygon draws itself: growing outward from the center over
-  // ~750ms instead of appearing instantly, so the personality visibly
-  // emerges rather than just showing up.
-  const drawPolygon = (progress) => {
-    ctx.save();
-    ctx.beginPath();
-    dims.forEach((d, i) => {
-      const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-      const val = Math.max(0, Math.min(1, (normDims[d] + 10) / 20)) * progress;
-      const r = R * val;
-      const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
-      i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    });
-    ctx.closePath();
-    ctx.fillStyle = hexToRgba(color, 0.18 * progress);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.8;
-    ctx.fill(); ctx.stroke();
-    ctx.fillStyle = dotColor;
-    dims.forEach((d, i) => {
-      const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-      const val = Math.max(0, Math.min(1, (normDims[d] + 10) / 20)) * progress;
-      const r = R * val;
-      const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
-      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI*2); ctx.fill();
-    });
-    ctx.restore();
-  };
-
-  if (reducedMotion()){
-    drawPolygon(1);
-    return;
-  }
-  const start = performance.now();
-  const duration = 750;
-  function tick(now){
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    ctx.clearRect(0,0,size,size);
-    ctx.strokeStyle = gridColor;
-    ctx.lineWidth = 1;
-    for (let ring = 1; ring <= 4; ring++){
-      ctx.beginPath();
-      for (let i = 0; i <= n; i++){
-        const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-        const r = (R * ring)/4;
-        const x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
-        i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-      }
-      ctx.stroke();
-    }
-    ctx.fillStyle = labelColor;
-    ctx.font = `${fontSize}px Manrope, sans-serif`;
-    ctx.textBaseline = "middle";
-    dims.forEach((d, i) => {
-      const angle = (i / n) * Math.PI * 2 - Math.PI/2;
-      const x = cx + Math.cos(angle) * R, y = cy + Math.sin(angle) * R;
-      ctx.strokeStyle = spokeColor;
-      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
-      const cosA = Math.cos(angle);
-      const lx = cx + cosA * (R + 14), ly = cy + Math.sin(angle) * (R + 14);
-      ctx.textAlign = cosA > 0.15 ? "left" : cosA < -0.15 ? "right" : "center";
-      ctx.fillText(labels[i], lx, ly);
-    });
-    drawPolygon(eased);
-    if (t < 1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-/* ---------------- PNG export (canvas render of a share card) -----------*/
-function exportPNG(kind){
-  const r = lastResult; const a = r.archetype;
-  const dims = kind === "story" ? { w: 1080, h: 1920 } : { w: 1080, h: 1350 };
-  const canvas = document.createElement("canvas");
-  canvas.width = dims.w; canvas.height = dims.h;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#0F1117";
-  ctx.fillRect(0,0,dims.w,dims.h);
-  const glow = ctx.createRadialGradient(dims.w/2, dims.h*0.22, 40, dims.w/2, dims.h*0.22, dims.w*0.7);
-  glow.addColorStop(0, hexToRgba(a.colors[0], 0.22)); glow.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = glow; ctx.fillRect(0,0,dims.w,dims.h);
-  const glow2 = ctx.createRadialGradient(dims.w*0.85, dims.h*0.75, 40, dims.w*0.85, dims.h*0.75, dims.w*0.6);
-  glow2.addColorStop(0, hexToRgba(a.colors[1], 0.14)); glow2.addColorStop(1, "rgba(0,0,0,0)");
-  ctx.fillStyle = glow2; ctx.fillRect(0,0,dims.w,dims.h);
-
-  ctx.textAlign = "center";
-  ctx.fillStyle = "#A7B0C2";
-  ctx.font = "600 26px 'Space Grotesk', sans-serif";
-  ctx.fillText("PERSONAFORGE", dims.w/2, dims.h*0.12);
-
-  if (r.name){
-    ctx.font = "500 30px 'JetBrains Mono', monospace";
-    ctx.fillStyle = "#F8FAFC";
-    ctx.fillText(r.name.toUpperCase(), dims.w/2, dims.h*0.18);
-  }
-
-  ctx.font = "700 90px 'Space Grotesk', sans-serif";
-  ctx.fillStyle = "#F8FAFC";
-  ctx.fillText(a.icon, dims.w/2, dims.h*0.30);
-
-  ctx.font = "700 60px 'Space Grotesk', sans-serif";
-  ctx.fillStyle = "#F8FAFC";
-  wrapText(ctx, a.name, dims.w/2, dims.h*0.38, dims.w*0.85, 66);
-
-  ctx.font = "italic 400 28px 'Manrope', sans-serif";
-  ctx.fillStyle = a.colors[0];
-  ctx.fillText(a.title, dims.w/2, dims.h*0.44);
-
-  ctx.font = "400 26px 'Manrope', sans-serif";
-  ctx.fillStyle = "#CBD5E1";
-  wrapText(ctx, a.description, dims.w/2, dims.h*0.52, dims.w*0.78, 38);
-
-  const topTraits = Object.entries(r.traits).sort((x,y)=>y[1]-x[1]).slice(0,3);
-  const statY = dims.h*0.7;
-  const spacing = dims.w/4;
-  const statColors = [a.colors[0], a.colors[1], "#A7B0C2"];
-  topTraits.forEach(([k,v], i) => {
-    const x = dims.w/2 + (i-1)*spacing;
-    ctx.font = "700 50px 'Space Grotesk', sans-serif"; ctx.fillStyle = statColors[i] || "#F8FAFC";
-    ctx.fillText(v, x, statY);
-    ctx.font = "400 18px 'Manrope', sans-serif"; ctx.fillStyle = "#A7B0C2";
-    wrapText(ctx, k, x, statY + 30, spacing - 10, 20);
-  });
-
-  ctx.font = "400 22px 'JetBrains Mono', monospace";
-  ctx.fillStyle = "#6B7385";
-  ctx.fillText(r.code, dims.w/2, dims.h*0.95);
-
-  const link = document.createElement("a");
-  link.download = `personaforge-${kind}.png`;
-  link.href = canvas.toDataURL("image/png");
-  link.click();
-  click(760);
-}
-function wrapText(ctx, text, x, y, maxWidth, lineHeight){
-  const words = String(text).split(" ");
-  let line = "", lines = [];
-  words.forEach(w => {
-    const test = line + w + " ";
-    if (ctx.measureText(test).width > maxWidth && line){ lines.push(line); line = w + " "; }
-    else line = test;
-  });
-  lines.push(line);
-  const startY = y - ((lines.length-1)*lineHeight)/2;
-  lines.forEach((l,i) => ctx.fillText(l.trim(), x, startY + i*lineHeight));
-}
-
-/* ---------------- COMPARE ------------------------------------------------*/
-function renderCompare(){
-  setAccentColors();
-  const prefillB = sessionStorage.getItem("pf_prefill_b") || "";
-  sessionStorage.removeItem("pf_prefill_b");
-  root.innerHTML = `
-    <div class="container">
-      ${topBar(true)}
-      <div class="eyebrow accent">COMPARE</div>
-      <h2 style="margin:10px 0 6px">Two Codes, One Read</h2>
-      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste two PersonaForge codes to see how the two of you actually line up. Everything decodes locally, right here in the browser.</p>
-      <div class="compare-inputs" style="margin-top:20px">
-        <div><label>Person A code</label><textarea id="codeA" placeholder="Name-PF1-...">${lastResult ? lastResult.code : ""}</textarea></div>
-        <div><label>Person B code</label><textarea id="codeB" placeholder="Name-PF1-...">${prefillB}</textarea></div>
-      </div>
-      <div class="cta-row" style="justify-content:flex-start;margin-top:18px">
-        <button class="btn btn-primary" onclick="runCompare()">Compare</button>
-        <button class="btn btn-ghost" onclick="navigate('party')">Compare a group instead</button>
-      </div>
-      <div id="compareOut"></div>
-    </div>
-  `;
-}
-
-function runCompare(){
-  const a = decodeCode(document.getElementById("codeA").value);
-  const b = decodeCode(document.getElementById("codeB").value);
-  const out = document.getElementById("compareOut");
-  if (!a || !b){
-    out.innerHTML = `<p class="center-note" style="text-align:left">One or both codes look off. Double check for typos and try again.</p>`;
-    return;
-  }
-  compareCategoriesExpanded = false;
-  compareState = { profileA: a, archA: a.archetype, nameA: a.name, profileB: b, archB: b.archetype, nameB: b.name, target: "compareOut" };
-  click(420);
-  showCompatibilityLoading(out, () => {
-    out.innerHTML = renderCompareResult();
-    initCountUps(out);
-  });
-}
-
-function toggleCompareCategories(){
-  compareCategoriesExpanded = !compareCategoriesExpanded;
-  const out = document.getElementById(compareState.target);
-  if (out){ out.innerHTML = renderCompareResult(); initCountUps(out); }
-}
-
-/* ---------------- PARTY COMPARE (3-5 people) ------------------------------*/
-function renderParty(){
-  setAccentColors();
-  root.innerHTML = `
-    <div class="container">
-      ${topBar(true)}
-      <div class="eyebrow accent">PARTY COMPARE</div>
-      <h2 style="margin:10px 0 6px">The Whole Group</h2>
-      <p class="tagline" style="text-align:left;color:var(--text-muted)">Paste 3 to 5 PersonaForge codes to see how the whole group lines up together, not just pair by pair.</p>
-      <div class="compare-inputs party-inputs" style="margin-top:20px">
-        <div><label>Person 1</label><textarea id="partyCode0" placeholder="Name-PF2-...">${lastResult ? lastResult.code : ""}</textarea></div>
-        <div><label>Person 2</label><textarea id="partyCode1" placeholder="Name-PF2-..."></textarea></div>
-        <div><label>Person 3</label><textarea id="partyCode2" placeholder="Name-PF2-..."></textarea></div>
-      </div>
-      <button class="btn btn-ghost" style="margin-top:12px" onclick="toggleMorePartySlots()" id="partyToggleBtn">+ Add up to 2 more people</button>
-      <div id="extraPartySlots" class="hidden party-inputs" style="margin-top:12px">
-        <div><label>Person 4</label><textarea id="partyCode3" placeholder="Name-PF2-..."></textarea></div>
-        <div><label>Person 5</label><textarea id="partyCode4" placeholder="Name-PF2-..."></textarea></div>
-      </div>
-      <div class="cta-row" style="justify-content:flex-start;margin-top:18px">
-        <button class="btn btn-primary" onclick="runPartyCompare()">Compare Group</button>
-        <button class="btn btn-ghost" onclick="navigate('compare')">Back to two-person compare</button>
-      </div>
-      <div id="partyOut"></div>
-    </div>
-  `;
-}
-function toggleMorePartySlots(){
-  const el = document.getElementById("extraPartySlots");
-  const btn = document.getElementById("partyToggleBtn");
-  const showing = !el.classList.contains("hidden");
-  el.classList.toggle("hidden");
-  btn.textContent = showing ? "+ Add up to 2 more people" : "\u2212 Hide extra slots";
-  click(360);
-}
-function runPartyCompare(){
-  const ids = ["partyCode0","partyCode1","partyCode2","partyCode3","partyCode4"];
-  const raw = ids.map(id => (document.getElementById(id)?.value || "").trim()).filter(Boolean);
-  const out = document.getElementById("partyOut");
-  if (raw.length < 3){
-    out.innerHTML = `<p class="center-note" style="text-align:left">Add at least 3 codes to compare a group. For two people, use regular Compare instead.</p>`;
-    return;
-  }
-  if (raw.length > 5){
-    out.innerHTML = `<p class="center-note" style="text-align:left">Party Compare supports up to 5 people at once.</p>`;
-    return;
-  }
-  const decoded = raw.map(c => decodeCode(c));
-  if (decoded.some(d => !d)){
-    out.innerHTML = `<p class="center-note" style="text-align:left">One or more codes look off. Double check each one for typos and try again.</p>`;
-    return;
-  }
-  partyState = { decoded, names: decoded.map((d,i) => d.name || `Person ${i+1}`) };
-  click(420);
-  showCompatibilityLoading(out, () => {
-    out.innerHTML = renderPartyResult();
-    initCountUps(out);
-  });
-}
-function renderPartyResult(){
-  const { decoded, names } = partyState;
-  const group = computeGroupCompatibility(decoded, names);
-  const sortedPairs = [...group.pairwise].sort((a,b) => b.score - a.score);
-  return `
-    <div class="section revealed">
-      <div class="card glass" style="text-align:center">
-        <h4>${group.vibe}</h4>
-        <div class="extras-row" style="justify-content:center;margin-top:10px">
-          ${decoded.map((d,i) => `<span class="tag">${d.archetype.icon} ${names[i]}</span>`).join("")}
-        </div>
-        <div class="ingot-name count-up" style="font-size:44px;margin-top:14px" data-target="${group.overallScore}" data-suffix="%">0%</div>
-        <p style="color:var(--text-muted)">Overall Group Compatibility</p>
-      </div>
-
-      <div class="grid-2" style="margin-top:12px">
-        <div class="card glass"><h4>Strongest Pair</h4><p>${group.bestPair.nameA} and ${group.bestPair.nameB}<br><span style="color:var(--text-dim);font-family:var(--font-mono);font-size:12px">${group.bestPair.score}%</span></p></div>
-        <div class="card glass"><h4>Most Friction</h4><p>${group.toughestPair.nameA} and ${group.toughestPair.nameB}<br><span style="color:var(--text-dim);font-family:var(--font-mono);font-size:12px">${group.toughestPair.score}%</span></p></div>
-      </div>
-
-      <div class="card glass" style="margin-top:12px">
-        <h4>Who Brings What</h4>
-        ${group.roles.map(r => `<div class="mini-bar-row"><span>${r.name}</span><span>${r.direction} ${r.standoutTrait} than the group average</span></div>`).join("")}
-      </div>
-
-      <div class="grid-2" style="margin-top:12px">
-        <div class="card glass"><h4>What the Whole Group Shares</h4><div class="tag-list">${group.groupSharedStrengths.length ? group.groupSharedStrengths.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>No single trait everyone's strong in, and that's fine</span>"}</div></div>
-        <div class="card glass"><h4>Where the Group Differs Most</h4><div class="tag-list">${group.groupFriction.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-      </div>
-
-      <div class="card glass" style="margin-top:12px">
-        <h4>Every Pair, Ranked</h4>
-        ${sortedPairs.map(p => `<div class="mini-bar-row"><span>${p.nameA} + ${p.nameB}</span><span>${p.score}%</span></div>`).join("")}
-      </div>
-
-      <div class="card glass" style="margin-top:12px"><h4>Advice</h4><p>Lean on your strongest pair to help smooth over the toughest one, and use the shared strengths as the group's default mode when plans need to come together fast.</p></div>
-    </div>
-  `;
-}
-
-function bandColor(band){
-  const map = {
-    "Extremely Incompatible": "#FB7185",
-    "Difficult": "#FDBA74",
-    "Mixed": "#FACC15",
-    "Good": "#7DD3FC",
-    "Excellent": "#6EE7B7",
-    "Exceptional": "#A78BFA",
-  };
-  return map[band] || "#A7B0C2";
-}
-
-function renderCompareResult(){
-  const { profileA, archA, nameA, profileB, archB, nameB } = compareState;
-  const deep = computeDeepCompatibility(profileA, profileB, nameA, nameB);
-  const topCats = compareCategoriesExpanded ? deep.categories : deep.categories.slice(0, 8);
-  const A = nameA || "Person A", B = nameB || "Person B";
-  const duo = computeDuoTitle(archA, archB);
-  return `
-    <div class="section revealed">
-      <div class="duo-crest" style="background: linear-gradient(120deg, ${duo.colorA}, ${duo.colorB})">
-        <div class="duo-icons"><span>${duo.iconA}</span><span class="duo-x">&times;</span><span>${duo.iconB}</span></div>
-        <div class="duo-title">${duo.title}</div>
-      </div>
-      <div class="card glass" style="text-align:center">
-        <h4>${A} and ${B}</h4>
-        <p style="color:var(--text-muted);margin-top:4px">${archA.icon} ${archA.name} &nbsp;meets&nbsp; ${archB.icon} ${archB.name}</p>
-        <div class="ingot-name count-up" style="font-size:44px;margin-top:14px" data-target="${deep.relationshipScore}" data-suffix="%">0%</div>
-        <p style="color:var(--text-muted)">Overall Compatibility</p>
-        <span class="tag band-tag" style="margin-top:10px;display:inline-block;color:${bandColor(deep.band)};border-color:${bandColor(deep.band)}66">${deep.band}</span>
-      </div>
-
-      <div class="grid-2" style="margin-top:12px">
-        <div class="card glass"><h4>Similarity</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${deep.similarityScore}%"></div></div><p style="margin-top:6px;font-size:12px;color:var(--text-dim);text-align:right">${deep.similarityScore}%</p></div>
-        <div class="card glass"><h4>Comparison Confidence</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${deep.comparisonConfidence}%"></div></div><p style="margin-top:6px;font-size:12px;color:var(--text-dim);text-align:right">${deep.comparisonConfidence}%</p></div>
-      </div>
-      <div class="card glass" style="margin-top:12px"><p style="font-size:13.5px">${deep.similarityNote}</p></div>
-
-      <div class="grid-2" style="margin-top:12px">
-        ${topCats.map(c => `
-          <div class="card glass"><h4>${c.name}</h4><div class="stat-bar-track"><div class="stat-bar-fill" style="width:${c.score}%"></div></div><p style="margin-top:6px;font-size:12px;color:var(--text-dim);text-align:right">${c.score}%</p></div>`).join("")}
-      </div>
-      <div class="careers-toggle"><button onclick="toggleCompareCategories()">${compareCategoriesExpanded ? "Show fewer categories" : `Show all ${deep.categories.length} categories`}</button></div>
-
-      ${deep.explanations.length ? `
-      <div class="card glass" style="margin-top:14px">
-        <h4>Why This Score</h4>
-        ${deep.explanations.map(e => `<p style="margin-top:8px">${e}</p>`).join("")}
-      </div>` : ""}
-
-      <div class="grid-2" style="margin-top:12px">
-        <div class="card glass"><h4>Shared Strengths</h4><div class="tag-list">${deep.sharedStrengths.map(s=>`<span class="tag">${s}</span>`).join("") || "<span class='tag'>Still emerging</span>"}</div></div>
-        <div class="card glass"><h4>Possible Friction</h4><div class="tag-list">${deep.conflictAreas.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
-      </div>
-
-      <div class="card glass" style="margin-top:12px">
-        <h4>Who Does What More</h4>
-        ${deep.whoComparisons.map(w => `<div class="mini-bar-row"><span>${w.label}</span><span>${w.winner}</span></div>`).join("")}
-      </div>
-
-      <div class="grid-2" style="margin-top:12px">
-        <div class="card glass"><h4>Perfect Activity</h4><p>${deep.activities.activity}</p></div>
-        <div class="card glass"><h4>Perfect Vacation</h4><p>${deep.activities.vacation}</p></div>
-        <div class="card glass"><h4>Perfect Business</h4><p>${deep.activities.business}</p></div>
-        <div class="card glass"><h4>Perfect Weekend</h4><p>${deep.activities.weekend}</p></div>
-      </div>
-
-      <div class="card glass" style="margin-top:12px">
-        <h4>Fun Facts</h4>
-        ${deep.funFacts.map(f => `<p style="margin-top:6px;font-size:13.5px">${f}</p>`).join("")}
-      </div>
-
-      <div class="card glass" style="margin-top:12px"><h4>Advice</h4><p>Lean on the shared strengths to build trust quickly, and name the friction points out loud early. Most conflict here comes from different defaults, not different goals.</p></div>
-    </div>
-  `;
-}
-
-/* ---------------- init ---------------------------------------------------*/
-window.navigate = navigate;
-window.goHome = goHome;
-window.resumeQuiz = resumeQuiz;
-window.discardSavedQuizAndStart = discardSavedQuizAndStart;
-window.goToNameScreen = goToNameScreen;
-window.toggleExtraDetails = toggleExtraDetails;
-window.startUpgradeQuiz = startUpgradeQuiz;
-window.selectUpgradeOption = selectUpgradeOption;
-window.confirmName = confirmName;
-window.startQuiz = startQuiz;
-window.selectOption = selectOption;
-window.goBackQuestion = goBackQuestion;
-window.continueForward = continueForward;
-window.toggleSound = toggleSound;
-window.exportPNG = exportPNG;
-window.copyCode = copyCode;
-window.runCompare = runCompare;
-window.runInlineCompare = runInlineCompare;
-window.toggleCompareCategories = toggleCompareCategories;
-window.toggleMorePartySlots = toggleMorePartySlots;
-window.runPartyCompare = runPartyCompare;
-window.quickCompareGo = quickCompareGo;
-window.viewProfileFromCode = viewProfileFromCode;
-window.loadSaved = loadSaved;
-window.toggleCareers = toggleCareers;
-window.toggleFunStats = toggleFunStats;
-window.downloadQR = downloadQR;
-window.click = click; // exposed for inline handlers alongside audio helper
-window.toggleTheme = toggleTheme;
-
-/* click ripple for every .btn, via delegation since buttons are
-   re-created on every render rather than persisting in the DOM */
-document.addEventListener("pointerdown", (e) => {
-  const btn = e.target.closest(".btn");
-  if (!btn || reducedMotion()) return;
-  const rect = btn.getBoundingClientRect();
-  const size = Math.max(rect.width, rect.height);
-  const ripple = document.createElement("span");
-  ripple.className = "ripple";
-  ripple.style.width = ripple.style.height = size + "px";
-  ripple.style.left = (e.clientX - rect.left - size/2) + "px";
-  ripple.style.top = (e.clientY - rect.top - size/2) + "px";
-  btn.appendChild(ripple);
-  setTimeout(() => ripple.remove(), 650);
-});
-
-applyTheme(currentTheme);
-renderLanding();
-
-
-</script>
-</body>
-</html>
