@@ -57,7 +57,7 @@
    stale app shell: the moment a new worker installs, it takes over and
    clears the old caches, rather than waiting for every tab to close.
    ----------------------------------------------------------------------- */
-const CACHE_VERSION = "v19";
+const CACHE_VERSION = "v1.0.0";
 
 const SHELL_CACHE = `personaforge-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `personaforge-static-${CACHE_VERSION}`;
@@ -66,6 +66,22 @@ const FONT_CACHE = `personaforge-fonts-${CACHE_VERSION}`;
 // Every cache this version of the worker owns. Anything else found on
 // activate belongs to an older version and gets deleted.
 const CURRENT_CACHES = [SHELL_CACHE, STATIC_CACHE, FONT_CACHE];
+
+/* -----------------------------------------------------------------------
+   UPDATE FLOW — a freshly installed worker no longer calls skipWaiting()
+   itself (see "install" below). Instead it sits in the "waiting" state,
+   which is what lets the page detect it and show a "new version
+   available" toast (see global.js's service worker registration block)
+   instead of silently swapping the app out from under an open tab. Two
+   ways a waiting worker actually takes over:
+     1. The user clicks "Refresh" in that toast -> the page postMessages
+        "SKIP_WAITING" to it (handled below) -> it activates -> the page
+        reloads once control changes.
+     2. Every tab is closed/navigated away without clicking Refresh -> the
+        browser activates the waiting worker on its own the next time the
+        app is opened. No extra code needed for this part; it's the
+        platform's default behavior once skipWaiting() isn't called early.
+   ----------------------------------------------------------------------- */
 
 /* -----------------------------------------------------------------------
    SCOPE — resolved at runtime from the browser itself, never hardcoded.
@@ -182,9 +198,11 @@ const FONT_HOSTS = new Set([
 
 /* -------------------------------------------------------------------------
    INSTALL
-   Pre-cache the app shell and known static assets. skipWaiting() lets a
-   freshly installed worker activate immediately instead of waiting for
-   every open tab to close, so updates land as soon as the page reloads.
+   Pre-cache the app shell and known static assets. Deliberately does NOT
+   call skipWaiting() here — see the "UPDATE FLOW" comment above. A newly
+   installed worker (when an older one is already controlling the page)
+   sits in the "waiting" state until the page tells it to take over, so
+   the update toast has something real to offer before the swap happens.
    ------------------------------------------------------------------------- */
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -202,8 +220,6 @@ self.addEventListener("install", (event) => {
             .catch(() => null)
         )
       );
-
-      await self.skipWaiting();
     })()
   );
 });
