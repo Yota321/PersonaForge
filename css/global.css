@@ -80,7 +80,19 @@
   --text-muted: #475569;
   --text-dim: #64748B;
   --accent: #8B5CF6;
-  --accent-soft: #A78BFA;
+  /* Was #A78BFA — measured 2.72:1 against this theme's white page
+     background (WCAG AA needs 4.5:1 for normal text), confirmed by a
+     real luminance/contrast calculation, not eyeballed. This token
+     drives every "soft" accent TEXT use in light mode (eyebrow labels,
+     quiz step/letter indicators, legal credit links, code snippets,
+     version tags) — all of them shared this exact failure, so the token
+     itself needed fixing rather than one call site. #7C3AED keeps the
+     same violet hue (a deeper step of it, not a different color) and
+     measures 5.70:1 — comfortably past AA with room to spare. Every
+     *decorative* use of this token (borders, gradient stops, hover
+     backgrounds) is unaffected in spirit — a richer violet reads as more
+     premium there too, not flatter. */
+  --accent-soft: #7C3AED;
   --sky: #0EA5E9;
   --mint: #10B981;
   --peach: #F97316;
@@ -475,6 +487,22 @@ html::-webkit-scrollbar{ display:none; }
   pointer-events:none;
   transition: grid-template-rows .55s var(--ease), opacity .45s var(--ease), filter .45s var(--ease), transform .5s var(--ease);
 }
+/* [hidden] is a plain attribute selector, so this has higher specificity
+   than the bare .nav-menu rule above regardless of source order, and
+   correctly wins over it — without this override, .nav-menu's own
+   `display:grid` silently beats the browser's native [hidden]{display:
+   none} UA rule (an author style always beats a UA style, specificity
+   aside), leaving every item inside genuinely focusable — reachable by
+   Tab and visible to a screen reader — the entire time the menu is
+   supposedly closed, even though it's visually clipped to nothing.
+   openNavMenu()/closeNavMenu() (global.js) already toggle `hidden`
+   correctly at the right moments (false the instant it opens, true only
+   550ms after the close transition finishes) — this was the one missing
+   piece needed for that toggle to actually take the menu out of the
+   accessibility tree and tab order once closed. `display:none` alone
+   already guarantees zero focusability for the whole subtree, so no
+   further aria-hidden/inert/focus-management is needed on top of it. */
+.nav-menu[hidden]{ display: none; }
 [data-theme="light"] .nav-menu{
   background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.52));
   box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
@@ -552,7 +580,7 @@ html::-webkit-scrollbar{ display:none; }
 
 /* print / PDF export */
 @media print{
-  #embers, .top-bar, .footer-nav, .export-row, .btn, .compare-widget, .nav-menu, .toast, .modal-overlay{ display:none !important; }
+  #embers, .top-bar, .footer-nav, .export-row, .btn, .nav-menu, .toast, .modal-overlay{ display:none !important; }
   body::before, body::after{ display:none !important; }
   body{ background: #0F1117; color:#F8FAFC; }
   .section{ opacity: 1 !important; transform: none !important; transition: none !important; }
@@ -625,7 +653,6 @@ html::-webkit-scrollbar{ display:none; }
 
 .ingot-name{ font-size: clamp(34px,6.5vw,52px); margin-top:8px; letter-spacing: -0.01em; line-height:1.05; }
 .section{ margin-top: 46px; }
-.section-title{ font-size: 19px; margin-bottom: 16px; display:flex; flex-direction:column; gap:6px; font-weight:500; }
 .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
 .grid-4{ display:grid; grid-template-columns: repeat(4,1fr); gap: 10px; }

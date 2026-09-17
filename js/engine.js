@@ -49,9 +49,9 @@ function emptyDims(){
    exactly 3 answers, each nudging 3-5 dimensions by -2..+2.
    The adaptive engine (see engine.js) asks a fixed 15-question core set
    first (CORE_QUESTION_IDS), then two batches of 10 chosen by
-   information value against the accumulated answers (26-35), then
+   information value against the accumulated answers (16-35), then
    continues one question at a time only if confidence isn't there yet,
-   up to 50 total. Adding more questions to any cluster array just grows
+   up to 45 total. Adding more questions to any cluster array just grows
    the pool the adaptive stages pick from; no other code needs to change.
 ------------------------------------------------------------------------- */
 
@@ -2125,6 +2125,27 @@ const MOTIVATION_STYLES = [
   { name:"Driven by Freedom", signature:[{dim:"independence",w:2},{dim:"risk",w:1}] },
 ];
 
+/* ---- Soul Type: a separate, deeper identity lens ---------------------------
+   Not the archetype system and not scored against it — this is a second,
+   independent read of the same normDims, structured like the other
+   scoreBySignature() lookups above (mythical creature, motivation style,
+   etc.), just with a fixed 7-item palette instead of 30 archetypes. The
+   archetype answers "which of 30 patterns fits your answers best"; soul
+   type answers "which single core value shows up strongest," a coarser,
+   more elemental read that intentionally overlaps with (rather than
+   derives from) the archetype score. Colors and their meanings are a
+   fixed, non-negotiable palette — do not add or reorder entries. */
+const SOUL_TYPES = [
+  { name:"Red", hex:"#EF4444", trait:"Determination", meaning:"Willpower, persistence, refusing to give up.", signature:[{dim:"persistence",w:2},{dim:"drive",w:1},{dim:"resilience",w:1}] },
+  { name:"Orange", hex:"#F97316", trait:"Bravery", meaning:"Courage, facing danger head-on.", signature:[{dim:"risk",w:2},{dim:"confidence",w:1}] },
+  { name:"Yellow", hex:"#EAB308", trait:"Justice", meaning:"Fairness, righteousness.", signature:[{dim:"logic",w:1},{dim:"trust",w:1},{dim:"responsibility",w:1}] },
+  { name:"Green", hex:"#22C55E", trait:"Kindness", meaning:"Compassion, caring for others.", signature:[{dim:"kindness",w:2},{dim:"empathy",w:1}] },
+  { name:"Blue", hex:"#3B82F6", trait:"Integrity", meaning:"Honesty, strong moral principles.", signature:[{dim:"responsibility",w:2},{dim:"discipline",w:1}] },
+  { name:"Purple", hex:"#A855F7", trait:"Perseverance", meaning:"Endurance, continuing despite hardship.", signature:[{dim:"resilience",w:2},{dim:"patience",w:1}] },
+  { name:"Light Blue", hex:"#38BDF8", trait:"Patience", meaning:"Calmness, waiting and enduring.", signature:[{dim:"patience",w:2},{dim:"emotionalStability",w:1}] },
+];
+function computeSoulType(normDims){ return scoreBySignature(SOUL_TYPES, normDims)[0].item; }
+
 /* ---- Fun extra profiles: mythical creature, season, weather, planet ------- */
 const MYTHICAL_CREATURES = [
   { name:"Phoenix", signature:[{dim:"resilience",w:2},{dim:"optimism",w:1}] },
@@ -2401,15 +2422,29 @@ const COFFEE_ORDERS = [
    ========================================================================= */
 
 const CLUSTERS = Object.keys(QUESTION_BANK);
-const MIN_QUESTIONS = 35;          // Stages 1-3 always run to exactly this many
-const MAX_QUESTIONS = 50;          // never exceeds this many
-const CONFIDENCE_TARGET = 95;      // stop early once this confident
+const MIN_QUESTIONS = 35;          // Stages 1-3 always run to exactly this many (15 fixed + 20 adaptive)
+const MAX_QUESTIONS = 45;          // never exceeds this many (35 baseline + at most 10 extra)
+// Empirically calibrated (not the original 95): a per-step greedy search
+// that simulates every candidate option at every question and always
+// picks whichever maximizes computeAssessmentConfidence().overall right
+// now — i.e. the best any answering strategy can realistically do —
+// still only reached ~81-85 overall by Q35-45 across dozens of trialed
+// target archetypes. 95 was consequently unreachable by any answer
+// pattern, silently turning "stop early once confident" into dead code
+// (every adaptive session ran to MAX_QUESTIONS regardless of how clear
+// the profile was). 80 sits just under that empirical ceiling: a
+// genuinely clear, consistent profile can still cross it and stop at
+// 35, while a noisy/inconsistent one (measured ~73-78 in the same
+// testing) correctly does not and keeps extending.
+const CONFIDENCE_TARGET = 80;      // stop early once this confident
 const CONFIDENCE_SCALE = 7;        // score-gap that counts as "fully confident", tuned against real score distributions
 // NOTE ON SCALING: the question bank holds 200 questions across 10
 // clusters (20 each). Stages 1-3 (see below) always run to exactly
-// MIN_QUESTIONS. From there, Stage 4/5 re-checks confidence after every
-// answer and keeps going only if the top two archetype candidates are
-// still close, up to MAX_QUESTIONS.
+// MIN_QUESTIONS: a fixed 15-question baseline (Stage 1) plus 20
+// adaptively-selected questions (Stages 2-3, 10 each). From there,
+// Stage 4/5 re-checks confidence after every answer and keeps going
+// only if the top two archetype candidates are still close, up to
+// MAX_QUESTIONS (at most 10 more beyond the 35 baseline).
 
 /* ---- Which dimensions matter most to the framework projections ---------
    Same idea as the old cluster-weight table, but for MBTI/Big
@@ -2447,18 +2482,28 @@ const CORE_QUESTION_IDS = ["ana6","ana8","pla4","amb13","cre18","soc3","phi17","
    depends only on accumulated answers, never on wall-clock time, so two
    people who answer identically get identical questions at every stage.
 
-   Stage 1 (Q1-15): CORE_QUESTION_IDS, fixed, identical for every user.
+   Stage 1 (Q1-15): CORE_QUESTION_IDS, fixed, identical for every user —
+     no randomness, no seed, so everyone's baseline starts from the same
+     15 questions.
    Stage 2 (Q16-25): one batch of 10, picked by _pickInformativeBatch()
      against the state after Q15. Same first 15 answers -> same 16-25.
    Stage 3 (Q26-35): another batch of 10, against the state after Q25.
-     Same first 25 answers -> same 26-35.
+     Same first 25 answers -> same 26-35. Stages 2+3 together are the
+     "20 adaptive questions": selected purely from the running answer
+     history (dimension confidence, archetype-candidate separation,
+     framework relevance), never from the clock or a session seed, so
+     two people with identical first-15 answers always get an identical
+     16-35 too.
    Stage 4 (after Q35): confidence check using the evidence-based
-     computeAssessmentConfidence(). Stops here if the target is met.
-   Stage 5 (Q36-50): only if Stage 4 wasn't confident enough. Unlike
+     computeAssessmentConfidence(). Stops here if the target is met —
+     this is the common "35 was enough" exit.
+   Stage 5 (Q36-45): only if Stage 4 wasn't confident enough. Unlike
      Stages 2-3, this re-checks confidence after every single answer
      (not in batches of 5) and stops the instant the target is reached,
      since minimizing extra questions matters most this late in the
-     quiz. Still hard-capped at 50.
+     quiz — a profile that becomes confident at, say, Q39 never gets
+     asked Q40-45 just because it started down this path. Hard-capped
+     at MAX_QUESTIONS (45) either way.
 
    Question selection itself (_pickInformativeBatch) ranks every unused
    question by computeQuestionInfoValue(): how much it addresses
@@ -3928,6 +3973,7 @@ function tryLoadProfileFromURL(){
 function buildProfileExtras(normDims, archetype, ranked, session, upgradedFromV1){
   return {
     mix: computePersonalityMix(ranked),
+    soul: computeSoulType(normDims),
     humanValues: computeHumanValues(normDims),
     lifeBalance: computeLifeBalance(normDims),
     motivationFacets: computeMotivationFacets(normDims),

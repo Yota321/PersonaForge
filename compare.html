@@ -6,14 +6,14 @@
 <meta name="theme-color" content="#0F1117" />
 <title>Forge &bull; Compare</title>
 <meta name="description" content="Paste Forge codes to see how you line up, one on one or as a whole group. Everything decodes locally, right in your browser." />
-<link rel="canonical" href="https://yota321.github.io/PersonaForge/compare.html" />
+<link rel="canonical" href="https://yota321.github.io/PersonaForge/compare" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Forge: Compare" />
 <meta property="og:description" content="Paste Forge codes to see how you line up, one on one or as a whole group. Everything decodes locally, right in your browser." />
 <meta property="og:image" content="https://yota321.github.io/PersonaForge/assets/Open_Graph.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:url" content="https://yota321.github.io/PersonaForge/compare.html" />
+<meta property="og:url" content="https://yota321.github.io/PersonaForge/compare" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Forge: Compare" />
 <meta name="twitter:description" content="Paste Forge codes to see how you line up, one on one or as a whole group. Everything decodes locally, right in your browser." />
@@ -42,12 +42,22 @@
 
 <script src="js/engine.js"></script>
 <script src="js/global.js"></script>
-<script src="js/pages.js"></script>
+<script src="js/compatibility.js"></script>
+<script src="js/compare.js"></script>
 <script>
 const PF_PAGE = "compare";
 applyTheme(currentTheme);
-if (new URLSearchParams(location.search).get("party") === "1") renderParty();
-else renderCompare();
+useCleanURL("compare");
+function renderCompareFromURL(){
+  if (new URLSearchParams(location.search).get("party") === "1") renderParty();
+  else renderCompare();
+}
+renderCompareFromURL();
+// setCompareModeURL() (global.js) updates the URL when switching modes
+// in place without a real navigation; this is what makes browser
+// back/forward actually restore the matching view instead of just
+// changing the address bar underneath a stale render.
+window.addEventListener("popstate", renderCompareFromURL);
 </script>
 </body>
 </html>

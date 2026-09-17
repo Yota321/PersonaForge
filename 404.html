@@ -304,6 +304,18 @@
           });
       }
 
+      // Clean-URL routes (see global.js's useCleanURL()): quiz/result/
+      // compare/legal are also reachable at these extensionless paths.
+      // GitHub Pages has no server-side rewriting, so a direct load,
+      // bookmark, or refresh of one of these 404s exactly like the
+      // PF-code deep-link case below always has — this is the other half
+      // of the same trick, just redirecting straight to the matching real
+      // file instead of folding the path into a query param. Kept as its
+      // own small map (not shared code with global.js/service-worker.js)
+      // for the same reason this page owns copies of everything else it
+      // needs: it can't assume the rest of the app has ever loaded.
+      var CLEAN_ROUTES = { quiz: "quiz.html", result: "result.html", compare: "compare.html", legal: "legal.html" };
+
       function buildRedirectURL(basePath) {
         var loc = window.location;
         var origin = loc.origin || (loc.protocol + "//" + loc.host);
@@ -314,8 +326,21 @@
           ? pathname.slice(basePath.length)
           : pathname.replace(/^\//, "");
         var segments = rest.split("/").filter(Boolean);
-
         var params = new URLSearchParams(loc.search || "");
+
+        // Clean-route match (e.g. "/quiz", or "/quiz/" once filtered)
+        // wins outright: redirect straight to the real file, carrying the
+        // original query string and hash through untouched (so a shared
+        // "/compare?party=1"-style link, if one is ever generated, still
+        // lands correctly).
+        var routeFile = segments.length === 1 ? CLEAN_ROUTES[segments[0].toLowerCase()] : null;
+        if (routeFile) {
+          var routeTarget = origin + basePath + routeFile;
+          var routeQuery = params.toString();
+          if (routeQuery) routeTarget += "?" + routeQuery;
+          if (loc.hash) routeTarget += loc.hash;
+          return { url: routeTarget, isKnownRoute: true };
+        }
 
         // An explicit ?code=... on the broken URL always wins. Otherwise,
         // if the trailing path segment looks like a PF1/PF2 code, restore
@@ -346,7 +371,7 @@
           target = origin + basePath;
         }
 
-        return target;
+        return { url: target, isKnownRoute: false };
       }
 
       var returnBtn = document.getElementById("returnBtn");
@@ -368,28 +393,36 @@
         }
 
         var redirectUrl = basePath;
+        var isKnownRoute = false;
         try {
-          redirectUrl = buildRedirectURL(basePath);
+          var built = buildRedirectURL(basePath);
+          redirectUrl = built.url;
+          isKnownRoute = built.isKnownRoute;
         } catch (e) {
           redirectUrl = basePath; // safest possible fallback
         }
 
         if (returnBtn) returnBtn.setAttribute("href", redirectUrl);
 
-        // Automatic redirect, ~1 second in — long enough to read the
-        // message, short enough not to feel stuck.
+        // Automatic redirect. A recognized clean route (e.g. "/quiz") is a
+        // confident match, not a guess, so it redirects almost instantly —
+        // the ~1 second delay stays only for the generic case below, where
+        // there's an actual message worth letting someone read.
         var redirected = false;
         window.setTimeout(function () {
           redirected = true;
           window.location.replace(redirectUrl);
-        }, 1000);
+        }, isKnownRoute ? 60 : 1000);
 
         // Safety net: if for any reason the automatic redirect doesn't
         // happen (blocked navigation, slow/unusual browser, etc.), reveal
         // the manual button shortly after so the visitor is never stuck.
+        // Scaled down alongside the redirect delay itself for a known
+        // route, so a failed fast-path redirect doesn't leave someone
+        // staring at this screen for a full 1.8s before the button appears.
         window.setTimeout(function () {
           if (!redirected && returnBtn) returnBtn.classList.add("visible");
-        }, 1800);
+        }, isKnownRoute ? 500 : 1800);
       });
     })();
   </script>

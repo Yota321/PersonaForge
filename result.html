@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0F1117" />
 <title>Forge &bull; Your Result</title>
 <meta name="description" content="Your Forge personality result: archetype, strengths, careers, relationships, and more." />
-<link rel="canonical" href="https://yota321.github.io/PersonaForge/result.html" />
+<link rel="canonical" href="https://yota321.github.io/PersonaForge/result" />
 <meta name="robots" content="noindex" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_black.svg" media="(prefers-color-scheme: light)" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_white.svg" media="(prefers-color-scheme: dark)" />
@@ -32,10 +32,12 @@
 
 <script src="js/engine.js"></script>
 <script src="js/global.js"></script>
-<script src="js/pages.js"></script>
+<script src="js/compatibility.js"></script>
+<script src="js/result.js"></script>
 <script>
 const PF_PAGE = "result";
 applyTheme(currentTheme);
+useCleanURL("result");
 (function boot(){
   const freshResult = sessionStorage.getItem("pf_fresh_result");
   if (freshResult){
@@ -54,6 +56,21 @@ applyTheme(currentTheme);
     const decoded = decodeCode(viewSharedCode);
     if (decoded){
       lastResult = buildResultFromDecoded(decoded, viewSharedCode);
+      careersExpanded = false; funStatsOpen = false;
+      renderResult();
+      return;
+    }
+  }
+  // A result page reloaded, bookmarked, or reopened from a copied address
+  // bar URL carries no sessionStorage (that's a one-shot handoff from
+  // index.html/the quiz) but DOES still carry setShareableURL()'s own
+  // ?code= query param, so this is the difference between "reloading
+  // your own result" working and silently bouncing to the landing page.
+  const urlCode = getProfileCodeFromURL();
+  if (urlCode){
+    const decoded = decodeCode(urlCode);
+    if (decoded){
+      lastResult = buildResultFromDecoded(decoded, urlCode);
       careersExpanded = false; funStatsOpen = false;
       renderResult();
       return;

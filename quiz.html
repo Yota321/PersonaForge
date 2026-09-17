@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0F1117" />
 <title>Forge &bull; Assessment</title>
 <meta name="description" content="A personality read that actually adapts to you. Answer real scenarios, not a survey." />
-<link rel="canonical" href="https://yota321.github.io/PersonaForge/quiz.html" />
+<link rel="canonical" href="https://yota321.github.io/PersonaForge/quiz" />
 <meta name="robots" content="noindex" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_black.svg" media="(prefers-color-scheme: light)" />
 <link rel="icon" type="image/svg+xml" href="assets/Icon_white.svg" media="(prefers-color-scheme: dark)" />
@@ -39,10 +39,11 @@
 
 <script src="js/engine.js"></script>
 <script src="js/global.js"></script>
-<script src="js/pages.js"></script>
+<script src="js/quiz.js"></script>
 <script>
 const PF_PAGE = "quiz";
 applyTheme(currentTheme);
+useCleanURL("quiz");
 (function boot(){
   if (sessionStorage.getItem("pf_resume_quiz") === "1"){
     sessionStorage.removeItem("pf_resume_quiz");

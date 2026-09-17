@@ -57,7 +57,7 @@
    stale app shell: the moment a new worker installs, it takes over and
    clears the old caches, rather than waiting for every tab to close.
    ----------------------------------------------------------------------- */
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v19";
 
 const SHELL_CACHE = `personaforge-shell-${CACHE_VERSION}`;
 const STATIC_CACHE = `personaforge-static-${CACHE_VERSION}`;
@@ -115,7 +115,17 @@ const STATIC_ASSETS = [
   "css/pages.css",
   "js/engine.js",
   "js/global.js",
-  "js/pages.js",
+  "js/home.js",
+  "js/quiz.js",
+  "js/compatibility.js",
+  "js/result.js",
+  "js/compare.js",
+  "js/legal.js",
+  // Vendored (never CDN-loaded, see js/result.js's loadJsPDF()) so "Save
+  // as PDF" keeps working offline even on its very first use — without
+  // this, an offline visitor who'd never clicked it online yet would hit
+  // a network error the moment result.js tries to inject this <script>.
+  "js/vendor/jspdf.umd.min.js",
   "assets/BG.mp3",
   "assets/Hero_Home.jpg",
   "assets/Avatar_1.jpg",
@@ -138,6 +148,30 @@ const STATIC_ASSETS = [
 
 // File extensions treated as long-lived static assets (cache-first).
 const STATIC_EXTENSIONS = /\.(?:css|js|mjs|png|jpe?g|webp|gif|svg|ico|mp3|wav|ogg|woff2?|ttf|otf|json)$/i;
+
+/* -----------------------------------------------------------------------
+   CLEAN URLS — quiz.html/result.html/compare.html/legal.html are also
+   reachable at extensionless paths ("/quiz", "/result", ...): each page
+   rewrites its own address bar to that form on load (see global.js's
+   useCleanURL()), and 404.html redirects a direct/refreshed load of one
+   of those paths back to the real .html file. Neither of those two
+   pieces run when there's no network at all, so this worker needs its
+   own tiny copy of the same route map purely for the OFFLINE case:
+   without it, a navigation whose URL is already the clean form (a
+   bookmark, or a refresh after the address bar was already rewritten)
+   would miss the cache lookup below (which is keyed by the real
+   "quiz.html" URL from APP_SHELL) and silently fall back to the index
+   shell instead of the page actually being asked for. Every other file
+   that knows about these routes keeps its own copy the same way
+   STATIC_ASSETS above does for filenames — nothing here is shared code.
+   ----------------------------------------------------------------------- */
+const CLEAN_ROUTES = { quiz: "quiz.html", result: "result.html", compare: "compare.html", legal: "legal.html" };
+function cleanRouteShellURL(pathname) {
+  const segments = pathname.split("/").filter(Boolean);
+  const last = (segments[segments.length - 1] || "").toLowerCase();
+  const mapped = CLEAN_ROUTES[last];
+  return mapped ? toURL(mapped) : null;
+}
 
 // Cross-origin hosts the app pulls webfonts from (see index.html <head>).
 const FONT_HOSTS = new Set([
@@ -288,7 +322,13 @@ async function networkFirstShell(request) {
     }
     return fresh;
   } catch (err) {
+    // A clean-URL navigation ("/quiz") is matched to its real cached
+    // page (see CLEAN_ROUTES above) before the generic ignoreSearch
+    // lookup, which is keyed by the literal .html URL and would never
+    // match "/quiz" on its own.
+    const cleanShellURL = cleanRouteShellURL(new URL(request.url).pathname);
     const cached =
+      (cleanShellURL && (await shellCache.match(cleanShellURL))) ||
       (await shellCache.match(request, { ignoreSearch: true })) ||
       (await shellCache.match(toURL("index.html")));
     if (cached) return cached;

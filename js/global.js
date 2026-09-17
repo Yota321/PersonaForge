@@ -5,7 +5,14 @@
    page after engine.js and before that page's own script.
    ========================================================================= */
 
-
+// Generic HTML-escaping for any user-entered string (names, occupations,
+// pasted codes, ...) dropped into a template literal. Lives here rather
+// than in one page's own file because it's used well beyond onboarding —
+// result.js, compatibility.js, compare.js, and home.js all escape a name
+// with it too, and every page loads global.js.
+function obEsc(str){
+  return String(str == null ? "" : str).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
 
 /* =========================================================================
    PERSONAFORGE, MINI QR ENCODER
@@ -838,6 +845,30 @@ function goHome(){
   navigate("landing");
 }
 
+/* ---------------- clean URLs --------------------------------------------
+   quiz.html/result.html/compare.html/legal.html are also reachable at
+   extensionless paths ("/quiz", "/result", "/compare", "/legal"). The
+   REAL file each page loads from is unchanged (every internal link and
+   location.href still points at the .html file directly — no extra
+   network round trip on ordinary in-app navigation); this just rewrites
+   the visible address bar to the clean form right after that real file
+   has loaded, via history.replaceState (no reload, no flash). Called
+   once near the top of each of those four pages' own boot <script>.
+   A direct load, bookmark, or refresh of the clean path itself (where
+   the browser asks the server for "/quiz", not "quiz.html") is handled
+   separately by 404.html, which recognizes the same route name and
+   redirects to the real file — this function then cleans the address
+   bar again once that lands, so the end state is identical either way. */
+function useCleanURL(routeName){
+  if (!window.history || !history.replaceState) return;
+  try{
+    const url = new URL(location.href);
+    if (!/\.html$/i.test(url.pathname)) return; // already clean, nothing to do
+    url.pathname = url.pathname.replace(/[^/]*\.html$/i, routeName);
+    history.replaceState(history.state, "", url.toString());
+  } catch(e){ /* not fatal — worst case the .html form stays visible */ }
+}
+
 /* ---------------- routing ---------------------------------------------
    "party" is just a view within compare.html now (like the compare page's
    own two internal modes), not a separate page — so both "compare" and
@@ -847,7 +878,16 @@ function goHome(){
    page sets its own PF_PAGE constant in its boot script so this can tell
    where it's actually running (every render* function exists on every
    page now that they're all bundled in pages.js, so a plain
-   typeof-function check can no longer tell pages apart). */
+   typeof-function check can no longer tell pages apart).
+
+   These location.href assignments (and every other internal href/
+   location.href in the app) intentionally still target the real .html
+   files rather than the clean paths ("/compare", not "compare.html") —
+   that's what lets a real navigation happen with zero extra round trip.
+   The clean address bar comes from useCleanURL() (above), which each
+   destination page calls on load; a direct load of a clean path instead
+   of a click is handled by 404.html. See useCleanURL()'s own comment for
+   the full picture. */
 function navigate(view){
   window.scrollTo(0, 0);
   clearShareableURL();
@@ -857,13 +897,33 @@ function navigate(view){
     else location.href = "index.html";
   }
   else if (view === "compare"){
-    if (onPage === "compare") renderCompare();
+    if (onPage === "compare"){ setCompareModeURL(false); renderCompare(); }
     else location.href = "compare.html";
   }
   else if (view === "party"){
-    if (onPage === "compare") renderParty();
+    if (onPage === "compare"){ setCompareModeURL(true); renderParty(); }
     else location.href = "compare.html?party=1";
   }
+}
+
+// Keeps compare.html's own address bar in sync with which mode (regular
+// or party) is on screen when switched in place — without this, the URL
+// stayed wherever it was before the switch, so a refresh or a shared
+// link silently dropped a party-compare visitor back into regular
+// compare. Uses replaceState (not pushState): clearShareableURL() just
+// above already pushed a fresh history entry for this navigate() call,
+// so this folds the mode into that same entry instead of adding a
+// second one — one user click should still be one "Back" press to undo.
+// compare.html's own popstate listener re-renders from the URL on the
+// way back, which is what actually makes Back/Forward restore the mode.
+function setCompareModeURL(isParty){
+  if (!window.history || !history.replaceState) return;
+  try{
+    const url = new URL(location.href);
+    if (isParty) url.searchParams.set("party", "1");
+    else url.searchParams.delete("party");
+    history.replaceState(history.state, "", url.toString());
+  } catch(e){ /* not fatal — worst case the URL just doesn't reflect the mode */ }
 }
 
 function goToNameScreen(){
@@ -980,10 +1040,17 @@ document.addEventListener("pointerdown", (e) => {
    exactly as the browser already handles them. This only draws a visual
    position indicator and an optional drag handle on top of it.
 
-   Two positions are tracked deliberately: SB.targetY (where the thumb
-   belongs *right now*, from the real scroll fraction) and SB.y (where it's
-   actually drawn). Every animation frame nudges y a fraction of the way
-   toward targetY (a lerp) rather than snapping straight to it — that
+   Generalized into createScrollbarController() so the exact same math,
+   easing, and drag/hover/hide behavior can drive more than one scrollable
+   surface with zero duplicated logic — initScrollbar() below wires it up
+   for the page itself, and result.js's result-detail modal reuses this
+   same factory (bound to the modal's own scroll container instead of the
+   window) rather than reimplementing a second scrollbar system.
+
+   Two positions are tracked deliberately: state.targetY (where the thumb
+   belongs *right now*, from the real scroll fraction) and state.y (where
+   it's actually drawn). Every animation frame nudges y a fraction of the
+   way toward targetY (a lerp) rather than snapping straight to it — that
    fractional catch-up is the "slight, elegant delay" the thumb should
    have, and it costs nothing but one line of math (no easing library, no
    spring state to tune). Dragging bypasses the lerp entirely and sets y
@@ -993,139 +1060,168 @@ document.addEventListener("pointerdown", (e) => {
    The rAF loop only runs while something is actually changing (scrolling,
    dragging, or still catching up from a lerp) and stops itself once
    settled, rather than ticking forever in the background. */
-const SB = {
-  rail: null, track: null, thumb: null,
-  y: 0, targetY: 0,          // thumb's top offset within the track, in px
-  thumbH: 24, travel: 1,      // thumb height and the track's usable travel (trackH - thumbH)
-  dragging: false, dragOffset: 0,
-  hovering: false,
-  hideTimer: null,
-  looping: false,
-  reduce: false,
-};
 const SB_HIDE_MS = 1100;   // fade out this long after the last scroll (spec: ~1-1.2s)
 const SB_MIN_THUMB = 28;   // never let the thumb get too small to grab
 const SB_LERP = 0.22;      // how much of the remaining distance to close per frame
 
-function sbMeasure(){
-  const trackH = SB.track.clientHeight;
-  const docH = document.documentElement.scrollHeight;
-  const viewH = window.innerHeight;
-  const ratio = viewH / Math.max(docH, 1);
-  SB.thumbH = Math.max(SB_MIN_THUMB, Math.min(trackH, trackH * ratio));
-  SB.travel = Math.max(1, trackH - SB.thumbH);
-  SB.thumb.style.height = SB.thumbH + "px";
-}
-function sbMaxScroll(){
-  return Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-}
-function sbSyncTarget(){
-  const frac = Math.min(1, Math.max(0, window.scrollY / sbMaxScroll()));
-  SB.targetY = frac * SB.travel;
-}
-function sbShow(){
-  SB.rail.classList.add("active");
-  if (SB.hideTimer){ clearTimeout(SB.hideTimer); SB.hideTimer = null; }
-}
-function sbScheduleHide(){
-  if (SB.hideTimer) clearTimeout(SB.hideTimer);
-  SB.hideTimer = setTimeout(() => {
-    SB.hideTimer = null;
-    if (!SB.hovering && !SB.dragging) SB.rail.classList.remove("active");
-  }, SB_HIDE_MS);
-}
-function sbEnsureLoop(){
-  if (SB.looping) return;
-  SB.looping = true;
-  requestAnimationFrame(sbTick);
-}
-function sbTick(){
-  const o = SB;
-  if (o.dragging || o.reduce){
-    o.y = o.targetY; // direct 1:1 while dragging; instant snap under reduced motion
-  } else {
-    o.y += (o.targetY - o.y) * SB_LERP;
-    if (Math.abs(o.targetY - o.y) < 0.15) o.y = o.targetY;
+// config: { rail, track, thumb, getScrollTop(), getScrollHeight(), getViewportHeight(), scrollTo(px, smooth), scrollEventTarget }
+// getScrollTop/getScrollHeight/getViewportHeight/scrollTo abstract away
+// *what* is scrolling (window vs. a specific element) so every other piece
+// of behavior below — measuring, lerping, dragging, hover/hide timing —
+// stays identical regardless of which surface a given instance controls.
+function createScrollbarController(config){
+  const { rail, track, thumb, getScrollTop, getScrollHeight, getViewportHeight, scrollTo, scrollEventTarget } = config;
+  const state = {
+    y: 0, targetY: 0,          // thumb's top offset within the track, in px
+    thumbH: 24, travel: 1,      // thumb height and the track's usable travel (trackH - thumbH)
+    dragging: false, dragOffset: 0,
+    hovering: false,
+    hideTimer: null,
+    looping: false,
+    reduce: false,
+  };
+
+  function measure(){
+    const trackH = track.clientHeight;
+    const docH = getScrollHeight();
+    const viewH = getViewportHeight();
+    const ratio = viewH / Math.max(docH, 1);
+    state.thumbH = Math.max(SB_MIN_THUMB, Math.min(trackH, trackH * ratio));
+    state.travel = Math.max(1, trackH - state.thumbH);
+    thumb.style.height = state.thumbH + "px";
   }
-  o.thumb.style.transform = `translateY(${o.y}px)`;
-  const settled = o.y === o.targetY;
-  if (!settled || o.dragging){
-    requestAnimationFrame(sbTick);
-  } else {
-    o.looping = false;
+  function maxScroll(){
+    return Math.max(1, getScrollHeight() - getViewportHeight());
   }
+  function syncTarget(){
+    const frac = Math.min(1, Math.max(0, getScrollTop() / maxScroll()));
+    state.targetY = frac * state.travel;
+  }
+  function show(){
+    rail.classList.add("active");
+    if (state.hideTimer){ clearTimeout(state.hideTimer); state.hideTimer = null; }
+  }
+  function scheduleHide(){
+    if (state.hideTimer) clearTimeout(state.hideTimer);
+    state.hideTimer = setTimeout(() => {
+      state.hideTimer = null;
+      if (!state.hovering && !state.dragging) rail.classList.remove("active");
+    }, SB_HIDE_MS);
+  }
+  function ensureLoop(){
+    if (state.looping) return;
+    state.looping = true;
+    requestAnimationFrame(tick);
+  }
+  function tick(){
+    if (state.dragging || state.reduce){
+      state.y = state.targetY; // direct 1:1 while dragging; instant snap under reduced motion
+    } else {
+      state.y += (state.targetY - state.y) * SB_LERP;
+      if (Math.abs(state.targetY - state.y) < 0.15) state.y = state.targetY;
+    }
+    thumb.style.transform = `translateY(${state.y}px)`;
+    const settled = state.y === state.targetY;
+    if (!settled || state.dragging){
+      requestAnimationFrame(tick);
+    } else {
+      state.looping = false;
+    }
+  }
+  function onScroll(){
+    syncTarget();
+    show();
+    ensureLoop();
+    scheduleHide();
+  }
+  function clientYToScroll(clientY){
+    const rect = track.getBoundingClientRect();
+    const thumbTop = clientY + state.dragOffset; // desired thumb top edge, viewport coords
+    const frac = Math.min(1, Math.max(0, (thumbTop - rect.top) / state.travel));
+    return frac * maxScroll();
+  }
+  function pointerDownThumb(e){
+    e.preventDefault();
+    state.dragging = true;
+    rail.classList.add("dragging");
+    // Offset between the pointer and the thumb's own top edge, so the thumb
+    // doesn't jump to re-center under the cursor the instant the drag starts.
+    const rect = thumb.getBoundingClientRect();
+    state.dragOffset = rect.top - e.clientY;
+    thumb.setPointerCapture(e.pointerId);
+    show();
+    ensureLoop();
+  }
+  function pointerMove(e){
+    if (!state.dragging) return;
+    scrollTo(clientYToScroll(e.clientY), false);
+    syncTarget();
+  }
+  function pointerUp(e){
+    if (!state.dragging) return;
+    state.dragging = false;
+    rail.classList.remove("dragging");
+    try { thumb.releasePointerCapture(e.pointerId); } catch(err){}
+    scheduleHide();
+  }
+  function pointerDownTrack(e){
+    const rect = track.getBoundingClientRect();
+    const clickFrac = Math.min(1, Math.max(0, (e.clientY - rect.top - state.thumbH / 2) / state.travel));
+    scrollTo(clickFrac * maxScroll(), !state.reduce);
+  }
+
+  // Re-measures and re-syncs against whatever the scroll surface's
+  // current size/position actually is — called on init, and by any
+  // caller whose content just changed size (a window resize for the page
+  // instance, a freshly-poured detail card for the modal instance).
+  function refresh(){
+    measure();
+    syncTarget();
+    ensureLoop();
+  }
+
+  state.reduce = reducedMotion();
+  measure();
+  syncTarget();
+  state.y = state.targetY;
+  thumb.style.transform = `translateY(${state.y}px)`;
+
+  scrollEventTarget.addEventListener("scroll", onScroll, { passive: true });
+  thumb.addEventListener("pointerdown", pointerDownThumb);
+  thumb.addEventListener("pointermove", pointerMove);
+  thumb.addEventListener("pointerup", pointerUp);
+  thumb.addEventListener("pointercancel", pointerUp);
+  track.addEventListener("pointerdown", pointerDownTrack);
+
+  const onEnter = () => { state.hovering = true; show(); };
+  const onLeave = () => { state.hovering = false; scheduleHide(); };
+  thumb.addEventListener("mouseenter", () => { rail.classList.add("hover"); onEnter(); });
+  thumb.addEventListener("mouseleave", () => { rail.classList.remove("hover"); onLeave(); });
+  track.addEventListener("mouseenter", onEnter);
+  track.addEventListener("mouseleave", onLeave);
+
+  window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => { state.reduce = e.matches; });
+
+  return { refresh };
 }
-function sbOnScroll(){
-  sbSyncTarget();
-  sbShow();
-  sbEnsureLoop();
-  sbScheduleHide();
-}
-function sbClientYToScroll(clientY){
-  const rect = SB.track.getBoundingClientRect();
-  const thumbTop = clientY + SB.dragOffset; // desired thumb top edge, viewport coords
-  const frac = Math.min(1, Math.max(0, (thumbTop - rect.top) / SB.travel));
-  return frac * sbMaxScroll();
-}
-function sbPointerDownThumb(e){
-  e.preventDefault();
-  SB.dragging = true;
-  SB.rail.classList.add("dragging");
-  // Offset between the pointer and the thumb's own top edge, so the thumb
-  // doesn't jump to re-center under the cursor the instant the drag starts.
-  const rect = SB.thumb.getBoundingClientRect();
-  SB.dragOffset = rect.top - e.clientY;
-  SB.thumb.setPointerCapture(e.pointerId);
-  sbShow();
-  sbEnsureLoop();
-}
-function sbPointerMove(e){
-  if (!SB.dragging) return;
-  window.scrollTo(0, sbClientYToScroll(e.clientY));
-  sbSyncTarget();
-}
-function sbPointerUp(e){
-  if (!SB.dragging) return;
-  SB.dragging = false;
-  SB.rail.classList.remove("dragging");
-  try { SB.thumb.releasePointerCapture(e.pointerId); } catch(err){}
-  sbScheduleHide();
-}
-function sbPointerDownTrack(e){
-  const rect = SB.track.getBoundingClientRect();
-  const clickFrac = Math.min(1, Math.max(0, (e.clientY - rect.top - SB.thumbH / 2) / SB.travel));
-  window.scrollTo({ top: clickFrac * sbMaxScroll(), behavior: SB.reduce ? "auto" : "smooth" });
-}
+
+let pageScrollbar = null;
 function initScrollbar(){
   const rail = document.getElementById("sbRail");
   if (!rail) return;
-  SB.rail = rail;
-  SB.track = document.getElementById("sbTrack");
-  SB.thumb = document.getElementById("sbThumb");
-  SB.reduce = reducedMotion();
+  const track = document.getElementById("sbTrack");
+  const thumb = document.getElementById("sbThumb");
 
-  sbMeasure();
-  sbSyncTarget();
-  SB.y = SB.targetY;
-  SB.thumb.style.transform = `translateY(${SB.y}px)`;
+  pageScrollbar = createScrollbarController({
+    rail, track, thumb,
+    getScrollTop: () => window.scrollY,
+    getScrollHeight: () => document.documentElement.scrollHeight,
+    getViewportHeight: () => window.innerHeight,
+    scrollTo: (top, smooth) => window.scrollTo({ top, behavior: smooth ? "smooth" : "auto" }),
+    scrollEventTarget: window,
+  });
 
-  window.addEventListener("scroll", sbOnScroll, { passive: true });
-  window.addEventListener("resize", () => { sbMeasure(); sbSyncTarget(); sbEnsureLoop(); });
-
-  SB.thumb.addEventListener("pointerdown", sbPointerDownThumb);
-  SB.thumb.addEventListener("pointermove", sbPointerMove);
-  SB.thumb.addEventListener("pointerup", sbPointerUp);
-  SB.thumb.addEventListener("pointercancel", sbPointerUp);
-  SB.track.addEventListener("pointerdown", sbPointerDownTrack);
-
-  const onEnter = () => { SB.hovering = true; sbShow(); };
-  const onLeave = () => { SB.hovering = false; sbScheduleHide(); };
-  SB.thumb.addEventListener("mouseenter", () => { SB.rail.classList.add("hover"); onEnter(); });
-  SB.thumb.addEventListener("mouseleave", () => { SB.rail.classList.remove("hover"); onLeave(); });
-  SB.track.addEventListener("mouseenter", onEnter);
-  SB.track.addEventListener("mouseleave", onLeave);
-
-  window.matchMedia("(prefers-reduced-motion: reduce)").addEventListener("change", (e) => { SB.reduce = e.matches; });
+  window.addEventListener("resize", () => pageScrollbar.refresh());
 
   // #app's innerHTML is replaced wholesale on every screen navigation,
   // which routinely changes the document's total scrollable height (a
@@ -1133,7 +1229,35 @@ function initScrollbar(){
   // thumb's size/travel stay correct without waiting for a resize.
   const app = document.getElementById("app");
   if (app){
-    new MutationObserver(() => { sbMeasure(); sbSyncTarget(); sbEnsureLoop(); }).observe(app, { childList: true, subtree: true });
+    new MutationObserver(() => pageScrollbar.refresh()).observe(app, { childList: true, subtree: true });
   }
 }
 initScrollbar();
+
+/* ---------------- service worker registration -----------------------------
+   Every page loads global.js, so this runs once per page load regardless
+   of which page is entered first — the browser dedupes repeat
+   registrations of the same script/scope on its own, so navigating
+   between pages never re-installs anything. A relative path (not
+   "/service-worker.js") so the registered scope is wherever the app
+   actually lives (a GitHub Pages project subpath, a custom domain root,
+   or this project's own local-dev root) rather than assuming the site
+   is deployed at its host's domain root.
+   Without this call actually registering the worker, everything else in
+   service-worker.js — precaching, offline fallback, the clean-URL
+   mapping, 404.html's own scope-detection lookup — never runs in any
+   browser; the file existing on disk isn't enough on its own. Registered
+   after "load" so it never competes with the current page's own
+   resources for bandwidth, and wrapped in a feature check + silent
+   catch so an unsupported context (e.g. this file opened directly via
+   file://, which has no service worker support at all) never breaks the
+   page — the app works fully online either way, just without the
+   offline/installable behavior. */
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js").catch(() => {
+      // Registration failed (unsupported context) — nothing to recover,
+      // the app itself doesn't depend on this succeeding.
+    });
+  });
+}
