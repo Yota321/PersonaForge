@@ -1252,12 +1252,79 @@ initScrollbar();
    catch so an unsupported context (e.g. this file opened directly via
    file://, which has no service worker support at all) never breaks the
    page — the app works fully online either way, just without the
-   offline/installable behavior. */
+   offline/installable behavior.
+
+   Update detection: the browser already re-fetches service-worker.js on
+   its own and silently installs a new worker in the background whenever
+   its bytes change (that part needs no code at all) — the only thing
+   this adds is noticing when that new worker has finished installing and
+   is sitting in the "waiting" state (see service-worker.js's "UPDATE
+   FLOW" comment for why it waits instead of taking over immediately),
+   and surfacing that as a small toast rather than leaving it invisible
+   until the next full reload. */
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").catch(() => {
+    navigator.serviceWorker.register("service-worker.js").then((reg) => {
+      // A worker can already be sitting in "waiting" the moment this page
+      // loads (installed by a tab that was open earlier) — catch that
+      // case immediately instead of only reacting to a fresh install.
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
+
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener("statechange", () => {
+          // "installed" + an existing controller means a real update is
+          // ready — the same state during the very first install has no
+          // controller yet and nothing meaningful to refresh from.
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller){
+            showUpdateToast(newWorker);
+          }
+        });
+      });
+    }).catch(() => {
       // Registration failed (unsupported context) — nothing to recover,
       // the app itself doesn't depend on this succeeding.
     });
+
+    // Reload once the new worker actually takes control (not the instant
+    // "Refresh" is clicked) so the page never runs half-controlled by the
+    // old worker. The flag guards against a duplicate reload if this ever
+    // fires more than once.
+    let pfSwRefreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (pfSwRefreshing) return;
+      pfSwRefreshing = true;
+      location.reload();
+    });
   });
+}
+
+// Small, self-contained "update available" toast. Styled inline rather
+// than via the app's stylesheets since this is PWA-update plumbing, not
+// app UI — it has no dependency on (and no effect on) the site's own
+// CSS. Bottom-right, dismisses itself by reloading once Refresh is
+// clicked; calling this twice (two updates found in one session) is a
+// no-op the second time since the first toast is still on screen.
+function showUpdateToast(waitingWorker){
+  if (document.getElementById("pf-update-toast")) return;
+  const toast = document.createElement("div");
+  toast.id = "pf-update-toast";
+  toast.setAttribute("role", "status");
+  toast.style.cssText = [
+    "position:fixed", "right:20px", "bottom:20px", "z-index:2147483647",
+    "display:flex", "align-items:center", "gap:14px",
+    "background:#1a1a1f", "color:#f5f5f7", "border:1px solid rgba(255,255,255,.14)",
+    "border-radius:12px", "padding:12px 16px", "box-shadow:0 8px 28px rgba(0,0,0,.4)",
+    "font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+    "max-width:min(90vw,340px)",
+  ].join(";");
+  toast.innerHTML =
+    '<span>✨ A new version of Forge is available.</span>' +
+    '<button type="button" style="flex-shrink:0;background:#7c5cff;color:#fff;border:none;' +
+    'border-radius:8px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer;">Refresh</button>';
+  toast.querySelector("button").addEventListener("click", () => {
+    waitingWorker.postMessage("SKIP_WAITING");
+  });
+  document.body.appendChild(toast);
 }
