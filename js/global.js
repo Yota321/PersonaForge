@@ -1264,7 +1264,7 @@ initScrollbar();
    until the next full reload. */
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").then((reg) => {
+    navigator.serviceWorker.register("service-worker.js?v=v1.0.2").then((reg) => {
       // A worker can already be sitting in "waiting" the moment this page
       // loads (installed by a tab that was open earlier) — catch that
       // case immediately instead of only reacting to a fresh install.
