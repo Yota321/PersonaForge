@@ -205,7 +205,11 @@ button:focus-visible, [tabindex]:focus-visible, input:focus-visible, textarea:fo
 h1,h2,h3,h4{ font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; }
 .career-row h4, .card h4{ font-weight: 500; }
 
-.container{ max-width: 900px; margin: 0 auto; padding: 0 28px; position:relative; z-index:1; }
+/* Shared page shell: same max-width/side-padding/centering as the result
+   page's own outer wrapper (.result-hero in css/pages.css), so every
+   page that reaches for ".container" sits in the same horizontal grid
+   as Results instead of each page picking its own width. */
+.container{ max-width: 1440px; margin: 0 auto; padding: 0 clamp(20px, 3vw, 38px); position:relative; z-index:1; }
 .screen{ min-height: 100vh; display:flex; flex-direction:column; padding: 32px 0 64px; }
 
 /* ---------- Floating background gradient orbs (decorative, aria-hidden) - */
@@ -478,7 +482,15 @@ html::-webkit-scrollbar{ display:none; }
 .nav-menu{
   position:absolute; top: calc(100% + 8px); right:0; z-index:500; min-width: 260px;
   display:grid; grid-template-rows: 0fr; overflow:hidden;
-  background: linear-gradient(180deg, rgba(23,26,34,0.74), rgba(23,26,34,0.54));
+  /* The menu has grown longer since this gradient was tuned (Growth/
+     Improve/Journal/Frameworks were added on top of Compare/Party/
+     Terms/Privacy/Export/Import), so the bottom stop's lower opacity —
+     originally a subtle top-to-bottom fade over a short list — now
+     lands under several real items, not just empty space, and reads as
+     noticeably weaker contrast there than at the top. Narrowing the
+     fade (0.74 -> 0.7) keeps the same visual character without any
+     item sitting on a materially weaker backdrop than another. */
+  background: linear-gradient(180deg, rgba(23,26,34,0.92), rgba(23,26,34,0.9));
   border:1px solid var(--border); border-radius: var(--radius-lg);
   box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
   backdrop-filter: blur(22px) saturate(150%);
@@ -504,7 +516,7 @@ html::-webkit-scrollbar{ display:none; }
    further aria-hidden/inert/focus-management is needed on top of it. */
 .nav-menu[hidden]{ display: none; }
 [data-theme="light"] .nav-menu{
-  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.52));
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.92));
   box-shadow: var(--shadow-soft), 0 16px 36px -20px rgba(100,116,139,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
 }
 .nav-menu.open{ grid-template-rows: 1fr; opacity:1; filter: blur(0); transform: scale(1); pointer-events:auto; }
@@ -570,6 +582,15 @@ html::-webkit-scrollbar{ display:none; }
 .modal-card p{ color: var(--text-muted); font-size:14.5px; margin-bottom:12px; }
 .modal-card .btn{ margin-top:8px; }
 .modal-close{ position:absolute; top:16px; right:16px; }
+
+/* Get Started modal: Local Profile vs Cloud Profile choice cards. */
+.get-started-choices{ display:flex; flex-direction:column; gap:10px; margin-top:6px; }
+.get-started-choice{ text-align:left; display:flex; flex-direction:column; gap:4px; padding:14px 16px; border-radius:16px; border:1px solid var(--border); background: var(--surface); transition: border-color .2s var(--ease), transform .2s var(--ease); }
+.get-started-choice:hover{ border-color: var(--accent); transform: translateY(-1px); }
+.get-started-choice-title{ font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px; }
+.get-started-choice-desc{ font-size:12.5px; color: var(--text-muted); }
+.get-started-choice-disabled{ opacity:.8; }
+.get-started-choice-disabled:hover{ border-color: var(--border); transform:none; }
 
 .hidden{ display:none !important; }
 /* Visually hidden but still reachable by screen readers — for text that
@@ -671,6 +692,16 @@ html::-webkit-scrollbar{ display:none; }
 .mini-bar-row{ display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid var(--border); }
 .mini-bar-row:last-child{ border-bottom:none; }
 .mini-bar-row span:last-child{ font-family:var(--font-mono); color:var(--text-muted); }
+
+/* Compare 2.0: a labeled break between the pairwise-score section and the
+   side-by-side "Layer Comparison" section, and the two-column style rows
+   (leadership/learning/work/etc.) within it. */
+.section-divider{ display:flex; align-items:center; gap:12px; margin:26px 0 14px; color:var(--text-dim); font-family:var(--font-mono); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; }
+.section-divider::before, .section-divider::after{ content:""; flex:1; height:1px; background:var(--border); }
+.cmp-style-row{ background: var(--surface); border:1px solid var(--border); border-radius:24px; padding:18px; margin-top:12px; }
+.cmp-style-row h4{ font-size:13px; color: var(--text-muted); font-weight:600; margin-bottom:8px; text-transform: uppercase; letter-spacing:0.04em; }
+.cmp-style-row p{ font-size:13.5px; }
+.cmp-overview-grid .mini-bar-row{ font-size:13.5px; }
 
 /* =========================================================================
    PHASE 3 ADDITION - the calc-overlay used by showCalcOverlay() (global.js),

@@ -18,6 +18,58 @@ function discardSavedQuizAndStart(){
   goToNameScreen();
 }
 
+/* ---------------- POST-QUIZ DASHBOARD -----------------------------------
+   Once a result exists, Home stops being a pure landing page and gains a
+   short "Forge noticing you" section: current archetype/soul, a couple
+   of human-sounding observations (computeLivingNotes(), engine.js), a
+   confidence/journal snapshot, and a context-aware retake nudge instead
+   of a flat button. Everything here is read-only and reuses computed
+   data other pages already show in full — this is deliberately the
+   short version, not a duplicate of Growth. */
+function renderHomeDashboard(){
+  const result = buildResultFromLatestTimeline();
+  if (!result) return "";
+  const growth = computeGrowthTimeline(result);
+  const notes = computeLivingNotes(result, growth);
+  const streak = computeJournalStreak();
+  const nudge = computeRetakeNudge(growth, streak);
+  const a = result.archetype;
+
+  return `
+  <section class="lp-dashboard section">
+    <div class="lp-dashboard-head">
+      <div class="eyebrow accent">YOUR SNAPSHOT</div>
+      <h2>Still figuring you out, <span class="accent-text">a little more each time.</span></h2>
+    </div>
+    <div class="lp-dashboard-grid">
+      <div class="card glass lp-dashboard-hero">
+        <div class="eyebrow accent">CURRENTLY</div>
+        <h3 style="margin-top:4px">${a.icon} ${a.name} &bull; ${result.soul.name} Soul</h3>
+        ${notes.map(n => `<p style="margin-top:8px;color:var(--text-muted)">${n}</p>`).join("")}
+        <div class="cta-row" style="margin-top:12px">
+          <button class="btn btn-ghost btn-sm" onclick="click(380);viewMyLastResult()">See Full Result</button>
+          <button class="btn btn-ghost btn-sm" onclick="click(380);navigate('growth')">See Growth</button>
+        </div>
+      </div>
+      <div class="card glass">
+        <h4>Recent Activity</h4>
+        <div class="mini-bar-row"><span>Retakes</span><span>${growth.retakeCount}</span></div>
+        <div class="mini-bar-row"><span>Journal streak</span><span>${streak.current} day${streak.current===1?"":"s"}</span></div>
+        <div class="mini-bar-row"><span>Confidence</span><span>${result.confidence.confidencePct}%</span></div>
+        <div class="cta-row" style="margin-top:10px">
+          <button class="btn btn-ghost btn-sm" onclick="click(380);navigate('journal')">Journal</button>
+          <button class="btn btn-ghost btn-sm" onclick="click(380);navigate('improve')">Improve</button>
+        </div>
+      </div>
+      <div class="card glass">
+        <h4>Feel Like Checking In?</h4>
+        <p style="color:var(--text-muted);font-size:13.5px">${nudge}</p>
+        <div class="cta-row" style="margin-top:10px"><button class="btn btn-primary btn-sm" onclick="click(520);goToNameScreen()">Retake Assessment &rarr;</button></div>
+      </div>
+    </div>
+  </section>`;
+}
+
 /* ---------------- LANDING ---------------------------------------------*/
 function renderLanding(){
   setAccentColors();
@@ -58,6 +110,12 @@ function renderLanding(){
           </div>
           `}
           ${saved ? `<button class="btn btn-ghost lp-reopen" onclick="click(380);loadSaved()">Reopen my last result</button>` : ""}
+          ${saved ? `
+          <div class="lp-quick-links" role="navigation" aria-label="Your profile">
+            <button class="lp-quick-link" onclick="click(360);navigate('profile')">${ICONS.people}<span>Profile</span></button>
+            <button class="lp-quick-link" onclick="click(360);navigate('growth')">${ICONS.trendUp}<span>Growth</span></button>
+            <button class="lp-quick-link" onclick="click(360);navigate('improve')">${ICONS.spark}<span>Improve</span></button>
+          </div>` : ""}
 
           <div class="lp-avatars" aria-hidden="true">
             <div class="lp-avatar-stack">
@@ -105,7 +163,7 @@ function renderLanding(){
               <p>See how you connect with friends, partners, and others.</p>
               <span class="lp-card-foot">Different people. Brighter connections.</span>
             </button>
-            <button class="lp-card lp-card-03" onclick="click(380);navigate('party')">
+            <button class="lp-card lp-card-03" onclick="click(380);navigate('growth')">
               <div class="lp-card-top"><span class="lp-card-num">03</span><span class="lp-card-arrow">&nearr;</span></div>
               <h3>Evolve</h3>
               <p>Track your growth over time.</p>
@@ -114,6 +172,8 @@ function renderLanding(){
           </div>
         </div>
       </section>
+
+      ${saved ? renderHomeDashboard() : ""}
 
       <section class="lp-features section" aria-label="Why Forge">
         <div class="lp-feature"><span class="lp-feature-icon lp-fi-1">${ICONS.lock}</span><div><h4>Private</h4><p>Your data stays on your device.</p></div></div>
@@ -144,7 +204,7 @@ function renderLanding(){
             <li>Saved comparisons</li>
             <li>Early access to new features</li>
           </ul>
-          <button class="btn btn-ghost" onclick="showComingSoon('Accounts')">Sign Up &rarr;</button>
+          <button class="btn btn-ghost" onclick="showComingSoon('Cloud profiles')">Cloud Profile &rarr;</button>
           <p class="lp-fine-print">Always optional. Your privacy, your choice.</p>
         </div>
       </section>
@@ -210,7 +270,7 @@ function initHeroParallax(){
 function loadSaved(){
   const code = localStorage.getItem("pf_last_code");
   const decoded = code && decodeCode(code);
-  if (!decoded){ alert("No valid saved result found on this device."); return; }
+  if (!decoded){ showToast("No valid saved result found on this device."); return; }
   sessionStorage.setItem("pf_view_shared_code", code);
   location.href = "result.html";
 }
@@ -227,7 +287,13 @@ function loadSaved(){
 
 function renderSharedLinkInterstitial(){
   const decoded = pendingSharedProfile;
-  const a = decoded.archetype;
+  // decoded.archetype is whatever archIdx was baked into the code string
+  // at encode time -- stale the moment matchArchetype's scoring changes,
+  // same class of bug as buildResultFromDecoded's identically-named field
+  // in engine.js. Recomputing fresh means this interstitial can never show
+  // a different archetype than the result page "View Profile" hands off
+  // to right after.
+  const a = matchArchetype(decoded.normDims).primary;
   setAccentColors(a.colors[0], a.colors[1]);
   setPageTitle(decoded.name ? `${decoded.name}'s Profile` : "Shared Profile");
   const hasOwnProfile = !!localStorage.getItem("pf_last_code");

@@ -45,14 +45,28 @@ const PF_PAGE = "quiz";
 applyTheme(currentTheme);
 useCleanURL("quiz");
 (function boot(){
-  if (sessionStorage.getItem("pf_resume_quiz") === "1"){
-    sessionStorage.removeItem("pf_resume_quiz");
-    const saved = getSavedQuizProgress();
-    if (saved){
-      session = restoreQuizSession(saved);
+  // Explicit flag (set by the homepage's "Continue" button, which already
+  // showed its own in-progress card and got a deliberate click) skips the
+  // extra confirmation and resumes straight away.
+  const explicitResume = sessionStorage.getItem("pf_resume_quiz") === "1";
+  sessionStorage.removeItem("pf_resume_quiz");
+  const savedQuiz = getSavedQuizProgress();
+  if (savedQuiz){
+    if (explicitResume){
+      session = restoreQuizSession(savedQuiz);
       renderQuiz();
       return;
     }
+    // Any other arrival at quiz.html (a plain refresh, a bookmarked link,
+    // reopening the tab) with real quiz progress sitting in storage asks
+    // first instead of silently restarting onboarding and losing it.
+    renderResumeQuizPrompt(savedQuiz);
+    return;
+  }
+  const savedOnboarding = getSavedOnboardingProgress();
+  if (savedOnboarding){
+    restoreOnboardingStep(savedOnboarding);
+    return;
   }
   renderNameScreen();
 })();

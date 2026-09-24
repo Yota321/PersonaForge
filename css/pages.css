@@ -18,21 +18,22 @@
    while 110% zoom (a narrower effective viewport, ~1745px) stayed under
    the cap and showed only ~35px, so the page visibly changed how "edge
    to edge" it felt depending on zoom level alone. width:100% always
-   fills whatever the viewport actually is; the 84px padding is now the
-   *only* margin, so it looks identical at any zoom. The max-width only
-   exists as a ceiling for genuinely ultra-wide displays. */
-.landing-v2{ position:relative; z-index:1; max-width: 2200px; width:100%; margin-inline:auto; padding: 0 84px 8px; display:flex; flex-direction:column; gap: 64px; }
+   fills whatever the viewport actually is; the side padding below is
+   the *only* margin, so it looks identical at any zoom. The max-width
+   only exists as a ceiling for genuinely ultra-wide displays. */
+/* Same shell as .container (css/global.css) — same max-width and side
+   padding as the result page's outer wrapper — so Home's side margins
+   never sit wider or narrower than any other page's. The internal hero/
+   bento composition below is unchanged; only how much room it's given
+   on either side changed. */
+.landing-v2{ position:relative; z-index:1; max-width: 1440px; width:100%; margin-inline:auto; padding: 0 clamp(20px, 3vw, 38px) 8px; display:flex; flex-direction:column; gap: 64px; }
 .landing-v2 > .section{ margin-top:0; }
 /* Must outrank .landing-v2's own stacking context (also z-index:1) so
    the sticky top bar's overflow menu — nested inside this wrapper's own
    stacking context — can never paint underneath hero/bento content that
    happens to come later in the DOM. A z-index on a descendant (the menu)
    can't escape its ancestor's stacking context on its own. */
-.lp-topbar-wrap{ max-width: 2200px; width:100%; margin-inline:auto; padding:0 84px; position:relative; z-index:50; }
-/* The 84px side padding above is sized for the desktop hero composition
-   (72-96px per this pass's spec); at phone widths it would eat more
-   than 40% of the viewport on its own, so it steps down well before
-   the 900px layout breakpoint. */
+.lp-topbar-wrap{ max-width: 1440px; width:100%; margin-inline:auto; padding: 0 clamp(20px, 3vw, 38px); position:relative; z-index:50; }
 @media (max-width: 760px){
   .landing-v2, .lp-topbar-wrap, .lp-footer-inner{ padding-left:20px; padding-right:20px; }
 }
@@ -124,6 +125,51 @@
 .lp-status-card{ max-width: 440px; padding: 18px 20px; }
 .lp-status-card p{ margin-top:8px; }
 .lp-reopen{ align-self:flex-start; margin-top:-14px; }
+/* Home page's post-result quick-links row: Profile/Growth/Improve, only
+   shown once a result exists — home stays a plain two-button start
+   screen until then (see renderLanding()'s `saved` gate). */
+.lp-quick-links{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+.lp-quick-link{ display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; border:1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size:13px; font-family: var(--font-mono); transition: color .2s var(--ease), border-color .2s var(--ease); }
+.lp-quick-link:hover{ color: var(--text); border-color: var(--accent); }
+.lp-quick-link svg{ width:15px; height:15px; }
+
+/* Improve page: plain, readable lists inside the existing .card.glass
+   shell rather than a new component — keeps the page feeling like more
+   Forge cards, not a separate settings-panel-style UI. */
+.improve-reason{ font-size:12px; color: var(--text-dim); font-style:italic; margin-top:-4px; margin-bottom:8px; }
+.improve-list{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+.improve-list li{ font-size:14px; padding-left:16px; position:relative; }
+.improve-list li::before{ content:"\2013"; position:absolute; left:0; color: var(--text-dim); }
+.improve-checkin{ border-color: var(--accent); }
+
+/* Profile page: the avatar/name header row. */
+.profile-hero-row{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.profile-avatar-wrap{ flex-shrink:0; }
+.profile-avatar-img{ width:72px; height:72px; border-radius:50%; object-fit:cover; display:block; border:1px solid var(--border); }
+.profile-avatar-fallback{ width:72px; height:72px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:600; color:#fff; }
+.profile-hero-info h3{ margin:0 0 2px; }
+.profile-name-edit{ max-width:340px; }
+.profile-name-row{ display:flex; gap:8px; margin-top:6px; }
+.profile-name-row .ns-input{ flex:1; }
+
+/* Journal page: the mood picker row and past-entry rows. */
+.journal-mood-row{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.journal-mood-btn{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:10px 14px; border-radius:16px; border:1px solid var(--border); background: var(--surface); font-size:22px; color: var(--text-muted); transition: border-color .2s var(--ease), color .2s var(--ease); }
+.journal-mood-btn span{ font-size:11px; font-family: var(--font-mono); }
+.journal-mood-btn.selected{ border-color: var(--accent); color: var(--text); }
+.journal-mood-btn:disabled{ opacity:.55; }
+.journal-entry-row{ display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+.journal-entry-row:last-child{ border-bottom:none; }
+.journal-entry-mood{ font-size:20px; flex-shrink:0; }
+.journal-entry-body{ flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.journal-entry-date{ font-size:11.5px; font-family: var(--font-mono); color: var(--text-dim); }
+.journal-entry-text{ font-size:13.5px; word-break:break-word; }
+.journal-entry-delete{ flex-shrink:0; width:28px; height:28px; }
+.journal-entry-delete svg{ width:12px; height:12px; }
+
+/* Profile page: the Level/XP progress card. */
+.progress-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.progress-xp{ font-family: var(--font-mono); font-size:13px; color: var(--text-muted); white-space:nowrap; }
 .lp-trust-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; color: var(--text-muted); font-size:12.5px; font-family: var(--font-mono); }
 .dot-sep{ width:3px; height:3px; border-radius:50%; background: var(--text-dim); display:inline-block; }
 
@@ -623,6 +669,12 @@ button.lp-card{ width:100%; }
 .lp-cta-split > *:nth-child(1){ transition-delay: .05s; }
 .lp-cta-split > *:nth-child(2){ transition-delay: .14s; }
 
+/* ---- Home post-quiz dashboard (renderHomeDashboard(), js/home.js) ---- */
+.lp-dashboard-head h2{ font-size: clamp(22px, 3vw, 30px); margin-top:6px; max-width:640px; }
+.lp-dashboard-grid{ display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:16px; margin-top:18px; align-items:start; }
+.lp-dashboard-hero h3{ font-size:19px; }
+@media (max-width: 900px){ .lp-dashboard-grid{ grid-template-columns: 1fr; } }
+
 /* ---- Feature strip ---- */
 .lp-features{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .lp-feature{
@@ -690,7 +742,7 @@ button.lp-card{ width:100%; }
   position:relative; z-index:1; margin: 24px 0 0; padding: 28px 0 0; border-top:1px solid var(--border);
 }
 .lp-footer-inner{
-  max-width:2200px; width:100%; margin-inline:auto; padding: 0 84px 32px;
+  max-width:1440px; width:100%; margin-inline:auto; padding: 0 clamp(20px, 3vw, 38px) 32px;
   display:grid; grid-template-columns: 1fr auto 1fr; align-items:center; gap:20px;
 }
 .lp-footer-top{ display:flex; align-items:baseline; gap:10px; }
@@ -1330,6 +1382,18 @@ html.detail-lock-scroll, html.detail-lock-scroll body{ overflow:hidden; }
 
 canvas#radar{ display:block; margin: 0 auto; max-width:100%; }
 .radar-legend{ text-align:center; font-family: var(--font-mono); font-size:11.5px; color: var(--text-dim); margin-top:10px; }
+
+/* Compare 2.0's dual-overlay radar canvases: same safety net as #radar
+   above — the canvas's pixel size is fixed at draw time, so if the
+   viewport is resized afterward (rotation, window resize) without a
+   redraw, this keeps it scaling down to fit its card instead of
+   overflowing it. */
+#cmpRadarMind, #cmpRadarEmotion{ display:block; margin:0 auto; max-width:100%; height:auto; }
+
+/* Top-bar "Profile" pill: the same slot the "Sign Up" pill used, just with
+   a small soul-colored dot standing in for an avatar, since there's no
+   account/photo system to hang a real avatar image off yet. */
+.nav-profile-dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
 
 .export-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 18px; justify-content:center; }
 

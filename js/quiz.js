@@ -43,6 +43,7 @@ function obSelectChip(el){
   document.querySelectorAll(`.ob-chip[data-group="${group}"]`).forEach(c => c.classList.remove("selected"));
   el.classList.add("selected");
   click(320);
+  autosaveOnboarding(obCurrentStep());
 }
 function obChipValue(group){
   return document.querySelector(`.ob-chip.selected[data-group="${group}"]`)?.dataset.value || "";
@@ -67,6 +68,16 @@ function obSelectCard(el){
   document.querySelectorAll(`.ob-card[data-group="${group}"]`).forEach(c => c.classList.remove("selected"));
   el.classList.add("selected");
   click(340);
+  autosaveOnboarding(obCurrentStep());
+}
+// Which onboarding screen is currently rendered, purely from DOM markers
+// already on each screen — used so shared widgets (chip rows, card groups)
+// can autosave under the right step number without threading it through
+// every call site.
+function obCurrentStep(){
+  if (document.getElementById("experienceScreen")) return 3;
+  if (document.getElementById("aboutScreen")) return 2;
+  return 1;
 }
 function obCardValue(group, fallback){
   return document.querySelector(`.ob-card.selected[data-group="${group}"]`)?.dataset.value || fallback;
@@ -134,8 +145,40 @@ function renderNameScreen(){
   }
   setTimeout(() => {
     const f = document.getElementById("nameField");
-    if (f){ f.focus(); f.onkeydown = (e) => { if (e.key === "Enter") confirmName(); }; }
+    if (f){
+      f.focus();
+      f.onkeydown = (e) => { if (e.key === "Enter") confirmName(); };
+      f.oninput = () => autosaveOnboarding(1);
+    }
+    ["occupationField","countryField"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.oninput = () => autosaveOnboarding(1);
+    });
   }, 50);
+  autosaveOnboarding(1);
+}
+// Persists the wizard's current step + whatever has been entered/picked so
+// far (name, age group, occupation, country, gender, reason, length), so a
+// refresh mid-onboarding restores to the exact same step with the exact
+// same fields filled in rather than bouncing back to step 1. Reads straight
+// off the live DOM where a field exists on the current screen, and falls
+// back to the in-memory pendingName/pendingMeta for anything not currently
+// on screen (so switching screens never drops an earlier answer).
+function autosaveOnboarding(step){
+  const nameField = document.getElementById("nameField");
+  if (nameField) pendingName = nameField.value;
+  const occ = document.getElementById("occupationField");
+  const country = document.getElementById("countryField");
+  if (occ) pendingMeta.occupation = occ.value;
+  if (country) pendingMeta.country = country.value;
+  if (document.querySelector('.ob-chip[data-group="ageGroup"]')) pendingMeta.ageGroup = obChipValue("ageGroup");
+  if (document.querySelector('.ob-chip[data-group="gender"]')) pendingMeta.gender = obChipValue("gender");
+  if (document.querySelector('.ob-chip[data-group="reason"]')) pendingMeta.reason = obChipValue("reason");
+  if (document.querySelector('.ob-card[data-group="length"]')){
+    pendingMeta.questionMode = obCardValue("length", pendingMeta.questionMode || "adaptive");
+    pendingMeta.resultDepth = obDepthForLength(pendingMeta.questionMode);
+  }
+  saveOnboardingProgress(step, pendingName, pendingMeta);
 }
 function toggleExtraDetails(){
   const el = document.getElementById("extraDetails");
@@ -145,7 +188,19 @@ function toggleExtraDetails(){
   label.textContent = showing ? "+ Add more details" : "\u2212 Hide extra details";
   click(360);
 }
+// Root-cause fix for a real, reproducible bug: a spurious duplicate
+// click (confirmed via instrumentation — a second, untrusted "click"
+// event firing immediately after the real one on buttons whose
+// pointerdown ripple effect mutates the button's own DOM) could invoke
+// this a second time after the screen had already moved on. That second
+// call would read chip/field values off whatever screen happened to be
+// showing by then (not this one), overwriting good values with empty
+// ones. Guarding on "is my own screen still the one on screen" makes
+// every onboarding step handler a safe no-op if called out of turn,
+// regardless of what triggers the extra call — a double click, a
+// double-fired event, or anything else.
 function confirmName(){
+  if (!document.getElementById("nameScreen")) return;
   pendingName = document.getElementById("nameField").value.trim();
   pendingMeta.ageGroup = obChipValue("ageGroup");
   pendingMeta.occupation = (document.getElementById("occupationField")?.value || "").trim();
@@ -191,8 +246,10 @@ function renderAboutScreen(){
     </div>
   `;
   spawnAmbience();
+  autosaveOnboarding(2);
 }
 function confirmAbout(goBack){
+  if (!document.getElementById("aboutScreen")) return;
   pendingMeta.gender = obChipValue("gender");
   pendingMeta.reason = obChipValue("reason");
   if (goBack){ renderNameScreen(); return; }
@@ -212,7 +269,7 @@ function confirmAbout(goBack){
    questionMode), everything else is presentation only. */
 const OB_LENGTH_OPTIONS = [
   { value: "15", depth: "short", title: "Quick Read", desc: "A fast, lighter pass that hits the highlights without digging deep." },
-  { value: "35", depth: "balanced", badge: "Recommended", title: "Balanced", desc: "The full Forge experience, thorough without dragging." },
+  { value: "adaptive", depth: "balanced", badge: "Recommended", title: "Balanced", desc: "The full Forge experience, thorough without dragging. Keeps asking a little longer if your answers are hard to pin down." },
   { value: "50", depth: "deep", title: "Deep Dive", desc: "Every angle explored, for the most complete and confident read Forge can give." },
 ];
 function renderExperienceScreen(){
@@ -232,7 +289,7 @@ function renderExperienceScreen(){
 
           <div class="ob-section">
             <span class="ns-label">How deep do you want to go?</span>
-            ${obCardGroup("length", OB_LENGTH_OPTIONS, pendingMeta.questionMode || "35")}
+            ${obCardGroup("length", OB_LENGTH_OPTIONS, pendingMeta.questionMode || "adaptive")}
           </div>
 
           <div class="qz-nav2">
@@ -244,6 +301,7 @@ function renderExperienceScreen(){
     </div>
   `;
   spawnAmbience();
+  autosaveOnboarding(3);
 }
 // Question count and result-page presentation depth are two faces of
 // the one visible choice — this is the only place that maps between
@@ -252,12 +310,14 @@ function obDepthForLength(questionMode){
   return (OB_LENGTH_OPTIONS.find(o => o.value === questionMode) || {}).depth || "balanced";
 }
 function backFromExperience(){
-  pendingMeta.questionMode = obCardValue("length", "35");
+  if (!document.getElementById("experienceScreen")) return;
+  pendingMeta.questionMode = obCardValue("length", "adaptive");
   pendingMeta.resultDepth = obDepthForLength(pendingMeta.questionMode);
   renderAboutScreen();
 }
 function confirmExperience(){
-  const questionMode = obCardValue("length", "35");
+  if (!document.getElementById("experienceScreen")) return;
+  const questionMode = obCardValue("length", "adaptive");
   pendingMeta.questionMode = questionMode;
   pendingMeta.resultDepth = obDepthForLength(questionMode);
   click(520);
@@ -275,7 +335,7 @@ let session = null;
 let pendingName = "";
 
 /* ---------------- QUIZ --------------------------------------------------*/
-// questionMode ("15" | "35" | "adaptive") comes from the "Your
+// questionMode ("15" | "adaptive" | "50") comes from the "Your
 // Experience" onboarding step (undefined when it was skipped entirely,
 // e.g. the name screen's own "Skip for now") and is the one onboarding
 // preference that actually changes what the quiz engine does — see
@@ -285,9 +345,61 @@ let pendingName = "";
 function startQuiz(name, meta, questionMode){
   pendingName = name || "";
   clearQuizProgress();
+  clearOnboardingProgress();
   session = new QuizSession(Date.now() % 100000, pendingName, questionMode);
   session.meta = meta || {};
   renderQuiz();
+}
+
+/* ---------------- SESSION RECOVERY (refresh mid-onboarding/mid-quiz) ---
+   boot() in quiz.html calls into these instead of assuming a fresh visit.
+   Onboarding progress restores silently (nothing lost, no extra tap: it's
+   just "the wizard remembers"). An in-progress quiz instead asks first,
+   since silently resuming could feel like it skipped past a fresh-start
+   click, and silently discarding could throw away real answers. */
+function restoreOnboardingStep(saved){
+  pendingName = saved.name || "";
+  pendingMeta = saved.meta || {};
+  const step = saved.step || 1;
+  if (step >= 3) renderExperienceScreen();
+  else if (step === 2) renderAboutScreen();
+  else renderNameScreen();
+}
+function renderResumeQuizPrompt(saved){
+  setAccentColors();
+  setPageTitle("Assessment");
+  root.innerHTML = `
+    <div class="container lp-topbar-wrap">${topBar(true)}</div>
+    <div class="ns-wrap">
+      <div class="ns-panel glass" id="resumeScreen">
+        <div class="ns-panel-top">
+          <div class="eyebrow accent">WELCOME BACK</div>
+        </div>
+        <div class="ns-panel-body">
+          <h2>Resume your <span class="accent-text">assessment?</span></h2>
+          <p>${saved.name ? obEsc(saved.name) + ", y" : "Y"}ou answered ${saved.cursor} of ${saved.targetLength}. Pick up on question ${saved.cursor + 1}, or start over from scratch.</p>
+          <button class="btn btn-primary" onclick="acceptResumeQuiz()">Resume &rarr;</button>
+          <div class="ns-divider">OR</div>
+          <button class="btn btn-ghost" onclick="declineResumeQuiz()">Start over</button>
+        </div>
+      </div>
+    </div>
+  `;
+  spawnAmbience();
+}
+function acceptResumeQuiz(){
+  click(500);
+  const saved = getSavedQuizProgress();
+  if (!saved){ renderNameScreen(); return; }
+  session = restoreQuizSession(saved);
+  pendingName = session.name || "";
+  renderQuiz();
+}
+function declineResumeQuiz(){
+  click(360);
+  clearQuizProgress();
+  clearOnboardingProgress();
+  renderNameScreen();
 }
 
 // Matches the .qz-cards breakpoint exactly — below it the grid is a
@@ -397,10 +509,10 @@ function renderQuiz(){
   // MAX_QUESTIONS) rather than the current target, since that target
   // itself can extend mid-quiz — basing the percentage on it would make
   // it visibly jump backward the instant confidence comes up short and
-  // the assessment grows by one question. Fixed modes ("15"/"35") never
-  // extend, so measuring against their own total instead reads more
-  // naturally as "how far through your chosen length."
-  const modeLabel = session.questionMode === "15" ? "Fast" : session.questionMode === "35" ? "Standard" : session.questionMode === "50" ? "Deep" : "Adaptive";
+  // the assessment grows by one question. Fixed modes ("15"/"50" — Quick
+  // Read/Deep Dive) never extend, so measuring against their own total
+  // instead reads more naturally as "how far through your chosen length."
+  const modeLabel = session.questionMode === "15" ? "Quick Read" : session.questionMode === "50" ? "Deep Dive" : "Balanced";
   const pctDenom = session.questionMode === "adaptive" ? max : total;
   const pctDone = Math.round((current / pctDenom) * 100);
   const existing = session.currentAnswer();

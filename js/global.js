@@ -658,9 +658,34 @@ const ICONS = {
   wifi: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5a10 10 0 0 1 14 0M5.6 10.6a6.2 6.2 0 0 1 8.8 0M8.4 13.6a2.4 2.4 0 0 1 3.2 0"/><circle cx="10" cy="16.2" r="1" fill="currentColor" stroke="none"/></svg>`,
   layers: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 17 8l-7 4.5L3 8z"/><path d="m4.6 10.8-1.6 1 7 4.5 7-4.5-1.6-1"/></svg>`,
   people: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.2" cy="7" r="2.6"/><path d="M2.5 16c.5-3 2.3-4.6 4.7-4.6s4.2 1.6 4.7 4.6"/><circle cx="14.4" cy="7.4" r="2.1"/><path d="M13 11.6c2 .1 3.5 1.6 3.9 4"/></svg>`,
+  trendUp: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l4.5-5 3.5 3L17 5"/><path d="M12.5 5H17v4.5"/></svg>`,
+  spark: `<svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5c.6 3 1.9 4.9 4.9 5.5-3 .6-4.3 1.9-4.9 4.9-.6-3-1.9-4.3-4.9-4.9 3-.6 4.3-2.5 4.9-5.5Z"/><path d="M15.5 13.5c.3 1.4.9 2.2 2.2 2.5-1.3.3-1.9.9-2.2 2.2-.3-1.3-.9-1.9-2.2-2.2 1.3-.3 1.9-1.1 2.2-2.5Z"/></svg>`,
 };
 
+// Once a local profile exists (the moment a first result exists — see
+// ensureLocalProfile() in engine.js), the top bar's "Sign Up" pill becomes
+// a "Profile" pill instead: there's no account to sign up for, and there
+// already IS a local identity to open. Both the pill and its nav-menu
+// twin key off the exact same getLocalProfile() check, so they never
+// disagree with each other.
+function navProfilePillLabel(profile){
+  if (!profile) return "Get Started";
+  const first = (profile.name || "").trim().split(/\s+/)[0];
+  return first ? first : "Profile";
+}
 function topBar(showBack){
+  const profile = getLocalProfile();
+  const pillHref = profile ? "profile.html" : null;
+  const pillOnclick = profile ? "click(380);navigate('profile')" : "showGetStartedModal()";
+  const pillLabel = profile ? navProfilePillLabel(profile) : "Get Started";
+  // profile.soulHex is only ever written at quiz-completion time (see
+  // ensureLocalProfile in engine.js) and never refreshed just from a page
+  // rendering its nav bar, so it goes stale the moment the engine's soul
+  // scoring changes -- recomputing fresh from the profile's own code keeps
+  // this dot in sync with what Profile/Growth/Result all show for the
+  // same person. Falls back to the stored value if decoding fails.
+  const decodedForNav = profile && profile.code ? decodeCode(profile.code) : null;
+  const freshSoulHex = decodedForNav ? computeSoulType(decodedForNav.normDims).hex : (profile && profile.soulHex);
   return `
   <div class="top-bar">
     <div class="nav-zone nav-left">
@@ -674,13 +699,17 @@ function topBar(showBack){
       <span id="navLogoFallback" class="nav-logo-fallback" style="display:none">Forge<span class="brand-dot">.</span></span>
     </div>
     <div class="nav-zone nav-right">
-      <button class="btn btn-primary btn-sm nav-signup" onclick="showComingSoon('Accounts')">Sign Up<span class="pill-arrow">&rarr;</span></button>
+      <button class="btn btn-primary btn-sm nav-signup${profile ? " nav-profile-pill" : ""}" onclick="${pillOnclick}">${profile ? `<span class="nav-profile-dot" style="background:${isSafeHexColor(freshSoulHex) ? freshSoulHex : "currentColor"}" aria-hidden="true"></span>` : ""}${obEsc(pillLabel)}<span class="pill-arrow">&rarr;</span></button>
       <button class="icon-btn" id="navMenuBtn" onclick="toggleNavMenu()" aria-haspopup="true" aria-expanded="false" aria-label="Open menu">${ICONS.menu}</button>
     </div>
     <div class="nav-menu-backdrop" id="navMenuBackdrop" hidden></div>
     <div class="nav-menu" id="navMenu" hidden>
      <div class="nav-menu-inner">
-      <button class="nav-menu-item nav-menu-signup" onclick="closeNavMenu();showComingSoon('Accounts')"><span>Sign Up &rarr;</span></button>
+      <button class="nav-menu-item nav-menu-signup" onclick="closeNavMenu();${pillOnclick}"><span>${obEsc(pillLabel)} &rarr;</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('growth')"><span>Growth</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('improve')"><span>Improve</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('journal')"><span>Journal</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('frameworks')"><span>Frameworks</span></button>
       <button class="nav-menu-item" id="navThemeItem" onclick="toggleTheme()">${currentTheme === "light" ? ICONS.moon : ICONS.sun}<span>${currentTheme === "light" ? "Dark mode" : "Light mode"}</span></button>
       <button class="nav-menu-item" id="navSoundItem" onclick="toggleSound()">${soundOn ? ICONS.soundOn : ICONS.soundOff}<span>Sound ${soundOn ? "on" : "off"}</span></button>
       <div class="nav-menu-sep"></div>
@@ -688,6 +717,9 @@ function topBar(showBack){
       <button class="nav-menu-item" onclick="closeNavMenu();click(380);navigate('party')"><span>Party Compare</span></button>
       <a class="nav-menu-item" href="legal.html"><span>Terms of Service</span></a>
       <button class="nav-menu-item" onclick="closeNavMenu();showPrivacyModal()"><span>Privacy</span></button>
+      <div class="nav-menu-sep"></div>
+      <button class="nav-menu-item" onclick="closeNavMenu();exportProfile()"><span>Export Profile (.pf)</span></button>
+      <button class="nav-menu-item" onclick="closeNavMenu();importProfile()"><span>Import Profile (.pf)</span></button>
       <div class="nav-menu-sep"></div>
       <div class="nav-menu-code">
         <label for="quickCode">Have someone's code?</label>
@@ -743,11 +775,37 @@ function onNavMenuOutsideClick(e){
   if (!menu || (menu.contains(e.target) || (btn && btn.contains(e.target)))) return;
   closeNavMenu();
 }
+// Real bug, found in a verification pass: Tab had no boundary while the
+// menu was open, so it walked straight past the last menu item into
+// whatever page content sits underneath — content that's still visually
+// covered by the menu and its backdrop at that point, so a keyboard user
+// could land on and activate something they can't actually see. Trapping
+// Tab/Shift+Tab within the menu's own focusable elements is the fix;
+// Escape already returned focus to the trigger button correctly and is
+// unchanged.
+function getNavMenuFocusable(){
+  const menu = document.getElementById("navMenu");
+  if (!menu) return [];
+  return [...menu.querySelectorAll("button, a[href], input")].filter(el => el.offsetParent !== null);
+}
 function onNavMenuKey(e){
-  if (e.key !== "Escape") return;
-  closeNavMenu();
-  const btn = document.getElementById("navMenuBtn");
-  if (btn) btn.focus();
+  if (e.key === "Escape"){
+    closeNavMenu();
+    const btn = document.getElementById("navMenuBtn");
+    if (btn) btn.focus();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  const focusable = getNavMenuFocusable();
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first){
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last){
+    e.preventDefault();
+    first.focus();
+  }
 }
 
 /* ---------------- nav-menu "have someone's code?" quick lookup -----------
@@ -768,7 +826,7 @@ function viewProfileFromCode(){
   const val = document.getElementById("quickCode").value.trim();
   if (!val) return;
   const decoded = decodeCode(val);
-  if (!decoded){ alert("That code doesn't look right. Check for typos and try again."); return; }
+  if (!decoded){ showToast("That code doesn't look right. Check for typos and try again."); return; }
   click(500);
   if (typeof PF_PAGE !== "undefined" && PF_PAGE === "result"){
     lastResult = buildResultFromDecoded(decoded, val);
@@ -779,6 +837,169 @@ function viewProfileFromCode(){
     sessionStorage.setItem("pf_view_shared_code", val);
     location.href = "result.html";
   }
+}
+
+/* ---------------- Profile export / import (.pf) -------------------------
+   ".pf" here is a plain JSON file, not to be confused with the "PF1"/
+   "PF2" version tag inside a share code — it's just this device's saved
+   profile (the current code, plus the local history log) wrapped so it
+   can move to another browser/device. Entirely local: no account, no
+   server, nothing leaves the device except the file itself when the
+   user explicitly downloads or picks one. */
+// Export format version 2: adds a full, human-inspectable snapshot
+// (archetype, soul, virtues, tendencies, mind map, fun stats, confidence,
+// quiz mode) on top of what v1 exported. The `code` field alone is still
+// the actual restore mechanism (see importProfile() below) since it fully
+// determines everything else deterministically — the extra fields exist
+// so the file is complete and portable on its own, not because import
+// strictly needs them.
+const PF_EXPORT_FORMAT = "forge-profile";
+const PF_EXPORT_VERSION = 2;
+function exportProfile(){
+  const code = localStorage.getItem("pf_last_code");
+  if (!code){
+    click(300);
+    showToast("No saved profile on this device yet. Take the quiz first.");
+    return;
+  }
+  click(460);
+  let history = [];
+  try{ history = JSON.parse(localStorage.getItem("pf_history") || "[]"); } catch(e){ /* ignore malformed history, export the code anyway */ }
+  const decoded = decodeCode(code);
+  const safeName = (decoded && decoded.name ? decoded.name : "Forge-Profile").replace(/[^a-z0-9_-]+/gi, "_") || "Forge-Profile";
+
+  const payload = { format: PF_EXPORT_FORMAT, version: PF_EXPORT_VERSION, exportedAt: Date.now(), code, history };
+  // Local-only data added alongside the core profile since this session's
+  // expansion (journal, saved groups) — same reasoning as everything
+  // else here: the .pf file stays a complete, portable snapshot, and
+  // these use the same stable-id records (see engine.js) that a future
+  // optional-sync layer would need anyway.
+  try{ payload.journal = getJournalEntries(); } catch(e){ /* ignore */ }
+  try{ payload.groups = getSavedGroups(); } catch(e){ /* ignore */ }
+  try{ payload.suggestionFeedback = getSuggestionFeedback(); } catch(e){ /* ignore */ }
+  try{ payload.settings = { theme: currentTheme, sound: soundOn ? "on" : "off" }; } catch(e){ /* ignore */ }
+  try{ const p = getLocalProfile(); if (p) payload.localProfile = p; } catch(e){ /* ignore */ }
+  // On the result page with the matching code still current, lastResult
+  // already carries real confidence (from the actual answer session);
+  // everywhere else, rebuild the same shape from the code alone with no
+  // session to draw on — computeAssessmentConfidence() already degrades
+  // gracefully to a session-less estimate in that case.
+  try{
+    const hasLiveResult = typeof lastResult !== "undefined" && lastResult && lastResult.code === code;
+    let extras;
+    if (hasLiveResult){
+      extras = lastResult;
+    } else if (decoded){
+      const match = matchArchetype(decoded.normDims);
+      extras = { name: decoded.name, meta: {}, normDims: decoded.normDims, archetype: match.primary, ...applyStoredConfidence(buildProfileExtras(decoded.normDims, match.primary, match.ranked, null, decoded.upgraded), code) };
+    }
+    if (extras){
+      payload.name = extras.name;
+      payload.quizMode = extras.meta && extras.meta.questionMode;
+      payload.confidence = extras.confidence;
+      payload.archetype = { id: extras.archetype.id, name: extras.archetype.name, icon: extras.archetype.icon };
+      payload.soul = extras.soul;
+      payload.virtues = extras.sinVirtue;
+      payload.tendencies = DIMENSIONS.map(d => ({ dim: d, label: DIM_LABELS[d], value: extras.normDims[d] })).sort((a,b) => Math.abs(b.value) - Math.abs(a.value)).slice(0, 6);
+      payload.mindMap = extras.normDims;
+      payload.funStats = extras.funStats;
+      payload.growthTimeline = history;
+    }
+  } catch(e){ /* the rich snapshot is a nice-to-have; code + history above already export the restorable core */ }
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${safeName}.pf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast("Profile exported as a .pf file.");
+}
+
+function importProfile(){
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".pf,application/json";
+  input.addEventListener("change", () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Never throw past this point: a bad .pf file (corrupted JSON, an
+      // unrelated JSON file, a future format we don't understand yet, a
+      // hand-edited file with fields missing or wrong types) should always
+      // end in a friendly toast, never a broken page.
+      let payload;
+      try{ payload = JSON.parse(reader.result); }
+      catch(e){ showToast("That .pf file couldn't be read. It may be corrupted or isn't actually a .pf file."); return; }
+
+      if (!payload || typeof payload !== "object"){
+        showToast("That .pf file doesn't contain a valid Forge profile.");
+        return;
+      }
+      // format/version are both optional and lenient on purpose: a hand-
+      // edited or older (v1, unversioned) export still restores fine off
+      // `code` alone, so only warn about a newer/unrecognized version
+      // rather than refusing it outright — everything else in the file
+      // besides code/history is informational, not load-critical.
+      if (payload.format && payload.format !== PF_EXPORT_FORMAT){
+        showToast("That file isn't a Forge profile export.");
+        return;
+      }
+      if (typeof payload.version === "number" && payload.version > PF_EXPORT_VERSION){
+        showToast("That .pf file was exported from a newer version of Forge. The core profile should still import, but some fields may be skipped.");
+      }
+
+      const code = typeof payload.code === "string" ? payload.code : null;
+      const decoded = code && decodeCode(code);
+      if (!decoded){ showToast("That .pf file doesn't contain a valid Forge profile code."); return; }
+
+      try{ localStorage.setItem("pf_last_code", code); }
+      catch(e){ showToast("Couldn't save that profile on this device (storage may be full or blocked)."); return; }
+
+      if (Array.isArray(payload.history)){
+        try{ localStorage.setItem("pf_history", JSON.stringify(payload.history)); }
+        catch(e){ /* history is a nice-to-have; the code itself already restored */ }
+      } else if (Array.isArray(payload.growthTimeline)){
+        try{ localStorage.setItem("pf_history", JSON.stringify(payload.growthTimeline)); }
+        catch(e){ /* same, non-fatal */ }
+      }
+      // Journal/groups/local-profile are all optional, all non-fatal if
+      // malformed or absent — an older (pre-journal) .pf file, or one
+      // with a corrupted extra field, should still import the core
+      // profile above cleanly.
+      if (Array.isArray(payload.journal)){
+        try{ localStorage.setItem(JOURNAL_KEY, JSON.stringify(sanitizeImportedJournal(payload.journal))); } catch(e){ /* ignore */ }
+      }
+      if (Array.isArray(payload.groups)){
+        try{ localStorage.setItem(GROUPS_KEY, JSON.stringify(sanitizeImportedGroups(payload.groups))); } catch(e){ /* ignore */ }
+      }
+      if (Array.isArray(payload.suggestionFeedback)){
+        try{ localStorage.setItem(SUGGESTION_FEEDBACK_KEY, JSON.stringify(sanitizeImportedSuggestionFeedback(payload.suggestionFeedback))); } catch(e){ /* ignore */ }
+      }
+      if (payload.localProfile && typeof payload.localProfile === "object"){
+        const safeProfile = sanitizeImportedLocalProfile(payload.localProfile);
+        if (safeProfile){ try{ saveLocalProfile(safeProfile); } catch(e){ /* ignore */ } }
+      }
+      if (payload.settings && typeof payload.settings === "object"){
+        if (payload.settings.theme === "light" || payload.settings.theme === "dark"){
+          try{ localStorage.setItem("pf_theme", payload.settings.theme); } catch(e){ /* ignore */ }
+        }
+        if (payload.settings.sound === "on" || payload.settings.sound === "off"){
+          try{ localStorage.setItem("pf_sound", payload.settings.sound); } catch(e){ /* ignore */ }
+        }
+      }
+      click(560);
+      showToast(`Imported ${decoded.name ? decoded.name + "'s" : "the"} profile. Reloading…`);
+      setTimeout(() => location.reload(), 900);
+    };
+    reader.onerror = () => showToast("That .pf file couldn't be read from disk. Try again.");
+    reader.readAsText(file);
+  });
+  input.click();
 }
 
 /* ---------------- Toast + inert "coming soon" affordances --------------
@@ -808,6 +1029,56 @@ function showToast(message){
 function showComingSoon(feature){
   click(420);
   showToast(`${feature} aren't built yet. Forge stays fully on-device for now. Star the repo to hear when that changes.`);
+}
+// Replaces the old "Sign Up" -> generic toast with a real choice: a
+// Local Profile (creates one immediately, on-device, no login) or a
+// Cloud Profile (visible so people know it's coming, but genuinely
+// inactive — clicking it still just explains it isn't built yet).
+function showGetStartedModal(){
+  click(460);
+  if (document.getElementById("getStartedModal")) return;
+  const overlay = document.createElement("div");
+  overlay.id = "getStartedModal";
+  overlay.className = "modal-overlay";
+  overlay.innerHTML = `
+    <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="getStartedModalTitle">
+      <button class="icon-btn modal-close" onclick="closeGetStartedModal()" aria-label="Close">${ICONS.close}</button>
+      <div class="eyebrow accent">GET STARTED</div>
+      <h3 id="getStartedModalTitle">How do you want to keep this?</h3>
+      <p>Either way, nothing about the quiz or your result changes. This just decides where your profile lives.</p>
+      <div class="get-started-choices">
+        <button type="button" class="get-started-choice" onclick="createLocalProfileFromModal()">
+          <span class="get-started-choice-title">Local Profile</span>
+          <span class="get-started-choice-desc">On this device, right now. Works offline, exports as a .pf file, no login.</span>
+        </button>
+        <button type="button" class="get-started-choice get-started-choice-disabled" onclick="showComingSoon('Cloud profiles')">
+          <span class="get-started-choice-title">Cloud Profile <span class="lp-soon-badge">Coming soon &#x1F6A7;</span></span>
+          <span class="get-started-choice-desc">Sync across your own devices. Not built yet, this is just showing you it's planned.</span>
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add("open"));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeGetStartedModal(); });
+  document.addEventListener("keydown", onGetStartedModalKey);
+}
+function onGetStartedModalKey(e){ if (e.key === "Escape") closeGetStartedModal(); }
+function closeGetStartedModal(){
+  const overlay = document.getElementById("getStartedModal");
+  if (!overlay) return;
+  overlay.classList.remove("open");
+  document.removeEventListener("keydown", onGetStartedModalKey);
+  setTimeout(() => overlay.remove(), 220);
+}
+// A Local Profile can exist before any quiz result does — it's just a
+// name/avatar shell at that point (see profile.js's "not assessed yet"
+// state); ensureLocalProfile() (engine.js) fills in archetype/soul the
+// moment a first result actually completes, same record either way.
+function createLocalProfileFromModal(){
+  updateLocalProfile({});
+  click(520);
+  closeGetStartedModal();
+  navigate("profile");
 }
 function showPrivacyModal(){
   click(460);
@@ -904,6 +1175,11 @@ function navigate(view){
     if (onPage === "compare"){ setCompareModeURL(true); renderParty(); }
     else location.href = "compare.html?party=1";
   }
+  else if (view === "growth") location.href = "growth.html";
+  else if (view === "improve") location.href = "improve.html";
+  else if (view === "profile") location.href = "profile.html";
+  else if (view === "journal") location.href = "journal.html";
+  else if (view === "frameworks") location.href = "frameworks.html";
 }
 
 // Keeps compare.html's own address bar in sync with which mode (regular
@@ -928,6 +1204,20 @@ function setCompareModeURL(isParty){
 
 function goToNameScreen(){
   location.href = "quiz.html";
+}
+
+// Shared "go look at my own last result" action, for any page besides
+// index.html that wants a link straight into result.html — result.html's
+// own boot script only shows a result when handed one of a few specific
+// session/URL signals (see result.html's boot()), so a bare
+// location.href="result.html" from elsewhere would otherwise silently
+// bounce to the landing page instead.
+function viewMyLastResult(){
+  const code = localStorage.getItem("pf_last_code");
+  const decoded = code && decodeCode(code);
+  if (!decoded){ showToast("No saved result found on this device yet."); return; }
+  sessionStorage.setItem("pf_view_shared_code", code);
+  location.href = "result.html";
 }
 
 /* A brief full-screen "calculating" beat between quiz questions and (in a
@@ -1252,12 +1542,79 @@ initScrollbar();
    catch so an unsupported context (e.g. this file opened directly via
    file://, which has no service worker support at all) never breaks the
    page — the app works fully online either way, just without the
-   offline/installable behavior. */
+   offline/installable behavior.
+
+   Update detection: the browser already re-fetches service-worker.js on
+   its own and silently installs a new worker in the background whenever
+   its bytes change (that part needs no code at all) — the only thing
+   this adds is noticing when that new worker has finished installing and
+   is sitting in the "waiting" state (see service-worker.js's "UPDATE
+   FLOW" comment for why it waits instead of taking over immediately),
+   and surfacing that as a small toast rather than leaving it invisible
+   until the next full reload. */
 if ("serviceWorker" in navigator){
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js").catch(() => {
+    navigator.serviceWorker.register("service-worker.js?v=v1.0.2").then((reg) => {
+      // A worker can already be sitting in "waiting" the moment this page
+      // loads (installed by a tab that was open earlier) — catch that
+      // case immediately instead of only reacting to a fresh install.
+      if (reg.waiting && navigator.serviceWorker.controller) showUpdateToast(reg.waiting);
+
+      reg.addEventListener("updatefound", () => {
+        const newWorker = reg.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener("statechange", () => {
+          // "installed" + an existing controller means a real update is
+          // ready — the same state during the very first install has no
+          // controller yet and nothing meaningful to refresh from.
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller){
+            showUpdateToast(newWorker);
+          }
+        });
+      });
+    }).catch(() => {
       // Registration failed (unsupported context) — nothing to recover,
       // the app itself doesn't depend on this succeeding.
     });
+
+    // Reload once the new worker actually takes control (not the instant
+    // "Refresh" is clicked) so the page never runs half-controlled by the
+    // old worker. The flag guards against a duplicate reload if this ever
+    // fires more than once.
+    let pfSwRefreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (pfSwRefreshing) return;
+      pfSwRefreshing = true;
+      location.reload();
+    });
   });
+}
+
+// Small, self-contained "update available" toast. Styled inline rather
+// than via the app's stylesheets since this is PWA-update plumbing, not
+// app UI — it has no dependency on (and no effect on) the site's own
+// CSS. Bottom-right, dismisses itself by reloading once Refresh is
+// clicked; calling this twice (two updates found in one session) is a
+// no-op the second time since the first toast is still on screen.
+function showUpdateToast(waitingWorker){
+  if (document.getElementById("pf-update-toast")) return;
+  const toast = document.createElement("div");
+  toast.id = "pf-update-toast";
+  toast.setAttribute("role", "status");
+  toast.style.cssText = [
+    "position:fixed", "right:20px", "bottom:20px", "z-index:2147483647",
+    "display:flex", "align-items:center", "gap:14px",
+    "background:#1a1a1f", "color:#f5f5f7", "border:1px solid rgba(255,255,255,.14)",
+    "border-radius:12px", "padding:12px 16px", "box-shadow:0 8px 28px rgba(0,0,0,.4)",
+    "font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif",
+    "max-width:min(90vw,340px)",
+  ].join(";");
+  toast.innerHTML =
+    '<span>✨ A new version of Forge is available.</span>' +
+    '<button type="button" style="flex-shrink:0;background:#7c5cff;color:#fff;border:none;' +
+    'border-radius:8px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer;">Refresh</button>';
+  toast.querySelector("button").addEventListener("click", () => {
+    waitingWorker.postMessage("SKIP_WAITING");
+  });
+  document.body.appendChild(toast);
 }

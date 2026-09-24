@@ -41,8 +41,8 @@ function renderCompare(){
 }
 
 function runCompare(){
-  const a = decodeCode(document.getElementById("codeA").value);
-  const b = decodeCode(document.getElementById("codeB").value);
+  const a = freshenDecoded(decodeCode(document.getElementById("codeA").value));
+  const b = freshenDecoded(decodeCode(document.getElementById("codeB").value));
   const out = document.getElementById("compareOut");
   if (!a || !b){
     out.innerHTML = `<p class="center-note" style="text-align:left">One or both codes look off. Double check for typos and try again.</p>`;
@@ -55,10 +55,7 @@ function runCompare(){
   // trust these as pre-sanitized rather than re-escaping downstream.
   compareState = { profileA: a, archA: a.archetype, nameA: obEsc(a.name), profileB: b, archB: b.archetype, nameB: obEsc(b.name), target: "compareOut" };
   click(420);
-  showCompatibilityLoading(out, () => {
-    out.innerHTML = renderCompareResult();
-    initCountUps(out);
-  });
+  showCompatibilityLoading(out, () => mountCompareResult(out));
 }
 
 
@@ -93,9 +90,66 @@ function renderParty(){
         <button class="btn btn-primary" onclick="runPartyCompare()">Compare Group</button>
         <button class="btn btn-ghost" onclick="navigate('compare')">Back to two-person compare</button>
       </div>
+      ${renderSavedGroupsList()}
       <div id="partyOut"></div>
     </div>
   `;
+}
+// A saved group is just a named, remembered set of pasted codes — so
+// "load" fills the exact same textareas a person would've pasted into
+// by hand, then runs the exact same compare, rather than being a
+// separate code path.
+function renderSavedGroupsList(){
+  // Defense in depth: importProfile() already drops any saved group
+  // whose id doesn't match isSafeId() before it's ever written to
+  // localStorage (see sanitizeImportedGroups() in engine.js) — g.id
+  // ends up in an inline onclick below, so this re-checks it here too
+  // rather than trusting whatever's already in storage.
+  const groups = getSavedGroups().filter(g => isSafeId(g.id));
+  if (!groups.length) return "";
+  return `
+    <div class="card glass" style="margin-top:20px">
+      <h4>My Groups</h4>
+      ${groups.map(g => `
+        <div class="mini-bar-row">
+          <span>${obEsc(g.name)} <span style="color:var(--text-dim)">(${g.codes.length})</span></span>
+          <span><button class="btn btn-ghost btn-sm" onclick="loadSavedGroup('${g.id}')">Load</button> <button class="icon-btn" style="width:28px;height:28px;vertical-align:middle" onclick="removeSavedGroup('${g.id}')" aria-label="Delete group">${ICONS.close}</button></span>
+        </div>`).join("")}
+    </div>`;
+}
+function loadSavedGroup(id){
+  const group = getSavedGroups().find(g => g.id === id);
+  if (!group) return;
+  if (group.codes.length > 3){
+    const extra = document.getElementById("extraPartySlots");
+    const btn = document.getElementById("partyToggleBtn");
+    if (extra && extra.classList.contains("hidden")){ extra.classList.remove("hidden"); if (btn) btn.textContent = "− Hide extra slots"; }
+  }
+  ["partyCode0","partyCode1","partyCode2","partyCode3","partyCode4"].forEach((id2, i) => {
+    const el = document.getElementById(id2);
+    if (el) el.value = group.codes[i] || "";
+  });
+  click(420);
+  runPartyCompare();
+}
+function removeSavedGroup(id){
+  deleteSavedGroup(id);
+  click(340);
+  renderParty();
+}
+function promptSaveGroup(){
+  const el = document.getElementById("saveGroupPanel");
+  if (el) el.classList.remove("hidden");
+  click(360);
+}
+function confirmSaveGroup(){
+  const nameField = document.getElementById("saveGroupName");
+  const name = (nameField.value || "").trim() || "Unnamed Group";
+  saveGroup(name, partyState.raw);
+  click(500);
+  showToast(`Saved "${name}".`);
+  const el = document.getElementById("saveGroupPanel");
+  if (el) el.classList.add("hidden");
 }
 function toggleMorePartySlots(){
   const el = document.getElementById("extraPartySlots");
@@ -117,7 +171,7 @@ function runPartyCompare(){
     out.innerHTML = `<p class="center-note" style="text-align:left">Party Compare supports up to 5 people at once.</p>`;
     return;
   }
-  const decoded = raw.map(c => decodeCode(c));
+  const decoded = raw.map(c => freshenDecoded(decodeCode(c)));
   if (decoded.some(d => !d)){
     out.innerHTML = `<p class="center-note" style="text-align:left">One or more codes look off. Double check each one for typos and try again.</p>`;
     return;
@@ -126,7 +180,7 @@ function runPartyCompare(){
   // pasted party codes) flows straight into rendered HTML in
   // renderPartyResult() via computeGroupCompatibility()'s bestPair/
   // toughestPair/roles/pairwise fields, none of which re-escape it.
-  partyState = { decoded, names: decoded.map((d,i) => obEsc(d.name) || `Person ${i+1}`) };
+  partyState = { decoded, raw, names: decoded.map((d,i) => obEsc(d.name) || `Person ${i+1}`) };
   click(420);
   showCompatibilityLoading(out, () => {
     out.innerHTML = renderPartyResult();
@@ -137,15 +191,55 @@ function renderPartyResult(){
   const { decoded, names } = partyState;
   const group = computeGroupCompatibility(decoded, names);
   const sortedPairs = [...group.pairwise].sort((a,b) => b.score - a.score);
+  const m = group.metrics;
+  const meterRow = (label, val, note) => `<div class="mini-bar-row"><span>${label}${note ? ` <span style="color:var(--text-dim)">(${note})</span>` : ""}</span><span class="count-up" data-target="${val}" data-suffix="%">0%</span></div>`;
   return `
     <div class="section revealed">
       <div class="card glass" style="text-align:center">
-        <h4>${group.vibe}</h4>
+        <div class="eyebrow accent">GROUP IDENTITY</div>
+        <h4>${group.identity}</h4>
         <div class="extras-row" style="justify-content:center;margin-top:10px">
           ${decoded.map((d,i) => `<span class="tag">${d.archetype.icon} ${names[i]}</span>`).join("")}
         </div>
         <div class="ingot-name count-up" style="font-size:44px;margin-top:14px" data-target="${group.overallScore}" data-suffix="%">0%</div>
-        <p style="color:var(--text-muted)">Overall Group Compatibility</p>
+        <p style="color:var(--text-muted)">Overall Team Chemistry</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card glass"><h4>Dominant Archetype</h4><p>${group.dominantArchetype ? `${group.dominantArchetype.archetype.icon} ${group.dominantArchetype.archetype.name} (${group.dominantArchetype.count} of ${group.n})` : "No single type repeats, everyone reads differently"}</p></div>
+        <div class="card glass"><h4>Dominant Soul</h4><p>${group.dominantSoul ? `${group.dominantSoul.soul.name} • ${group.dominantSoul.soul.trait} (${group.dominantSoul.count} of ${group.n})` : "No single soul type repeats"}</p></div>
+      </div>
+
+      <div class="card glass" style="margin-top:12px">
+        <h4>Team Metrics</h4>
+        ${meterRow("Creativity Index", m.creativityIndex)}
+        ${meterRow("Leadership Balance", m.leadershipBalance)}
+        ${meterRow("Empathy Balance", m.empathyBalance)}
+        ${meterRow("Conflict Risk", m.conflictRisk)}
+        ${meterRow("Innovation Score", m.innovationScore)}
+        ${meterRow("Team Stability", m.teamStability)}
+        ${meterRow("Decision Speed", m.decisionSpeed)}
+        ${meterRow("Social Energy", m.socialEnergy)}
+        ${meterRow("Planning vs Action", m.planningPct, `${m.planningPct}% planning / ${m.actionPct}% action`)}
+        ${meterRow("Risk Tolerance", m.riskTolerance)}
+        ${meterRow("Communication Health", m.communicationHealth)}
+        ${meterRow("Group Diversity", m.groupDiversity)}
+        ${meterRow("Growth Potential", m.growthPotential)}
+        ${meterRow("Average Confidence", m.avgConfidence, "estimated from answer strength, not a saved score")}
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card glass"><h4>Group Strengths</h4><div class="tag-list">${group.groupStrengths.length ? group.groupStrengths.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>Nothing everyone shares strongly</span>"}</div></div>
+        <div class="card glass"><h4>Group Weaknesses</h4><div class="tag-list">${group.groupWeaknesses.length ? group.groupWeaknesses.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>Nothing everyone is weak on</span>"}</div></div>
+      </div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="card glass"><h4>Missing Personality Types</h4><div class="tag-list">${group.missingArchetypes.map(s=>`<span class="tag">${s}</span>`).join("")}</div></div>
+        <div class="card glass"><h4>Shared Blind Spots</h4><div class="tag-list">${group.sharedBlindSpots.length ? group.sharedBlindSpots.map(s=>`<span class="tag">${s}</span>`).join("") : "<span class='tag'>No trait everyone's weak on</span>"}</div></div>
+      </div>
+
+      <div class="card glass" style="margin-top:12px">
+        <h4>Group Report</h4>
+        ${group.report.map(l => `<p style="margin-top:8px">${l}</p>`).join("")}
       </div>
 
       <div class="grid-2" style="margin-top:12px">
@@ -169,6 +263,16 @@ function renderPartyResult(){
       </div>
 
       <div class="card glass" style="margin-top:12px"><h4>Advice</h4><p>Lean on your strongest pair to help smooth over the toughest one, and use the shared strengths as the group's default mode when plans need to come together fast.</p></div>
+
+      <div class="card glass" style="margin-top:12px">
+        <h4>Save This Group</h4>
+        <p>Name it once, and next time you don't have to re-paste every code.</p>
+        <div class="cta-row" style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="promptSaveGroup()">Save Group</button></div>
+        <div id="saveGroupPanel" class="hidden" style="margin-top:10px">
+          <input type="text" id="saveGroupName" class="ns-input ns-input-sm" maxlength="40" placeholder="e.g. Book Club" />
+          <div class="cta-row" style="margin-top:8px"><button class="btn btn-primary btn-sm" onclick="confirmSaveGroup()">Confirm</button></div>
+        </div>
+      </div>
     </div>
   `;
 }

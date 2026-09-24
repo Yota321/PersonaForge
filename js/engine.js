@@ -9,8 +9,8 @@
 
 /* =========================================================================
    PERSONAFORGE, DATA MODULE
-   20 hidden dimensions, an adaptive question bank (10 clusters), 30 original
-   archetypes, and career/relationship reference tables.
+   25 hidden dimensions, an adaptive question bank (10 clusters), 12 core
+   archetypes, 6 soul types, and career/relationship reference tables.
    ========================================================================= */
 
 const DIMENSIONS = [
@@ -72,7 +72,7 @@ const QUESTION_BANK = {
       { text:"Use it to finally get a full day of total peace and quiet", d:{independence:2,patience:1,socialEnergy:-2} } ]},
     { id:"soc4", text:"Your friend group is splitting into two dinner plans and both are asking you to pick a side.", options:[
       { text:"Pick the louder, bigger group for the extra energy", d:{socialEnergy:2,risk:1} },
-      { text:"Pick the smaller group, better conversation", d:{empathy:1,socialEnergy:-1,trust:1} },
+      { text:"Pick the smaller group, better conversation", d:{empathy:1,socialEnergy:-1,trust:2} },
       { text:"Suggest merging both plans into one", d:{leadership:2,adaptability:1} } ]},
     { id:"soc5", text:"You accidentally become mildly famous overnight for something small and harmless.", options:[
       { text:"Lean into it and enjoy the attention", d:{confidence:2,humor:1,socialEnergy:1} },
@@ -84,45 +84,45 @@ const QUESTION_BANK = {
       { text:"Quietly enjoy watching everyone else enjoy it", d:{empathy:1,patience:1,socialEnergy:-1} } ]},
     { id:"soc7", text:"It's a big family gathering and someone brings up an old, slightly touchy argument from years ago.", options:[
       { text:"Steer the conversation somewhere lighter", d:{adaptability:2,empathy:1,socialEnergy:1} },
-      { text:"Let people say their piece, even if it gets tense", d:{resilience:1,trust:1,emotionalStability:1} },
+      { text:"Let people say their piece, even if it gets tense", d:{resilience:2,trust:2,emotionalStability:2} },
       { text:"Quietly excuse yourself until it blows over", d:{independence:1,patience:1,socialEnergy:-2} } ]},
     { id:"soc8", text:"A childhood friend you haven't spoken to in years messages you out of nowhere.", options:[
-      { text:"Reply right away, excited to catch up", d:{socialEnergy:2,trust:1,optimism:1} },
-      { text:"Reply, but keep it short until you see where it goes", d:{selfAwareness:1,patience:1,trust:-1} },
+      { text:"Reply right away, excited to catch up", d:{socialEnergy:2,trust:2,optimism:1} },
+      { text:"Reply, but keep it short until you see where it goes", d:{selfAwareness:1,patience:1,trust:-2} },
       { text:"Let it sit a while before deciding how to respond", d:{independence:1,planning:1,patience:1} } ]},
     { id:"soc9", text:"You're put on a group project with three people you've never worked with before.", options:[
-      { text:"Suggest everyone share their strengths first so roles make sense", d:{leadership:1,responsibility:2,planning:1} },
+      { text:"Suggest everyone share their strengths first so roles make sense", d:{leadership:1,responsibility:3,planning:1} },
       { text:"Wait to see how the group naturally organizes itself", d:{patience:1,adaptability:1,openMindedness:1} },
       { text:"Pick the part you're best at and just get started", d:{drive:1,independence:1,confidence:1} } ]},
     { id:"soc10", text:"You're invited to a wedding where you'll only know the couple, no one else.", options:[
       { text:"Treat it as a chance to meet a room full of strangers", d:{socialEnergy:2,openMindedness:1,confidence:1} },
-      { text:"Stick close to the couple whenever you can", d:{trust:1,socialEnergy:-1,patience:1} },
+      { text:"Stick close to the couple whenever you can", d:{trust:2,socialEnergy:-1,patience:1} },
       { text:"Find the one other person who also looks a little out of place", d:{empathy:2,socialEnergy:1} } ]},
     { id:"soc11", text:"A group chat you're in has slowly turned into people mostly talking over each other.", options:[
-      { text:"Try to bring some order back to the conversation", d:{leadership:1,responsibility:1,patience:1} },
+      { text:"Try to bring some order back to the conversation", d:{leadership:1,responsibility:2,patience:1} },
       { text:"Mute it and check in only when something matters", d:{independence:2,socialEnergy:-1} },
       { text:"Just enjoy the chaos, it's kind of fun", d:{humor:2,adaptability:1,openMindedness:1} } ]},
     { id:"soc12", text:"Everyone at work has an opinion about a decision that technically isn't theirs to make.", options:[
-      { text:"Share your opinion clearly when asked", d:{confidence:1,responsibility:1,logic:1} },
+      { text:"Share your opinion clearly when asked", d:{confidence:1,responsibility:2,logic:1} },
       { text:"Stay out of it, it's not your call either", d:{patience:1,independence:1,discipline:1} },
       { text:"Listen to everyone first, then quietly form your own view", d:{selfAwareness:2,curiosity:1} } ]},
     { id:"soc13", text:"A close friend starts dating someone the rest of your friend group isn't sure about.", options:[
-      { text:"Give the new person a fair, honest chance", d:{openMindedness:2,trust:1,empathy:1} },
-      { text:"Trust your friend's judgment, even if you have doubts", d:{trust:2,patience:1} },
-      { text:"Say something if it keeps bothering you", d:{confidence:1,responsibility:1,empathy:1} } ]},
+      { text:"Give the new person a fair, honest chance", d:{openMindedness:2,trust:2,empathy:1} },
+      { text:"Trust your friend's judgment, even if you have doubts", d:{trust:3,patience:1} },
+      { text:"Say something if it keeps bothering you", d:{confidence:1,responsibility:2,empathy:1} } ]},
     { id:"soc14", text:"You move to a new city where you don't know a single person yet.", options:[
       { text:"Say yes to every invitation for the first few months", d:{socialEnergy:2,risk:1,openMindedness:1} },
-      { text:"Build a small, solid group slowly instead of a big one fast", d:{patience:2,trust:1} },
-      { text:"Get comfortable on your own before actively looking for people", d:{independence:2,emotionalStability:1} } ]},
+      { text:"Build a small, solid group slowly instead of a big one fast", d:{patience:2,trust:2} },
+      { text:"Get comfortable on your own before actively looking for people", d:{independence:2,emotionalStability:2} } ]},
     { id:"soc15", text:"A friend keeps canceling plans last minute, again.", options:[
-      { text:"Bring it up honestly the next time it happens", d:{confidence:1,responsibility:1,trust:-1} },
+      { text:"Bring it up honestly the next time it happens", d:{confidence:1,responsibility:2,trust:-2} },
       { text:"Stop making plans that depend on them showing up", d:{independence:1,selfAwareness:1,discipline:1} },
       { text:"Give them the benefit of the doubt, people get busy", d:{patience:2,kindness:1} } ]},
 
     { id:"soc16", text:"You're assigned a random roommate for your first semester away from home.", options:[
       { text:"Reach out before move-in day to break the ice", d:{socialEnergy:2,confidence:1,openMindedness:1} },
       { text:"Wait and see what they're like in person first", d:{patience:2,adaptability:1} },
-      { text:"Set clear expectations early so things stay smooth", d:{planning:1,responsibility:2} } ]},
+      { text:"Set clear expectations early so things stay smooth", d:{planning:1,responsibility:3} } ]},
     { id:"soc17", text:"A group trip with friends is being planned and everyone has a different idea of the perfect itinerary.", options:[
       { text:"Volunteer to merge everyone's wish list into one plan", d:{leadership:1,planning:2} },
       { text:"Go with whatever the majority picks", d:{adaptability:2,socialEnergy:1} },
@@ -136,9 +136,9 @@ const QUESTION_BANK = {
       { text:"Rewrite it to be a little safer first", d:{selfAwareness:1,patience:1} },
       { text:"Save it as a draft and decide tomorrow", d:{patience:2,discipline:1} } ]},
     { id:"soc20", text:"Your class group project has one member who keeps missing meetings.", options:[
-      { text:"Message them directly and ask what's going on", d:{empathy:1,responsibility:2} },
+      { text:"Message them directly and ask what's going on", d:{empathy:1,responsibility:3} },
       { text:"Quietly redistribute their part among the rest of the group", d:{leadership:1,independence:1,discipline:1} },
-      { text:"Flag it to the instructor before it becomes a bigger problem", d:{responsibility:2,confidence:1} } ]},
+      { text:"Flag it to the instructor before it becomes a bigger problem", d:{responsibility:3,confidence:1} } ]},
 
   ],
 
@@ -150,25 +150,25 @@ const QUESTION_BANK = {
     { id:"ana2", text:"Two plans for the weekend look equally good on paper, but you can only pick one.", options:[
       { text:"Make a pros-and-cons list before deciding", d:{logic:2,planning:2} },
       { text:"Go with your gut instinct immediately", d:{risk:1,confidence:1,adaptability:1} },
-      { text:"Ask someone else to break the tie", d:{trust:1,socialEnergy:1,independence:-1} } ]},
+      { text:"Ask someone else to break the tie", d:{trust:2,socialEnergy:1,independence:-1} } ]},
     { id:"ana3", text:"A machine at work or school starts making a strange noise that no one else seems to notice.", options:[
       { text:"Investigate exactly what's causing it", d:{curiosity:2,logic:2} },
-      { text:"Report it and let someone qualified handle it", d:{discipline:1,trust:1,planning:1} },
+      { text:"Report it and let someone qualified handle it", d:{discipline:1,trust:2,planning:1} },
       { text:"Assume it's fine unless it gets worse", d:{adaptability:1,optimism:1,discipline:-1} } ]},
     { id:"ana4", text:"You find a long, complicated contract you're expected to sign by tomorrow.", options:[
       { text:"Read every line, even if it takes all night", d:{discipline:2,logic:2,patience:1} },
       { text:"Skim for anything alarming, then decide", d:{adaptability:1,risk:1,logic:1} },
-      { text:"Ask someone you trust to look it over with you", d:{trust:2,empathy:1} } ]},
+      { text:"Ask someone you trust to look it over with you", d:{trust:3,empathy:1} } ]},
     { id:"ana5", text:"Your favorite theory about how something works turns out to be wrong.", options:[
       { text:"Update your thinking immediately, no ego about it", d:{selfAwareness:2,logic:1,adaptability:1} },
       { text:"Look for the exception that might still prove you right", d:{drive:1,logic:1,confidence:1} },
-      { text:"Feel a little embarrassed but move on quickly", d:{resilience:1,selfAwareness:1} } ]},
+      { text:"Feel a little embarrassed but move on quickly", d:{resilience:2,selfAwareness:1} } ]},
     { id:"ana6", text:"You're debugging a problem that's been broken for hours and everyone else has given up.", options:[
       { text:"Keep going alone until it's solved", d:{discipline:2,independence:2,drive:1} },
-      { text:"Step away, then come back with fresh eyes", d:{patience:2,selfAwareness:1,resilience:1} },
-      { text:"Call in someone with a different skill set", d:{trust:1,leadership:1,adaptability:1} } ]},
+      { text:"Step away, then come back with fresh eyes", d:{patience:2,selfAwareness:1,resilience:2} },
+      { text:"Call in someone with a different skill set", d:{trust:2,leadership:1,adaptability:1} } ]},
     { id:"ana7", text:"You're splitting a shared bill and the numbers don't quite add up to what everyone remembers ordering.", options:[
-      { text:"Actually do the math before saying anything", d:{logic:2,responsibility:1,patience:1} },
+      { text:"Actually do the math before saying anything", d:{logic:2,responsibility:2,patience:1} },
       { text:"Just round it out evenly, it's not worth the friction", d:{adaptability:1,patience:1,logic:-1} },
       { text:"Ask the group to figure it out together", d:{leadership:1,socialEnergy:1,logic:1} } ]},
     { id:"ana8", text:"You're choosing between two career paths that both look reasonable on paper.", options:[
@@ -177,28 +177,28 @@ const QUESTION_BANK = {
       { text:"Talk to people already in both fields first", d:{curiosity:1,openMindedness:1,socialEnergy:1} } ]},
     { id:"ana9", text:"You're playing a strategy game and losing badly to someone using a tactic you've never seen before.", options:[
       { text:"Pause and actually study what they're doing", d:{curiosity:2,logic:1,persistence:1} },
-      { text:"Adapt on the fly, mistakes included", d:{adaptability:2,resilience:1} },
+      { text:"Adapt on the fly, mistakes included", d:{adaptability:2,resilience:2} },
       { text:"Stick to your own strategy and refine it next round", d:{discipline:1,persistence:2} } ]},
     { id:"ana10", text:"A movie's twist ending doesn't fully add up when you think about it afterward.", options:[
       { text:"Go back and pick apart exactly where the logic breaks", d:{logic:2,curiosity:1} },
       { text:"Let it go, it was still a good ride", d:{adaptability:1,optimism:1,logic:-1} },
       { text:"Look up what other people think about it", d:{curiosity:1,openMindedness:1,socialEnergy:1} } ]},
     { id:"ana11", text:"A family disagreement keeps circling the same argument without ever resolving.", options:[
-      { text:"Try to name the actual root issue everyone's dancing around", d:{logic:2,empathy:1,responsibility:1} },
-      { text:"Step back until emotions cool down", d:{patience:2,emotionalStability:1} },
+      { text:"Try to name the actual root issue everyone's dancing around", d:{logic:2,empathy:1,responsibility:2} },
+      { text:"Step back until emotions cool down", d:{patience:2,emotionalStability:2} },
       { text:"Accept that some things just don't get fully resolved", d:{adaptability:1,patience:1} } ]},
     { id:"ana12", text:"You're mapping out your next five years and it feels like there are too many variables to plan around.", options:[
       { text:"Build a flexible plan with checkpoints instead of a fixed one", d:{planning:2,adaptability:1} },
       { text:"Focus on the next year and figure out the rest later", d:{discipline:1,patience:1} },
       { text:"Trust that you'll adjust as things come up", d:{optimism:1,adaptability:2} } ]},
     { id:"ana13", text:"Something you worked hard on fails completely, and you have to figure out why.", options:[
-      { text:"Break down exactly what went wrong, step by step", d:{logic:2,selfAwareness:1,responsibility:1} },
-      { text:"Accept it wasn't meant to work and move to the next thing", d:{resilience:1,optimism:1} },
-      { text:"Ask someone else to look at it with fresh eyes", d:{trust:1,openMindedness:1} } ]},
+      { text:"Break down exactly what went wrong, step by step", d:{logic:2,selfAwareness:1,responsibility:2} },
+      { text:"Accept it wasn't meant to work and move to the next thing", d:{resilience:2,optimism:1} },
+      { text:"Ask someone else to look at it with fresh eyes", d:{trust:2,openMindedness:1} } ]},
     { id:"ana14", text:"Two teammates disagree about the right approach and both make fair points.", options:[
       { text:"Weigh both arguments against the actual evidence", d:{logic:2,leadership:1} },
       { text:"Suggest testing both on a small scale first", d:{curiosity:1,planning:1,adaptability:1} },
-      { text:"Let the more experienced person's judgment carry more weight", d:{trust:1,patience:1,logic:1} } ]},
+      { text:"Let the more experienced person's judgment carry more weight", d:{trust:2,patience:1,logic:1} } ]},
     { id:"ana15", text:"You realize a rule you've been following at work doesn't actually make logical sense anymore.", options:[
       { text:"Question it and propose something better", d:{logic:2,leadership:1,confidence:1} },
       { text:"Follow it anyway until someone official changes it", d:{discipline:2,patience:1} },
@@ -211,11 +211,11 @@ const QUESTION_BANK = {
     { id:"ana17", text:"You're budgeting for a trip and the numbers are tighter than you'd like.", options:[
       { text:"Build a detailed spreadsheet before booking anything", d:{planning:2,discipline:1} },
       { text:"Book the essentials and figure out the rest along the way", d:{adaptability:1,risk:1,optimism:1} },
-      { text:"Cut the trip down to what you can comfortably afford", d:{discipline:2,responsibility:1} } ]},
+      { text:"Cut the trip down to what you can comfortably afford", d:{discipline:2,responsibility:2} } ]},
     { id:"ana18", text:"A piece of technology you rely on breaks with zero warning, right before a deadline.", options:[
       { text:"Methodically troubleshoot from the most likely cause down", d:{logic:2,patience:1} },
       { text:"Find a workaround immediately and debug it properly later", d:{adaptability:2,drive:1} },
-      { text:"Call in someone who actually knows this better than you", d:{trust:1,humility:0,logic:1} } ]},
+      { text:"Call in someone who actually knows this better than you", d:{trust:2,logic:1} } ]},
     { id:"ana19", text:"You're comparing two job offers and the numbers alone don't make the choice obvious.", options:[
       { text:"Build an actual weighted comparison of every factor", d:{logic:2,planning:2} },
       { text:"Go with whichever one you pictured yourself enjoying more", d:{optimism:1,confidence:1,selfAwareness:1} },
@@ -267,21 +267,21 @@ const QUESTION_BANK = {
     { id:"cre10", text:"Something you're genuinely embarrassed about from years ago keeps coming to mind.", options:[
       { text:"Turn it into a story you can actually laugh about", d:{humor:2,selfAwareness:1,creativity:1} },
       { text:"Let it remind you how much you've grown since", d:{selfAwareness:2,optimism:1} },
-      { text:"File it away and just move on", d:{emotionalStability:1,independence:1} } ]},
+      { text:"File it away and just move on", d:{emotionalStability:2,independence:1} } ]},
     { id:"cre11", text:"A memory from childhood keeps resurfacing lately, for no clear reason.", options:[
       { text:"Sit with it and try to understand why it matters now", d:{selfAwareness:2,curiosity:1} },
       { text:"Turn it into something creative, a story, drawing, or song", d:{creativity:2,openMindedness:1} },
-      { text:"Let it pass without digging into it too much", d:{emotionalStability:1,patience:1} } ]},
+      { text:"Let it pass without digging into it too much", d:{emotionalStability:2,patience:1} } ]},
     { id:"cre12", text:"A project you poured yourself into completely falls apart before it's finished.", options:[
-      { text:"Salvage the interesting parts for something new", d:{creativity:2,resilience:1,persistence:1} },
-      { text:"Grieve it properly, then start fresh with a clean idea", d:{emotionalStability:1,resilience:1} },
+      { text:"Salvage the interesting parts for something new", d:{creativity:2,resilience:2,persistence:1} },
+      { text:"Grieve it properly, then start fresh with a clean idea", d:{emotionalStability:2,resilience:2} },
       { text:"Push through and finish it anyway, imperfect or not", d:{persistence:2,discipline:1} } ]},
     { id:"cre13", text:"You're asked to invent one small object that doesn't exist yet but really should.", options:[
       { text:"Something that solves a tiny daily annoyance", d:{creativity:1,logic:1,curiosity:1} },
       { text:"Something purely delightful with no real use at all", d:{creativity:2,humor:1,openMindedness:1} },
       { text:"Something that helps people connect with each other", d:{creativity:1,empathy:2} } ]},
     { id:"cre14", text:"A family recipe gets passed down to you, and you're tempted to change it.", options:[
-      { text:"Keep it exactly as it was, tradition matters", d:{discipline:1,trust:1,responsibility:1} },
+      { text:"Keep it exactly as it was, tradition matters", d:{discipline:1,trust:2,responsibility:2} },
       { text:"Tweak it a little and make it your own", d:{creativity:2,independence:1,openMindedness:1} },
       { text:"Ask the family what they'd think before changing anything", d:{empathy:1,socialEnergy:1,openMindedness:1} } ]},
     { id:"cre15", text:"You get to design your dream workspace with absolutely no budget limit.", options:[
@@ -298,9 +298,9 @@ const QUESTION_BANK = {
       { text:"Write something structurally precise and technical", d:{discipline:1,logic:1,creativity:1} },
       { text:"Write something that's meant to make people feel one specific emotion", d:{empathy:2,creativity:1} } ]},
     { id:"cre18", text:"You're handed a damaged, half-destroyed piece of art and asked to finish it however you see fit.", options:[
-      { text:"Restore it as close to the original as possible", d:{discipline:2,responsibility:1} },
+      { text:"Restore it as close to the original as possible", d:{discipline:2,responsibility:2} },
       { text:"Let the damage become part of the new piece", d:{creativity:2,openMindedness:1} },
-      { text:"Research the original artist's intent before touching it", d:{curiosity:2,responsibility:1} } ]},
+      { text:"Research the original artist's intent before touching it", d:{curiosity:2,responsibility:2} } ]},
     { id:"cre19", text:"The moon suddenly disappears from the sky one night, no explanation, and everyone's asking what it means.", options:[
       { text:"Start theorizing about the science of it immediately", d:{curiosity:2,logic:1} },
       { text:"Feel oddly moved and want to write or create something about it", d:{creativity:2,selfAwareness:1} },
@@ -319,12 +319,12 @@ const QUESTION_BANK = {
       { text:"Use the time to needle them a little", d:{humor:1,risk:1,confidence:1} } ]},
     { id:"imp2", text:"You find a door in a building you've visited a hundred times that you swear you've never seen before.", options:[
       { text:"Open it immediately", d:{risk:2,curiosity:2} },
-      { text:"Ask a staff member what's behind it first", d:{planning:1,trust:1,curiosity:1} },
+      { text:"Ask a staff member what's behind it first", d:{planning:1,trust:2,curiosity:1} },
       { text:"Leave it alone, some doors aren't yours to open", d:{patience:1,discipline:1,risk:-1} } ]},
     { id:"imp3", text:"A stranger offers you a genuinely great opportunity, but you have to decide in the next sixty seconds.", options:[
       { text:"Say yes, you can figure out details later", d:{risk:2,confidence:1,optimism:1} },
       { text:"Ask one sharp clarifying question first", d:{logic:1,confidence:1} },
-      { text:"Say no, good opportunities don't need a countdown", d:{discipline:1,trust:-1,patience:1} } ]},
+      { text:"Say no, good opportunities don't need a countdown", d:{discipline:1,trust:-2,patience:1} } ]},
     { id:"imp4", text:"You're mid-plan when a much more exciting, completely different opportunity shows up.", options:[
       { text:"Drop the plan and chase the new thing", d:{adaptability:2,risk:2,drive:1} },
       { text:"Finish what you started first", d:{discipline:2,planning:1} },
@@ -332,14 +332,14 @@ const QUESTION_BANK = {
     { id:"imp5", text:"You wake up with a genuinely wild idea you're sure could work.", options:[
       { text:"Start acting on it before the excitement fades", d:{risk:2,drive:2,confidence:1} },
       { text:"Write it down and sleep on it", d:{patience:1,planning:2} },
-      { text:"Pitch it to someone else first to test the reaction", d:{socialEnergy:1,trust:1,confidence:1} } ]},
+      { text:"Pitch it to someone else first to test the reaction", d:{socialEnergy:1,trust:2,confidence:1} } ]},
     { id:"imp6", text:"A once-in-a-lifetime trip appears with almost no notice and a real cost to your plans.", options:[
       { text:"Go, you can rearrange the rest", d:{risk:2,adaptability:2,optimism:1} },
       { text:"Weigh it seriously against what you'd give up", d:{planning:2,logic:1} },
       { text:"Pass, stability matters more to you right now", d:{discipline:1,patience:1,risk:-1} } ]},
     { id:"imp7", text:"Someone you've been quietly interested in asks you out with almost no warning.", options:[
       { text:"Say yes immediately, why overthink it", d:{risk:2,confidence:1,optimism:1} },
-      { text:"Say yes, but suggest something low-pressure first", d:{planning:1,risk:1,emotionalStability:1} },
+      { text:"Say yes, but suggest something low-pressure first", d:{planning:1,risk:1,emotionalStability:2} },
       { text:"Ask for a day to actually think it over", d:{patience:1,selfAwareness:1,discipline:1} } ]},
     { id:"imp8", text:"A rare item drops in a game you play, and you have to decide fast whether to use it or save it.", options:[
       { text:"Use it right now, the moment might not come again", d:{risk:2,drive:1} },
@@ -347,11 +347,11 @@ const QUESTION_BANK = {
       { text:"Trade it for something more useful to you now", d:{logic:1,adaptability:1,independence:1} } ]},
     { id:"imp9", text:"You unexpectedly come into a decent amount of money with no strings attached.", options:[
       { text:"Spend some right away on something you've wanted forever", d:{risk:1,optimism:1,drive:1} },
-      { text:"Save almost all of it without much internal debate", d:{discipline:2,planning:1,responsibility:1} },
+      { text:"Save almost all of it without much internal debate", d:{discipline:2,planning:1,responsibility:2} },
       { text:"Split it between saving, spending, and giving some away", d:{kindness:1,planning:1} } ]},
     { id:"imp10", text:"A friend calls with a last-minute trip idea leaving in two days.", options:[
       { text:"Start packing before you've even hung up", d:{risk:2,adaptability:2,optimism:1} },
-      { text:"Check what you'd actually be giving up first", d:{planning:1,logic:1,responsibility:1} },
+      { text:"Check what you'd actually be giving up first", d:{planning:1,logic:1,responsibility:2} },
       { text:"Pass this time, but ask for more notice next time", d:{discipline:1,patience:1,risk:-1} } ]},
     { id:"imp11", text:"You get a sudden, real opportunity to change careers entirely, starting almost from zero.", options:[
       { text:"Take the leap while the door is open", d:{risk:2,confidence:1,drive:1} },
@@ -372,7 +372,7 @@ const QUESTION_BANK = {
     { id:"imp15", text:"You're handed a wish that has to be used within the next sixty seconds or it disappears.", options:[
       { text:"Wish for something big and bold without hesitating", d:{risk:2,confidence:1,drive:1} },
       { text:"Wish for something small but genuinely meaningful", d:{empathy:1,selfAwareness:1,kindness:1} },
-      { text:"Freeze up and let the moment pass", d:{patience:1,emotionalStability:-1,risk:-1} } ]},
+      { text:"Freeze up and let the moment pass", d:{patience:1,emotionalStability:-2,risk:-1} } ]},
 
     { id:"imp16", text:"You spot a genuinely striking piece of clothing that's a little out of your usual style and budget.", options:[
       { text:"Buy it right there, it's rare to find something like this", d:{risk:2,confidence:1} },
@@ -399,19 +399,19 @@ const QUESTION_BANK = {
 
   empathic: [
     { id:"emp1", text:"Your best friend admits they lied to protect someone you both care about.", options:[
-      { text:"Understand it, even if you wouldn't have done the same", d:{empathy:2,trust:1,patience:1} },
+      { text:"Understand it, even if you wouldn't have done the same", d:{empathy:2,trust:2,patience:1} },
       { text:"Push them to come clean to the person involved", d:{discipline:1,leadership:1,logic:1} },
-      { text:"Feel a little hurt that they didn't tell you first", d:{selfAwareness:1,empathy:1,trust:-1} } ]},
+      { text:"Feel a little hurt that they didn't tell you first", d:{selfAwareness:1,empathy:1,trust:-2} } ]},
     { id:"emp2", text:"A coworker takes credit for an idea that was mostly yours, in front of everyone.", options:[
       { text:"Speak up and correct the record on the spot", d:{confidence:2,leadership:1} },
       { text:"Let it go publicly, but address it privately later", d:{patience:1,discipline:1,empathy:1} },
-      { text:"Let it slide entirely, it's not worth the conflict", d:{patience:1,independence:1,trust:-1} } ]},
+      { text:"Let it slide entirely, it's not worth the conflict", d:{patience:1,independence:1,trust:-2} } ]},
     { id:"emp3", text:"Someone close to you is clearly struggling but insists they're fine.", options:[
       { text:"Gently keep checking in until they open up", d:{empathy:2,patience:2} },
-      { text:"Respect their space and let them come to you", d:{patience:1,trust:1,independence:1} },
+      { text:"Respect their space and let them come to you", d:{patience:1,trust:2,independence:1} },
       { text:"Do something small and kind without making it a big deal", d:{kindness:2,empathy:1} } ]},
     { id:"emp4", text:"You overhear two friends arguing about something involving you, but they don't know you heard.", options:[
-      { text:"Bring it up honestly so it doesn't fester", d:{confidence:1,trust:1,leadership:1} },
+      { text:"Bring it up honestly so it doesn't fester", d:{confidence:1,trust:2,leadership:1} },
       { text:"Let it play out and see if it resolves itself", d:{patience:2,independence:1} },
       { text:"Try to smooth things over without mentioning what you heard", d:{empathy:2,adaptability:1} } ]},
     { id:"emp5", text:"A stranger is visibly overwhelmed in public and clearly needs help.", options:[
@@ -423,21 +423,21 @@ const QUESTION_BANK = {
       { text:"Soften it heavily so it doesn't hurt", d:{empathy:2,kindness:1} },
       { text:"Delay it until you're sure exactly how to phrase it", d:{patience:1,planning:1,empathy:1} } ]},
     { id:"emp7", text:"A family member says something hurtful during an argument that probably wasn't fully meant.", options:[
-      { text:"Let it go once things calm down, it was said in the heat of it", d:{patience:2,empathy:1,emotionalStability:1} },
-      { text:"Bring it up honestly once everyone's calm", d:{confidence:1,responsibility:1,trust:1} },
-      { text:"Need some real distance before you're ready to talk about it", d:{independence:1,emotionalStability:1,patience:1} } ]},
+      { text:"Let it go once things calm down, it was said in the heat of it", d:{patience:2,empathy:1,emotionalStability:2} },
+      { text:"Bring it up honestly once everyone's calm", d:{confidence:1,responsibility:2,trust:2} },
+      { text:"Need some real distance before you're ready to talk about it", d:{independence:1,emotionalStability:2,patience:1} } ]},
     { id:"emp8", text:"Your partner is clearly having a rough day but insists they don't want to talk about it.", options:[
       { text:"Stay close by without pushing for details", d:{empathy:2,patience:2} },
       { text:"Do something small and thoughtful instead of asking questions", d:{kindness:2,empathy:1} },
-      { text:"Give them real space and check in again later", d:{independence:1,patience:1,trust:1} } ]},
+      { text:"Give them real space and check in again later", d:{independence:1,patience:1,trust:2} } ]},
     { id:"emp9", text:"You remember a moment as a kid when an adult made you feel truly seen and understood.", options:[
-      { text:"Try to be that person for someone younger now", d:{empathy:2,kindness:1,responsibility:1} },
+      { text:"Try to be that person for someone younger now", d:{empathy:2,kindness:1,responsibility:2} },
       { text:"Carry it quietly as something that shaped who you are", d:{selfAwareness:2} },
       { text:"Reach out and actually tell that person it mattered", d:{confidence:1,empathy:1,socialEnergy:1} } ]},
     { id:"emp10", text:"A teammate is clearly struggling to keep up but hasn't said anything about it.", options:[
       { text:"Quietly offer to help without making it a big deal", d:{empathy:2,kindness:1} },
-      { text:"Bring it up with the team so the workload gets rebalanced", d:{leadership:1,responsibility:2} },
-      { text:"Let them ask for help when they're ready", d:{patience:1,trust:1,independence:1} } ]},
+      { text:"Bring it up with the team so the workload gets rebalanced", d:{leadership:1,responsibility:3} },
+      { text:"Let them ask for help when they're ready", d:{patience:1,trust:2,independence:1} } ]},
     { id:"emp11", text:"A close friend fails at something they'd worked toward for a long time.", options:[
       { text:"Sit with them in it before saying anything fix-it shaped", d:{empathy:2,patience:1} },
       { text:"Help them find the next practical step forward", d:{logic:1,leadership:1,empathy:1} },
@@ -449,42 +449,42 @@ const QUESTION_BANK = {
     { id:"emp13", text:"A stranger online is venting about something painful in a comment section.", options:[
       { text:"Leave a genuinely kind reply, even though you don't know them", d:{kindness:2,empathy:1} },
       { text:"Scroll past, it's not really your place", d:{independence:1,patience:1} },
-      { text:"Report or flag it if it seems like they need real help", d:{responsibility:2,empathy:1} } ]},
+      { text:"Report or flag it if it seems like they need real help", d:{responsibility:3,empathy:1} } ]},
     { id:"emp14", text:"Your partner's family situation is a lot more complicated than your own.", options:[
       { text:"Ask questions and genuinely try to understand it", d:{empathy:2,curiosity:1,openMindedness:1} },
-      { text:"Follow their lead on how much to get involved", d:{patience:1,trust:1,empathy:1} },
+      { text:"Follow their lead on how much to get involved", d:{patience:1,trust:2,empathy:1} },
       { text:"Keep some healthy distance from it either way", d:{independence:1,discipline:1} } ]},
     { id:"emp15", text:"You realize, looking back, that you weren't very kind to someone who needed you once.", options:[
-      { text:"Reach out now, even if it's years later", d:{confidence:1,responsibility:2,empathy:1} },
+      { text:"Reach out now, even if it's years later", d:{confidence:1,responsibility:3,empathy:1} },
       { text:"Let it teach you something and be different going forward", d:{selfAwareness:2,kindness:1} },
-      { text:"Try not to dwell on it too much, everyone's imperfect", d:{emotionalStability:1,optimism:1} } ]},
+      { text:"Try not to dwell on it too much, everyone's imperfect", d:{emotionalStability:2,optimism:1} } ]},
 
     { id:"emp16", text:"A friend at college is clearly overwhelmed but keeps insisting they're managing fine.", options:[
       { text:"Check in consistently, even if they keep brushing it off", d:{empathy:2,patience:2} },
-      { text:"Help with something concrete instead of just asking how they are", d:{kindness:2,responsibility:1} },
-      { text:"Respect that they might genuinely want to handle it alone", d:{patience:1,trust:1,independence:1} } ]},
+      { text:"Help with something concrete instead of just asking how they are", d:{kindness:2,responsibility:2} },
+      { text:"Respect that they might genuinely want to handle it alone", d:{patience:1,trust:2,independence:1} } ]},
     { id:"emp17", text:"Someone you're close to just lost a competition they'd trained hard for.", options:[
       { text:"Let them feel it fully before saying anything encouraging", d:{empathy:2,patience:1} },
       { text:"Remind them of everything that actually went right", d:{optimism:1,kindness:1,empathy:1} },
       { text:"Help them start planning the next attempt", d:{leadership:1,logic:1,empathy:1} } ]},
     { id:"emp18", text:"You notice an animal that seems distressed, maybe lost or hurt, in an unfamiliar place.", options:[
       { text:"Stop everything and try to help it directly", d:{kindness:2,empathy:1,risk:1} },
-      { text:"Find someone or somewhere better equipped to help", d:{responsibility:2,logic:1} },
+      { text:"Find someone or somewhere better equipped to help", d:{responsibility:3,logic:1} },
       { text:"Keep an eye on it while figuring out the right move", d:{patience:1,empathy:1,logic:1} } ]},
     { id:"emp19", text:"An older family member is anxious and a little embarrassed about not understanding new technology.", options:[
       { text:"Sit with them and teach it patiently, however long it takes", d:{patience:2,kindness:1,empathy:1} },
-      { text:"Set it up simply for them so they don't have to stress about it", d:{kindness:1,responsibility:1} },
+      { text:"Set it up simply for them so they don't have to stress about it", d:{kindness:1,responsibility:2} },
       { text:"Reassure them it's genuinely not a big deal", d:{empathy:1,optimism:1,kindness:1} } ]},
     { id:"emp20", text:"A friend tells you an embarrassing story about themselves and clearly needs it to land as funny, not awkward.", options:[
       { text:"Laugh warmly and make it feel like a bonding moment", d:{humor:1,empathy:2} },
-      { text:"Match their energy and share an embarrassing one of your own", d:{empathy:1,humor:1,trust:1} },
+      { text:"Match their energy and share an embarrassing one of your own", d:{empathy:1,humor:1,trust:2} },
       { text:"Reassure them it's honestly not that bad", d:{kindness:1,empathy:1} } ]},
 
   ],
 
   leadership: [
     { id:"lea1", text:"Your boss offers you double pay in exchange for taking credit away from a teammate.", options:[
-      { text:"Refuse immediately, no negotiation", d:{trust:2,kindness:1,discipline:1} },
+      { text:"Refuse immediately, no negotiation", d:{trust:3,kindness:1,discipline:1} },
       { text:"Push back and propose a version that's fair to both", d:{leadership:2,logic:1} },
       { text:"Take a beat to think it through before responding", d:{patience:1,selfAwareness:1,logic:1} } ]},
     { id:"lea2", text:"A group project is falling apart and no one has stepped up to organize it.", options:[
@@ -493,61 +493,61 @@ const QUESTION_BANK = {
       { text:"Wait to see if someone else naturally takes the lead", d:{patience:1,adaptability:1,leadership:-1} } ]},
     { id:"lea3", text:"Two teammates are in a disagreement that's slowing everything down.", options:[
       { text:"Mediate directly and push for a decision", d:{leadership:2,empathy:1} },
-      { text:"Let them work it out without your input", d:{independence:1,patience:1,trust:1} },
+      { text:"Let them work it out without your input", d:{independence:1,patience:1,trust:2} },
       { text:"Propose a compromise that gives both something", d:{creativity:1,leadership:1,empathy:1} } ]},
     { id:"lea4", text:"You're suddenly the most experienced person in the room on a topic everyone's relying on.", options:[
       { text:"Step up and guide the group confidently", d:{leadership:2,confidence:2} },
       { text:"Share what you know but let others weigh in equally", d:{empathy:1,leadership:1,humor:0} },
-      { text:"Feel the pressure but push through anyway", d:{resilience:1,confidence:1,leadership:1} } ]},
+      { text:"Feel the pressure but push through anyway", d:{resilience:2,confidence:1,leadership:1} } ]},
     { id:"lea5", text:"A plan you championed is starting to visibly fail in front of everyone.", options:[
-      { text:"Own it publicly and pivot fast", d:{leadership:2,resilience:2,selfAwareness:1} },
+      { text:"Own it publicly and pivot fast", d:{leadership:2,resilience:3,selfAwareness:1} },
       { text:"Defend the plan while quietly adjusting it", d:{confidence:1,discipline:1} },
-      { text:"Ask the group for honest input on what to change", d:{empathy:1,leadership:1,trust:1} } ]},
+      { text:"Ask the group for honest input on what to change", d:{empathy:1,leadership:1,trust:2} } ]},
     { id:"lea6", text:"You're offered a leadership role you don't feel fully ready for.", options:[
       { text:"Take it, you'll grow into it", d:{confidence:2,risk:1,drive:1} },
-      { text:"Take it, but ask for support along the way", d:{selfAwareness:1,trust:1,leadership:1} },
+      { text:"Take it, but ask for support along the way", d:{selfAwareness:1,trust:2,leadership:1} },
       { text:"Turn it down until you feel genuinely ready", d:{patience:1,selfAwareness:1,confidence:-1} } ]},
     { id:"lea7", text:"A project you led falls behind schedule and it's partly your fault.", options:[
-      { text:"Own it fully in front of the whole team", d:{responsibility:2,leadership:1,confidence:1} },
-      { text:"Fix what you can quietly and explain later if asked", d:{discipline:1,independence:1,responsibility:1} },
+      { text:"Own it fully in front of the whole team", d:{responsibility:3,leadership:1,confidence:1} },
+      { text:"Fix what you can quietly and explain later if asked", d:{discipline:1,independence:1,responsibility:2} },
       { text:"Get the team together to solve it as a group", d:{leadership:2,socialEnergy:1} } ]},
     { id:"lea8", text:"Your family is deciding something big together and everyone has a different opinion.", options:[
-      { text:"Help guide the conversation toward an actual decision", d:{leadership:1,patience:1,responsibility:1} },
+      { text:"Help guide the conversation toward an actual decision", d:{leadership:1,patience:1,responsibility:2} },
       { text:"Voice your view once, then let others lead", d:{confidence:1,patience:1} },
       { text:"Stay mostly quiet and support whatever gets decided", d:{patience:2,adaptability:1} } ]},
     { id:"lea9", text:"You're offered a promotion that means managing people who used to be your peers.", options:[
       { text:"Take it and figure out the dynamic as you go", d:{confidence:2,risk:1,leadership:1} },
-      { text:"Take it, but have an honest conversation with them first", d:{empathy:1,leadership:1,responsibility:1} },
+      { text:"Take it, but have an honest conversation with them first", d:{empathy:1,leadership:1,responsibility:2} },
       { text:"Turn it down, you'd rather stay where you are", d:{independence:1,discipline:1,leadership:-1} } ]},
     { id:"lea10", text:"You're leading a guild or team in a game and someone quits mid-event, leaving a gap.", options:[
       { text:"Reorganize on the fly and keep things moving", d:{leadership:2,adaptability:2} },
       { text:"Reach out to them first to see if something's actually wrong", d:{empathy:1,leadership:1} },
       { text:"Recruit a replacement and move forward without dwelling on it", d:{drive:1,leadership:1,persistence:1} } ]},
     { id:"lea11", text:"You witness something at work that feels ethically off, but reporting it could cause real friction.", options:[
-      { text:"Report it, regardless of the fallout", d:{responsibility:2,confidence:1,trust:1} },
-      { text:"Raise it privately with the person first", d:{empathy:1,leadership:1,responsibility:1} },
+      { text:"Report it, regardless of the fallout", d:{responsibility:3,confidence:1,trust:2} },
+      { text:"Raise it privately with the person first", d:{empathy:1,leadership:1,responsibility:2} },
       { text:"Document it and wait to see if it happens again", d:{planning:1,patience:1,logic:1} } ]},
     { id:"lea12", text:"You're planning a big group event and two people both want to be in charge of the same part.", options:[
       { text:"Split the task in a way that plays to both their strengths", d:{leadership:2,logic:1} },
       { text:"Let them sort it out between themselves", d:{patience:1,independence:1} },
       { text:"Make the call yourself and explain your reasoning", d:{confidence:1,leadership:2} } ]},
     { id:"lea13", text:"A crisis hits your community and people are looking for someone to organize a response.", options:[
-      { text:"Step up immediately, even without being asked", d:{leadership:2,confidence:1,responsibility:1} },
+      { text:"Step up immediately, even without being asked", d:{leadership:2,confidence:1,responsibility:2} },
       { text:"Support whoever does step up as much as you can", d:{kindness:1,adaptability:1,leadership:1} },
-      { text:"Focus on the part you can personally help with most", d:{responsibility:1,independence:1} } ]},
+      { text:"Focus on the part you can personally help with most", d:{responsibility:2,independence:1} } ]},
     { id:"lea14", text:"You're teaching someone a skill you're genuinely good at, and they're struggling to get it.", options:[
       { text:"Break it down slower and stay patient through the repeats", d:{patience:2,empathy:1} },
       { text:"Try a completely different way of explaining it", d:{creativity:1,adaptability:1,leadership:1} },
-      { text:"Let them struggle a bit longer before stepping in again", d:{patience:1,trust:1} } ]},
+      { text:"Let them struggle a bit longer before stepping in again", d:{patience:1,trust:2} } ]},
     { id:"lea15", text:"Your idea gets picked over a colleague's in a meeting, and they seem visibly frustrated.", options:[
-      { text:"Talk to them privately afterward", d:{empathy:1,leadership:1,responsibility:1} },
+      { text:"Talk to them privately afterward", d:{empathy:1,leadership:1,responsibility:2} },
       { text:"Give them real credit for parts of their idea going forward", d:{kindness:1,leadership:1} },
       { text:"Let it be, competition is normal", d:{confidence:1,competitiveness:1,independence:1} } ]},
 
     { id:"lea16", text:"You're the one who actually understands the group project topic best, and it shows.", options:[
       { text:"Take the lead and assign the workload", d:{leadership:2,confidence:1} },
       { text:"Teach the others enough that leadership isn't just on you", d:{leadership:1,empathy:1,patience:1} },
-      { text:"Do more than your share quietly rather than manage people", d:{responsibility:2,independence:1} } ]},
+      { text:"Do more than your share quietly rather than manage people", d:{responsibility:3,independence:1} } ]},
     { id:"lea17", text:"You're organizing a trip for a big group of friends with very different budgets.", options:[
       { text:"Design one plan that works within the tightest budget", d:{leadership:1,empathy:1,planning:1} },
       { text:"Offer tiered options so everyone can opt into what fits", d:{planning:2,leadership:1} },
@@ -573,7 +573,7 @@ const QUESTION_BANK = {
       { text:"No, not knowing is part of what makes life feel open", d:{optimism:1,independence:1} },
       { text:"You'd want to know, but you're not sure you could handle it", d:{selfAwareness:2,empathy:1} } ]},
     { id:"phi2", text:"A machine could make you perfectly happy forever, but it's not real, would you plug in?", options:[
-      { text:"No, a real, imperfect life matters more than manufactured happiness", d:{selfAwareness:2,resilience:1} },
+      { text:"No, a real, imperfect life matters more than manufactured happiness", d:{selfAwareness:2,resilience:2} },
       { text:"Yes, happiness is happiness, real or not", d:{optimism:1,risk:1} },
       { text:"You'd want to try it briefly, then decide", d:{curiosity:2,adaptability:1} } ]},
     { id:"phi3", text:"You find out a core belief you've held for years was built on a mistake.", options:[
@@ -581,11 +581,11 @@ const QUESTION_BANK = {
       { text:"Sit with it for a while before changing anything", d:{patience:2,logic:1} },
       { text:"Keep the parts of it that still feel true to you", d:{independence:1,selfAwareness:1,confidence:1} } ]},
     { id:"phi4", text:"Would you rather always know the truth, or always be comfortable?", options:[
-      { text:"Truth, every time, even when it's painful", d:{logic:2,resilience:1,confidence:1} },
+      { text:"Truth, every time, even when it's painful", d:{logic:2,resilience:2,confidence:1} },
       { text:"Comfort, some truths aren't worth the cost", d:{empathy:1,patience:1,optimism:1} },
       { text:"Depends entirely on who else it affects", d:{empathy:2,selfAwareness:1} } ]},
     { id:"phi5", text:"You're given the chance to relive one year of your life exactly as it happened.", options:[
-      { text:"Yes, you'd want to feel it all again, mistakes included", d:{optimism:2,resilience:1} },
+      { text:"Yes, you'd want to feel it all again, mistakes included", d:{optimism:2,resilience:2} },
       { text:"No, you'd rather move only forward", d:{drive:1,independence:1} },
       { text:"Only if you could change one small thing", d:{selfAwareness:1,logic:1} } ]},
     { id:"phi6", text:"Is it better to be feared, respected, or liked, if you could only pick one?", options:[
@@ -597,15 +597,15 @@ const QUESTION_BANK = {
       { text:"Success, it tends to create happiness eventually", d:{drive:2,confidence:1} },
       { text:"You'd want to find a version that's actually both", d:{planning:1,optimism:1,logic:1} } ]},
     { id:"phi8", text:"Is a regret you never act on still worth carrying, or is it just wasted weight?", options:[
-      { text:"It still teaches you something, even unresolved", d:{selfAwareness:2,resilience:1} },
-      { text:"Better to let it go completely if you're not acting on it", d:{emotionalStability:2,optimism:1} },
+      { text:"It still teaches you something, even unresolved", d:{selfAwareness:2,resilience:2} },
+      { text:"Better to let it go completely if you're not acting on it", d:{emotionalStability:4,optimism:1} },
       { text:"Depends entirely on what the regret actually is", d:{logic:1,selfAwareness:1} } ]},
     { id:"phi9", text:"If you knew for certain your biggest dream would never happen, would you still chase it?", options:[
       { text:"Yes, the chasing has its own value", d:{persistence:2,optimism:1} },
       { text:"No, you'd redirect that energy somewhere winnable", d:{logic:2,adaptability:1} },
       { text:"You'd want proof first, certainty like that is rare", d:{logic:1,curiosity:1} } ]},
     { id:"phi10", text:"Does failure actually teach more than success does, or is that just something people say to feel better?", options:[
-      { text:"Genuinely, yes, failure is where the real lessons are", d:{resilience:2,selfAwareness:1} },
+      { text:"Genuinely, yes, failure is where the real lessons are", d:{resilience:3,selfAwareness:1} },
       { text:"Success teaches plenty too, just different things", d:{optimism:1,logic:1} },
       { text:"Depends on whether you actually reflect on either one", d:{selfAwareness:2,logic:1} } ]},
     { id:"phi11", text:"A childhood memory you're fond of turns out to have not happened quite the way you remember it.", options:[
@@ -615,7 +615,7 @@ const QUESTION_BANK = {
     { id:"phi12", text:"Is it better to be afraid of the right things, or afraid of nothing at all?", options:[
       { text:"Afraid of the right things, fear can be useful information", d:{logic:1,selfAwareness:1,discipline:1} },
       { text:"Afraid of nothing, fear mostly just gets in the way", d:{risk:2,confidence:1} },
-      { text:"Somewhere in between, fully fearless sounds exhausting to maintain", d:{emotionalStability:1,logic:1} } ]},
+      { text:"Somewhere in between, fully fearless sounds exhausting to maintain", d:{emotionalStability:2,logic:1} } ]},
     { id:"phi13", text:"If money were never a factor again, would your daily life actually look different?", options:[
       { text:"Completely different, money is the main thing in the way", d:{drive:1,optimism:1} },
       { text:"Barely different, you're already doing what matters to you", d:{selfAwareness:2,optimism:1} },
@@ -638,7 +638,7 @@ const QUESTION_BANK = {
       { text:"Hard to say, and that uncertainty is honestly interesting", d:{curiosity:2,logic:1} },
       { text:"Probably simpler than we like to imagine", d:{logic:2} } ]},
     { id:"phi18", text:"Is home a place, or is it something you carry with you wherever you actually end up?", options:[
-      { text:"A place, specifically, it's not interchangeable", d:{trust:1,discipline:1} },
+      { text:"A place, specifically, it's not interchangeable", d:{trust:2,discipline:1} },
       { text:"Something you carry, it's the people and habits, not the address", d:{independence:1,optimism:1,selfAwareness:1} },
       { text:"A mix, and it changes depending on the season of your life", d:{adaptability:2,openMindedness:1} } ]},
     { id:"phi19", text:"Does real competition make people better, or does it just make people more anxious versions of who they already were?", options:[
@@ -660,7 +660,7 @@ const QUESTION_BANK = {
     { id:"pla2", text:"You can instantly become fluent in one skill, but everyone will know you cheated to get it.", options:[
       { text:"Don't care, take the skill anyway", d:{confidence:2,risk:1} },
       { text:"Skip it, earning things matters to your identity", d:{discipline:2,selfAwareness:1} },
-      { text:"Take it, but only tell people who'd understand", d:{trust:1,selfAwareness:1,humor:1} } ]},
+      { text:"Take it, but only tell people who'd understand", d:{trust:2,selfAwareness:1,humor:1} } ]},
     { id:"pla3", text:"Everyone at a gathering is asked to share an embarrassing story about themselves.", options:[
       { text:"Go all in with your best one", d:{confidence:2,humor:2,socialEnergy:1} },
       { text:"Share something mild and safe", d:{patience:1,socialEnergy:1} },
@@ -695,7 +695,7 @@ const QUESTION_BANK = {
       { text:"Track down the exact person you used to play it with", d:{socialEnergy:2,empathy:1} } ]},
     { id:"pla11", text:"A wedding you're at hits a moment of pure, unplanned chaos, the cake falls, the mic cuts out, something.", options:[
       { text:"Laugh loudly, it's the best part of the story now", d:{humor:2,optimism:1,adaptability:1} },
-      { text:"Quietly try to help fix it", d:{kindness:1,responsibility:1,adaptability:1} },
+      { text:"Quietly try to help fix it", d:{kindness:1,responsibility:2,adaptability:1} },
       { text:"Film it discreetly for posterity", d:{humor:1,curiosity:1} } ]},
     { id:"pla12", text:"You meet a genuinely friendly mythical creature that grants exactly one small, silly wish.", options:[
       { text:"Wish to always know the perfect thing to say", d:{confidence:1,humor:1,socialEnergy:1} },
@@ -729,7 +729,7 @@ const QUESTION_BANK = {
     { id:"pla19", text:"You find a mysterious, ornate key that doesn't seem to match any lock you know of.", options:[
       { text:"Spend the next while actively trying every lock you can find", d:{persistence:2,curiosity:1} },
       { text:"Keep it somewhere safe and let the mystery be its own reward", d:{patience:1,openMindedness:1} },
-      { text:"Show it to someone who might actually know what it's from", d:{socialEnergy:1,curiosity:1,trust:1} } ]},
+      { text:"Show it to someone who might actually know what it's from", d:{socialEnergy:1,curiosity:1,trust:2} } ]},
     { id:"pla20", text:"You're granted the ability to instantly become fluent in the language of exactly one animal.", options:[
       { text:"Dogs, obviously, the drama alone would be worth it", d:{humor:2,empathy:1} },
       { text:"Crows, they clearly know something we don't", d:{curiosity:2,openMindedness:1} },
@@ -739,7 +739,7 @@ const QUESTION_BANK = {
 
   cautious: [
     { id:"cau1", text:"A financial opportunity promises big returns but asks you to move fast with no guarantees.", options:[
-      { text:"Pass, if it's rushing you, it's a red flag", d:{discipline:2,trust:-1,logic:1} },
+      { text:"Pass, if it's rushing you, it's a red flag", d:{discipline:2,trust:-2,logic:1} },
       { text:"Put in a small amount to test it", d:{risk:1,logic:1,planning:1} },
       { text:"Go all in, big rewards need big risk", d:{risk:2,confidence:1,optimism:1} } ]},
     { id:"cau2", text:"You're offered a comfortable, stable path or an exciting, uncertain one.", options:[
@@ -749,7 +749,7 @@ const QUESTION_BANK = {
     { id:"cau3", text:"Before a big decision, you realize you don't have all the information you'd like.", options:[
       { text:"Gather more before deciding, even if it takes time", d:{planning:2,patience:1,discipline:1} },
       { text:"Decide anyway with what you've got", d:{risk:1,confidence:1,adaptability:1} },
-      { text:"Ask someone more experienced to weigh in", d:{trust:2,empathy:1} } ]},
+      { text:"Ask someone more experienced to weigh in", d:{trust:3,empathy:1} } ]},
     { id:"cau4", text:"You've saved up for something you've wanted for a long time, and a tempting alternative appears.", options:[
       { text:"Stick to the original plan", d:{discipline:2,patience:1} },
       { text:"Switch, if the new option is genuinely better", d:{adaptability:2,logic:1} },
@@ -757,7 +757,7 @@ const QUESTION_BANK = {
     { id:"cau5", text:"You're about to try something physically or socially risky for the first time.", options:[
       { text:"Just go for it, overthinking ruins the moment", d:{risk:2,confidence:2} },
       { text:"Prepare thoroughly first", d:{planning:2,discipline:1} },
-      { text:"Bring someone along for support", d:{trust:1,socialEnergy:1,empathy:1} } ]},
+      { text:"Bring someone along for support", d:{trust:2,socialEnergy:1,empathy:1} } ]},
     { id:"cau6", text:"A rule at work or school seems outdated, but breaking it could cause real trouble.", options:[
       { text:"Follow it anyway, not your fight today", d:{discipline:2,patience:1} },
       { text:"Push to change it through the proper channels", d:{leadership:2,logic:1} },
@@ -765,29 +765,29 @@ const QUESTION_BANK = {
     { id:"cau7", text:"A friend pitches a business idea and wants you to invest your own savings.", options:[
       { text:"Ask for real numbers before considering anything", d:{logic:2,discipline:1} },
       { text:"Invest a small, safe amount to support them", d:{kindness:1,risk:1,planning:1} },
-      { text:"Say no to money, but offer to help in other ways", d:{discipline:2,trust:1} } ]},
+      { text:"Say no to money, but offer to help in other ways", d:{discipline:2,trust:2} } ]},
     { id:"cau8", text:"You're deciding whether to take a stable job offer or hold out for a riskier, better one.", options:[
       { text:"Take the stable offer, certainty has real value", d:{discipline:2,planning:1} },
       { text:"Hold out, the upside is worth the wait", d:{risk:2,persistence:1} },
       { text:"Take the stable one while quietly still looking", d:{planning:2,logic:1} } ]},
     { id:"cau9", text:"Your family is discussing a big shared financial decision that affects everyone.", options:[
-      { text:"Push for the most conservative option available", d:{discipline:2,responsibility:1} },
+      { text:"Push for the most conservative option available", d:{discipline:2,responsibility:2} },
       { text:"Advocate for taking a calculated chance", d:{risk:1,logic:1,confidence:1} },
-      { text:"Trust whoever in the family knows finances best", d:{trust:2,patience:1} } ]},
+      { text:"Trust whoever in the family knows finances best", d:{trust:3,patience:1} } ]},
     { id:"cau10", text:"You're dating someone great, but a few small things about them keep nagging at you.", options:[
-      { text:"Bring it up early, better to know now", d:{confidence:1,responsibility:1} },
+      { text:"Bring it up early, better to know now", d:{confidence:1,responsibility:2} },
       { text:"Watch a while longer before deciding it matters", d:{patience:2,logic:1} },
-      { text:"Let it go, nobody's perfect", d:{optimism:1,trust:1} } ]},
+      { text:"Let it go, nobody's perfect", d:{optimism:1,trust:2} } ]},
     { id:"cau11", text:"A game you love adds a purchase that promises a real edge, for real money.", options:[
       { text:"Buy it without much hesitation", d:{risk:1,drive:1} },
       { text:"Skip it on principle, you'd rather earn it", d:{discipline:2,persistence:1} },
       { text:"Wait to see if it's actually worth it first", d:{logic:1,patience:1,discipline:1} } ]},
     { id:"cau12", text:"Your team wants to try a completely untested approach right before a major deadline.", options:[
-      { text:"Push back, this isn't the moment to gamble", d:{discipline:2,responsibility:1} },
+      { text:"Push back, this isn't the moment to gamble", d:{discipline:2,responsibility:2} },
       { text:"Support a small test version of it instead", d:{logic:1,adaptability:1,planning:1} },
-      { text:"Trust the team and go for it fully", d:{trust:2,risk:1} } ]},
+      { text:"Trust the team and go for it fully", d:{trust:3,risk:1} } ]},
     { id:"cau13", text:"Before a serious long-term commitment, you realize you still have real doubts.", options:[
-      { text:"Voice the doubts honestly before going further", d:{confidence:1,responsibility:2} },
+      { text:"Voice the doubts honestly before going further", d:{confidence:1,responsibility:3} },
       { text:"Give it more time to see if the doubts fade", d:{patience:2,discipline:1} },
       { text:"Trust your gut and decide either way", d:{confidence:1,risk:1} } ]},
     { id:"cau14", text:"An adventure activity you want to try has a real, if small, chance of injury.", options:[
@@ -801,18 +801,18 @@ const QUESTION_BANK = {
 
     { id:"cau16", text:"A friend wants you to co-invest in an AI startup idea that sounds promising but very unproven.", options:[
       { text:"Ask for a real business plan before considering it", d:{logic:2,discipline:1} },
-      { text:"Put in a small amount as a bet on the friendship and the idea", d:{trust:1,risk:1,kindness:1} },
-      { text:"Pass entirely, unproven ideas aren't where your savings go", d:{discipline:2,responsibility:1} } ]},
+      { text:"Put in a small amount as a bet on the friendship and the idea", d:{trust:2,risk:1,kindness:1} },
+      { text:"Pass entirely, unproven ideas aren't where your savings go", d:{discipline:2,responsibility:2} } ]},
     { id:"cau17", text:"You're planning a solo trip somewhere you don't speak the language.", options:[
       { text:"Go anyway and figure it out as you go", d:{risk:2,adaptability:1,confidence:1} },
       { text:"Prepare thoroughly, translation apps, routes, backups", d:{planning:2,discipline:1} },
       { text:"Book a guided option instead of going fully solo", d:{discipline:1,patience:1} } ]},
     { id:"cau18", text:"You're holding onto an embarrassing secret that isn't really hurting anyone by staying hidden.", options:[
       { text:"Keep it exactly where it is, some things don't need airing", d:{discipline:1,independence:1} },
-      { text:"Tell one deeply trusted person, just to not carry it alone", d:{trust:2,empathy:1} },
+      { text:"Tell one deeply trusted person, just to not carry it alone", d:{trust:3,empathy:1} },
       { text:"Let it go eventually when the moment feels right", d:{patience:1,selfAwareness:1} } ]},
     { id:"cau19", text:"During a competition, you notice a small way to bend the rules that almost certainly wouldn't get caught.", options:[
-      { text:"Absolutely not, it's not worth what it costs internally", d:{discipline:2,responsibility:2} },
+      { text:"Absolutely not, it's not worth what it costs internally", d:{discipline:2,responsibility:3} },
       { text:"Feel tempted, but ultimately walk away from it", d:{selfAwareness:1,discipline:1} },
       { text:"Consider it seriously if the stakes are high enough", d:{risk:1,competitiveness:2} } ]},
     { id:"cau20", text:"A fashion trend everyone's suddenly wearing doesn't really feel like you, but it's genuinely everywhere.", options:[
@@ -832,7 +832,7 @@ const QUESTION_BANK = {
       { text:"Steady success, extraordinary is overrated", d:{discipline:1,patience:1,drive:-1} },
       { text:"Depends entirely on what you'd be gambling with", d:{logic:2,planning:1} } ]},
     { id:"amb3", text:"You hit a huge setback on something you've worked toward for years.", options:[
-      { text:"Get back up immediately and adjust the plan", d:{resilience:2,drive:1,planning:1} },
+      { text:"Get back up immediately and adjust the plan", d:{resilience:3,drive:1,planning:1} },
       { text:"Take real time to process before moving again", d:{selfAwareness:2,patience:1} },
       { text:"Question whether it was even the right goal", d:{selfAwareness:1,logic:1,adaptability:1} } ]},
     { id:"amb4", text:"You're far ahead of schedule on a personal goal, what now?", options:[
@@ -840,7 +840,7 @@ const QUESTION_BANK = {
       { text:"Enjoy the win before starting the next thing", d:{optimism:2,patience:1} },
       { text:"Help someone else catch up to where you are", d:{kindness:2,leadership:1} } ]},
     { id:"amb5", text:"Someone you respect tells you your goal is unrealistic.", options:[
-      { text:"It only makes you want it more", d:{drive:2,confidence:1,resilience:1,competitiveness:1} },
+      { text:"It only makes you want it more", d:{drive:2,confidence:1,resilience:2,competitiveness:1} },
       { text:"You take it seriously and reconsider", d:{selfAwareness:2,logic:1} },
       { text:"You ask them exactly why, and decide from there", d:{curiosity:1,logic:1,confidence:1} } ]},
     { id:"amb6", text:"You reach a major goal, but almost no one notices or celebrates it with you.", options:[
@@ -858,14 +858,14 @@ const QUESTION_BANK = {
     { id:"amb9", text:"Your family expected a very specific path for you, and your actual dream looks nothing like it.", options:[
       { text:"Follow your own dream, even if it disappoints them", d:{independence:2,confidence:1,drive:1} },
       { text:"Find a version that satisfies both, if one exists", d:{adaptability:1,logic:1,planning:1} },
-      { text:"Follow their path and keep your dream as a side pursuit", d:{responsibility:1,discipline:1,patience:1} } ]},
+      { text:"Follow their path and keep your dream as a side pursuit", d:{responsibility:2,discipline:1,patience:1} } ]},
     { id:"amb10", text:"You define success mostly by what, when you're honest with yourself?", options:[
       { text:"How far you've come compared to where you started", d:{selfAwareness:1,drive:1} },
       { text:"How you compare to the people around you", d:{competitiveness:2,drive:1} },
       { text:"Whether you're proud of how you got there", d:{selfAwareness:2,discipline:1} } ]},
     { id:"amb11", text:"A tenth failed attempt at the same big goal lands, and it stings more than the last nine.", options:[
-      { text:"Push through anyway, the tenth doesn't cancel the effort", d:{persistence:2,resilience:2} },
-      { text:"Take a real break before deciding whether to try an eleventh", d:{selfAwareness:1,patience:1,emotionalStability:1} },
+      { text:"Push through anyway, the tenth doesn't cancel the effort", d:{persistence:2,resilience:3} },
+      { text:"Take a real break before deciding whether to try an eleventh", d:{selfAwareness:1,patience:1,emotionalStability:2} },
       { text:"Rethink whether this particular goal still fits who you are now", d:{selfAwareness:2,logic:1} } ]},
     { id:"amb12", text:"You picture your life exactly ten years from now, as honestly as you can.", options:[
       { text:"Ambitious, busy, and clearly further along than today", d:{drive:2,optimism:1} },
@@ -873,11 +873,11 @@ const QUESTION_BANK = {
       { text:"Genuinely hard to picture, and that's fine with you", d:{adaptability:1,openMindedness:1} } ]},
     { id:"amb13", text:"Someone with far less experience than you gets picked for an opportunity you wanted badly.", options:[
       { text:"Ask directly what you can improve for next time", d:{selfAwareness:1,confidence:1,drive:1} },
-      { text:"Let the disappointment sit before deciding what's next", d:{emotionalStability:1,patience:1} },
+      { text:"Let the disappointment sit before deciding what's next", d:{emotionalStability:2,patience:1} },
       { text:"Compete harder for the next one that comes along", d:{competitiveness:2,persistence:1} } ]},
     { id:"amb14", text:"You've achieved something you worked toward for years, and it feels smaller than you expected.", options:[
       { text:"Set the next goal almost immediately", d:{drive:2,persistence:1} },
-      { text:"Sit with the anticlimax and figure out what that means", d:{selfAwareness:2,emotionalStability:1} },
+      { text:"Sit with the anticlimax and figure out what that means", d:{selfAwareness:2,emotionalStability:2} },
       { text:"Make sure to actually celebrate it properly first", d:{optimism:2,kindness:1} } ]},
     { id:"amb15", text:"Building the life you actually want will take a lot longer than you'd like it to.", options:[
       { text:"That's fine, you're playing a long game anyway", d:{persistence:2,patience:1,optimism:1} },
@@ -913,670 +913,274 @@ const QUESTIONS = Object.entries(QUESTION_BANK).flatMap(([cluster, qs]) =>
   qs.map(q => ({ ...q, cluster }))
 );
 
-/* ---- 30 original archetypes ---------------------------------------- */
+/* ---- The 12 core archetypes ---------------------------------------- */
 /* Each archetype carries a small "signature" of {dim, weight} pairs used
    by the matching algorithm (see engine.js: matchArchetype). */
 
 const ARCHETYPES = [
-  { id:"ember-strategist", name:"The Ember Strategist", title:"Calculated Fire", icon:"🔥",
-    colors:["#FB7185","#FACC15"],
-    image:"assets/archetypes/webp/01-ember-strategist.webp",
-    signature:[{dim:"logic",w:2},{dim:"drive",w:2},{dim:"planning",w:1}],
-    description:"You burn slow and deliberate, turning ambition into a plan before you turn it into action. People underestimate how much fire is underneath the calm.",
-    strengths:["Strategic thinking","Focused ambition","Composure under pressure"],
-    weaknesses:["Can overplan","Slow to show emotion","Impatient with disorder"],
-    workStyle:"Methodical, goal-driven, prefers owning a clear objective end-to-end.",
-    stressResponse:"Withdraws to re-strategize rather than react.",
-    friendshipStyle:"Small circle, deeply loyal, shows up when it counts.",
-    datingStyle:"Intentional and steady; courts with actions more than words.",
-    leadershipStyle:"Leads by having the clearest plan in the room.",
-    learningStyle:"Structured, sequential, wants the 'why' before the 'how'.",
-    communicationStyle:"Direct, economical with words, precise.",
-    decisionMaking:"Weighs options carefully, then commits fully.",
-    idealEnvironments:["Quiet focused workspaces","High-stakes projects","Small dedicated teams"],
-    hobbies:["Chess and strategy games","Long-form reading","Solo training or sport"],
-    growthAdvice:"Let plans stay unfinished sometimes, not everything needs a map first.",
-    bestTeammate:"Someone spontaneous who tests the plan before it calcifies.",
-    worstTeammate:"Someone who changes direction with no rationale.",
-    quote:"Fire that isn't aimed is just a mess." },
+  { id:"stormcaller", name:"The Stormcaller", title:"Command Presence", icon:"⛈️",
+    colors:["#818CF8","#38BDF8"],
+    image:"assets/archetypes/webp/stormcaller.webp",
+    signature:[{dim:"leadership",w:2},{dim:"confidence",w:2},{dim:"risk",w:1}],
+    description:"You don't wait for a room to find its energy, you bring it. When things get tense, people look to you first, and you usually already have an answer.",
+    strengths:["Decisive under pressure","Magnetic presence","Rallies people fast"],
+    weaknesses:["Can steamroll quieter voices","Impatient with hesitation","Struggles to sit still"],
+    workStyle:"Takes the room, sets the pace, expects people to keep up.",
+    stressResponse:"Gets louder and more directive, not quieter.",
+    friendshipStyle:"The one who organizes the group and actually makes it happen.",
+    datingStyle:"Flirts like it's a competition, means it anyway.",
+    leadershipStyle:"Leads from the front, out loud, no committee required.",
+    learningStyle:"Learns by taking charge of something real, not by watching.",
+    communicationStyle:"Blunt, fast, doesn't dress things up much.",
+    decisionMaking:"Decides quickly and owns it, right or wrong.",
+    idealEnvironments:["High-stakes rooms","Teams that need a push","Anywhere with a clear stage"],
+    hobbies:["Public speaking or debate","Competitive sports","Organizing group trips"],
+    growthAdvice:"Not every room needs a captain. Some just need you to listen first.",
+    bestTeammate:"Someone calm who tempers the intensity without dimming it.",
+    worstTeammate:"Another Stormcaller fighting for the same mic.",
+    quote:"Somebody has to say it first." },
 
-  { id:"quiet-architect", name:"The Quiet Architect", title:"Builder of Systems", icon:"🏛️",
+  { id:"architect", name:"The Architect", title:"Builder of Systems", icon:"🏛️",
     colors:["#34D399","#CBD5E1"],
-    image:"assets/archetypes/webp/02-quiet-architect.webp",
-    signature:[{dim:"planning",w:2},{dim:"discipline",w:2},{dim:"independence",w:1}],
-    description:"You think in structures, the invisible frameworks that hold everything else up. You'd rather build the system than be the center of attention within it.",
+    image:"assets/archetypes/webp/architect.webp",
+    signature:[{dim:"planning",w:2},{dim:"discipline",w:2},{dim:"logic",w:1}],
+    description:"You think in blueprints. Before anyone else has a plan, you already have three, plus a backup for when the first one breaks.",
     strengths:["Long-term planning","Reliability","Clear-headed problem solving"],
     weaknesses:["Resists improvisation","Can seem distant","Overinvests in process"],
-    workStyle:"Systematic, prefers ownership of process and infrastructure.",
+    workStyle:"Systematic, prefers owning process and infrastructure end-to-end.",
     stressResponse:"Retreats into organizing something, anything.",
-    friendshipStyle:"Consistent and dependable, not flashy.",
+    friendshipStyle:"Consistent and dependable, not flashy about it.",
     datingStyle:"Shows love through stability and follow-through.",
-    leadershipStyle:"Leads by designing systems others can trust.",
-    learningStyle:"Builds mental frameworks before diving into detail.",
+    leadershipStyle:"Leads by designing systems people can actually trust.",
+    learningStyle:"Builds the mental framework first, fills in detail after.",
     communicationStyle:"Measured, considered, rarely impulsive.",
-    decisionMaking:"Slow and thorough, gets it right over getting it fast.",
-    idealEnvironments:["Structured organizations","Long-horizon projects","Independent work"],
-    hobbies:["Building/making things","Puzzles","Urban planning or architecture interests"],
+    decisionMaking:"Slow and thorough, would rather be right than first.",
+    idealEnvironments:["Structured organizations","Long-horizon projects","Quiet, independent work"],
+    hobbies:["Building or making things","Puzzles and logic games","Organizing anything, honestly"],
     growthAdvice:"Not every moment needs a system. Some just need presence.",
     bestTeammate:"An energetic connector who brings the system to life.",
     worstTeammate:"Someone allergic to structure or follow-through.",
     quote:"Good systems are just kindness with a plan." },
 
-  { id:"wildfire", name:"The Wildfire", title:"Unstoppable Momentum", icon:"⚡",
+  { id:"sentinel", name:"The Sentinel", title:"Unshaken Ground", icon:"🛡️",
+    colors:["#60A5FA","#2DD4BF"],
+    image:"assets/archetypes/webp/sentinel.webp",
+    signature:[{dim:"responsibility",w:2},{dim:"emotionalStability",w:2},{dim:"trust",w:1}],
+    description:"You're who people call when things actually go wrong, not because you love the chaos, but because you don't flinch in it.",
+    strengths:["Steady under pressure","Deeply reliable","Protective of people who matter"],
+    weaknesses:["Struggles to ask for help","Carries too much quietly","Can resist change"],
+    workStyle:"Holds the line, shows up every time, no exceptions.",
+    stressResponse:"Gets more composed, not less, right when it counts.",
+    friendshipStyle:"The friend who actually answers at 2am.",
+    datingStyle:"Slow to open up, unshakeable once they do.",
+    leadershipStyle:"Leads by being the person others can lean on.",
+    learningStyle:"Learns through repetition until it's second nature.",
+    communicationStyle:"Calm, grounded, says less than it's thinking.",
+    decisionMaking:"Weighs risk to the people involved before anything else.",
+    idealEnvironments:["Teams under real pressure","Long-term commitments","Anywhere trust actually matters"],
+    hobbies:["Strength training","Caretaking, plants or people","Long, familiar routines"],
+    growthAdvice:"Being needed isn't the same as being okay. Let someone hold it sometimes.",
+    bestTeammate:"Someone spontaneous who gets you to loosen the grip a little.",
+    worstTeammate:"Someone who treats your steadiness as a given, never a gift.",
+    quote:"I don't move unless it matters. Then I don't stop." },
+
+  { id:"pathfinder", name:"The Pathfinder", title:"Off the Map", icon:"🧭",
+    colors:["#FBBF24","#34D399"],
+    image:"assets/archetypes/webp/pathfinder.webp",
+    signature:[{dim:"curiosity",w:2},{dim:"adaptability",w:2},{dim:"independence",w:1}],
+    description:"Comfort zones bore you a little. You'd rather figure it out as you go than follow someone else's map, even when their map is fine.",
+    strengths:["Fast adaptation","Genuine curiosity","Comfortable with uncertainty"],
+    weaknesses:["Struggles to commit to one path","Underplans logistics","Gets restless with routine"],
+    workStyle:"Improvises well, gets bored fast once a thing becomes routine.",
+    stressResponse:"Changes something, anything, rather than sit with it.",
+    friendshipStyle:"The friend with the story nobody else has.",
+    datingStyle:"Exciting, a little unpredictable, hard to pin down early on.",
+    leadershipStyle:"Leads by finding the way nobody else saw yet.",
+    learningStyle:"Learns by wandering into it, not by studying it first.",
+    communicationStyle:"Curious, tangential, asks more questions than it answers.",
+    decisionMaking:"Chooses the interesting option over the safe one, often.",
+    idealEnvironments:["New or unfamiliar settings","Loosely structured projects","Anywhere with room to explore"],
+    hobbies:["Travel, planned or not","Trying new hobbies constantly","Getting intentionally lost"],
+    growthAdvice:"Finishing the path is sometimes the more interesting part.",
+    bestTeammate:"A planner who catches the logistics you'd rather skip.",
+    worstTeammate:"Someone who needs the whole route mapped before step one.",
+    quote:"The map is just someone else's opinion." },
+
+  { id:"archivist", name:"The Archivist", title:"Keeper of Detail", icon:"📚",
+    colors:["#A78BFA","#F472B6"],
+    image:"assets/archetypes/webp/archivist.webp",
+    signature:[{dim:"selfAwareness",w:2},{dim:"patience",w:2},{dim:"logic",w:1}],
+    description:"You remember the detail everyone else forgot, and you're quietly the person with the most context in the room.",
+    strengths:["Deep pattern memory","Careful, considered judgment","Quiet expertise"],
+    weaknesses:["Slow to speak up","Overthinks small decisions","Holds onto old context too long"],
+    workStyle:"Thorough, prefers to actually understand before acting.",
+    stressResponse:"Goes inward, replays details until it makes sense.",
+    friendshipStyle:"Remembers the thing you mentioned once, months ago.",
+    datingStyle:"Notices everything, says little until it's sure.",
+    leadershipStyle:"Leads by knowing more than anyone expected them to.",
+    learningStyle:"Reads everything first, asks questions second.",
+    communicationStyle:"Precise, quiet, chooses words carefully.",
+    decisionMaking:"Wants the full picture before committing to anything.",
+    idealEnvironments:["Research-heavy work","Low-noise environments","Roles that reward depth over speed"],
+    hobbies:["Reading widely","Archiving or collecting things","Trivia and deep-dive rabbit holes"],
+    growthAdvice:"You don't need the full picture to say something true right now.",
+    bestTeammate:"Someone decisive who turns your context into action.",
+    worstTeammate:"Someone who wants an answer before you've actually thought about it.",
+    quote:"Context is the whole job." },
+
+  { id:"dreamweaver", name:"The Dreamweaver", title:"Half Elsewhere", icon:"🌙",
+    colors:["#F472B6","#818CF8"],
+    image:"assets/archetypes/webp/dreamweaver.webp",
+    signature:[{dim:"creativity",w:2},{dim:"openMindedness",w:2},{dim:"empathy",w:1}],
+    description:"Your head is a little bit somewhere else, mid-idea, half a world you're still building. Most of your best thinking happens sideways.",
+    strengths:["Original thinking","Emotionally attuned","Comfortable with ambiguity"],
+    weaknesses:["Loses the thread on logistics","Can seem scattered","Avoids hard practical calls"],
+    workStyle:"Nonlinear, follows the idea wherever it actually leads.",
+    stressResponse:"Escapes into imagination rather than facing it head-on.",
+    friendshipStyle:"The friend with the wildest, most specific inside jokes.",
+    datingStyle:"Romantic in a way that's more felt than said.",
+    leadershipStyle:"Leads by making people feel like more is possible.",
+    learningStyle:"Learns through story, metaphor, and association.",
+    communicationStyle:"Expressive, imagistic, occasionally hard to pin down.",
+    decisionMaking:"Follows what feels right before what looks rational.",
+    idealEnvironments:["Creative, low-rigid-structure work","Rooms that welcome weird ideas","Anywhere imagination is currency"],
+    hobbies:["Writing or art","Daydreaming, unironically","Music that means something specific"],
+    growthAdvice:"An idea only changes anything once it lands somewhere real.",
+    bestTeammate:"A grounded finisher who turns the idea into something shipped.",
+    worstTeammate:"Someone who needs everything decided before the fun part starts.",
+    quote:"I'm not distracted. I'm just also somewhere else." },
+
+  { id:"vanguard", name:"The Vanguard", title:"Leading Edge", icon:"☄️",
     colors:["#FB923C","#FACC15"],
-    image:"assets/archetypes/webp/03-wildfire.webp",
-    signature:[{dim:"risk",w:2},{dim:"confidence",w:2},{dim:"socialEnergy",w:1}],
-    description:"You move first and figure out the rest while already in motion. Rooms get louder and faster when you walk in, that's not an accident.",
-    strengths:["Bold initiative","Magnetic energy","Fast adaptation"],
-    weaknesses:["Impulsive follow-through","Burns out fast","Skips details"],
+    image:"assets/archetypes/webp/vanguard.webp",
+    signature:[{dim:"drive",w:2},{dim:"competitiveness",w:2},{dim:"risk",w:1}],
+    description:"You go first, on purpose. Waiting for permission has never really been your style, and it shows in everything you touch.",
+    strengths:["Bold initiative","Relentless drive","Thrives under competition"],
+    weaknesses:["Impulsive follow-through","Burns out fast","Skips the boring but necessary steps"],
     workStyle:"Fast-paced, thrives on momentum and visible progress.",
-    stressResponse:"Moves faster instead of slower, sometimes to a fault.",
+    stressResponse:"Pushes harder and faster, sometimes to a fault.",
     friendshipStyle:"The friend who starts the plan nobody else would suggest.",
-    datingStyle:"Intense, exciting, sometimes too fast for their own good.",
+    datingStyle:"Intense, all-in early, occasionally too fast for their own good.",
     leadershipStyle:"Leads by example, from the front, at full speed.",
     learningStyle:"Learns by doing, not by reading about it first.",
-    communicationStyle:"Enthusiastic, expressive, occasionally overwhelming.",
+    communicationStyle:"Enthusiastic, direct, occasionally overwhelming.",
     decisionMaking:"Fast, confident, occasionally regretted later.",
-    idealEnvironments:["High-energy teams","Startups","Anything with a deadline"],
-    hobbies:["Extreme or adventure sports","Live events","Anything competitive"],
+    idealEnvironments:["High-energy teams","Competitive settings","Anything with a real deadline"],
+    hobbies:["Competitive sports","Adventure or extreme activities","Anything with a scoreboard"],
     growthAdvice:"Speed is a strength until it starts making your decisions for you.",
     bestTeammate:"A grounded planner who catches what you miss.",
     worstTeammate:"Someone equally impulsive with no one steering.",
     quote:"Ask forgiveness, not permission." },
 
-  { id:"anchor", name:"The Anchor", title:"Unshaken Ground", icon:"⚓",
-    colors:["#60A5FA","#2DD4BF"],
-    image:"assets/archetypes/webp/04-anchor.webp",
-    signature:[{dim:"patience",w:2},{dim:"resilience",w:2},{dim:"trust",w:1}],
-    description:"When everything around you is moving too fast, you're the fixed point people orient themselves by. Calm isn't your mood, it's your default state.",
-    strengths:["Steadiness under pressure","Dependability","Emotional regulation"],
-    weaknesses:["Can seem unmovable","Slow to embrace change","Underexpresses needs"],
-    workStyle:"Reliable, consistent, the person others build around.",
-    stressResponse:"Stays visibly calm, even when it takes effort.",
-    friendshipStyle:"The friend everyone calls first in a crisis.",
-    datingStyle:"Grounding presence; steady rather than dramatic.",
-    leadershipStyle:"Leads by being the stable center of the storm.",
-    learningStyle:"Prefers repetition and mastery over novelty.",
-    communicationStyle:"Calm, patient, rarely raises their voice.",
-    decisionMaking:"Deliberate, rarely rushed, hard to shake once made.",
-    idealEnvironments:["Crisis-prone or high-pressure roles","Long-term commitments"],
-    hobbies:["Fishing, gardening, or slow crafts","Meditation","Reliable routines"],
-    growthAdvice:"Stability doesn't mean staying still forever, let yourself move too.",
-    bestTeammate:"A restless innovator who needs somewhere to land.",
-    worstTeammate:"Someone who mistakes your calm for indifference.",
-    quote:"Still water runs the deepest." },
+  { id:"oracle", name:"The Oracle", title:"Sees the Undercurrent", icon:"🔮",
+    colors:["#38BDF8","#A78BFA"],
+    image:"assets/archetypes/webp/oracle.webp",
+    signature:[{dim:"empathy",w:2},{dim:"curiosity",w:2},{dim:"selfAwareness",w:1}],
+    description:"You notice what people don't say out loud. Half the time you know how something's going to land before it does.",
+    strengths:["Reads people accurately","Sharp intuition","Comfortable naming hard truths"],
+    weaknesses:["Overthinks other people's motives","Can seem cryptic","Absorbs others' moods too easily"],
+    workStyle:"Reads the room before reading the brief.",
+    stressResponse:"Withdraws to process what it's sensing before saying anything.",
+    friendshipStyle:"Knows something's wrong before you've said a word.",
+    datingStyle:"Perceptive to a fault, sometimes overanalyzes what's actually simple.",
+    leadershipStyle:"Leads by naming the thing nobody else was willing to say.",
+    learningStyle:"Learns by watching patterns, not by being told the rule.",
+    communicationStyle:"Thoughtful, a little indirect, precise when it matters.",
+    decisionMaking:"Trusts the gut read, then checks it against the facts.",
+    idealEnvironments:["Roles centered on people","Quiet spaces to actually think","Anywhere nuance is valued"],
+    hobbies:["People-watching, unapologetically","Journaling","Astrology, tarot, or anything symbolic"],
+    growthAdvice:"Not every read needs to be spoken out loud right away.",
+    bestTeammate:"Someone direct who turns your read into a real conversation.",
+    worstTeammate:"Someone who dismisses a read just because they can't see it yet.",
+    quote:"I already knew, I was just waiting for you to say it." },
 
-  { id:"cartographer", name:"The Cartographer", title:"Mapper of Ideas", icon:"🧭",
-    colors:["#7DD3FC","#CBD5E1"],
-    image:"assets/archetypes/webp/05-cartographer.webp",
-    signature:[{dim:"curiosity",w:2},{dim:"independence",w:1},{dim:"adaptability",w:1}],
-    description:"You collect ideas, places, and people the way others collect souvenirs. What matters most to you is having seen it, understood it, mapped it for yourself.",
-    strengths:["Insatiable curiosity","Broad knowledge","Comfortable with the unknown"],
-    weaknesses:["Struggles to commit to one path","Can overcollect, underfinish","Restless"],
-    workStyle:"Exploratory, thrives on variety and new problems.",
-    stressResponse:"Seeks a change of scenery or a new project.",
-    friendshipStyle:"Brings new perspectives and unexpected stories to the group.",
-    datingStyle:"Drawn to partners who keep surprising them.",
-    leadershipStyle:"Leads by opening doors others didn't know existed.",
-    learningStyle:"Wide before deep, loves connecting unrelated ideas.",
-    communicationStyle:"Curious, full of questions, enjoys tangents.",
-    decisionMaking:"Weighs novelty heavily, sometimes over practicality.",
-    idealEnvironments:["Research","Travel-heavy roles","Cross-disciplinary teams"],
-    hobbies:["Travel","Reading widely","Learning random skills"],
-    growthAdvice:"Depth is its own kind of adventure, try finishing the map sometimes.",
-    bestTeammate:"A finisher who turns your discoveries into results.",
-    worstTeammate:"Someone who wants to stick to one narrow lane forever.",
-    quote:"Not all who wander are lost, but I am definitely also collecting data." },
+  { id:"luminary", name:"The Luminary", title:"Warm Light", icon:"🏮",
+    colors:["#FACC15","#FB7185"],
+    image:"assets/archetypes/webp/luminary.webp",
+    signature:[{dim:"optimism",w:2},{dim:"socialEnergy",w:2},{dim:"kindness",w:1}],
+    description:"People leave conversations with you feeling a little more capable than when they walked in. That's not an accident, it's just how you show up.",
+    strengths:["Genuinely encouraging","Easy to be around","Brings out the best in others"],
+    weaknesses:["Avoids necessary conflict","Overextends for others","Struggles to sit with negativity"],
+    workStyle:"Collaborative, energizes the room without needing the spotlight.",
+    stressResponse:"Reaches for connection rather than isolation.",
+    friendshipStyle:"The friend who remembers everyone's good news.",
+    datingStyle:"Warm, affirming, makes people feel genuinely seen.",
+    leadershipStyle:"Leads by making people believe they can do more than they thought.",
+    learningStyle:"Learns best alongside other people, out loud.",
+    communicationStyle:"Warm, affirming, generous with encouragement.",
+    decisionMaking:"Weighs how it affects everyone, not just the outcome.",
+    idealEnvironments:["People-centered work","Collaborative teams","Anywhere morale actually matters"],
+    hobbies:["Hosting people","Volunteering","Group activities of almost any kind"],
+    growthAdvice:"Some conversations need honesty more than they need comfort.",
+    bestTeammate:"A straight-shooter who says the hard thing you're avoiding.",
+    worstTeammate:"Someone who mistakes your warmth for a lack of a backbone.",
+    quote:"Bring your own light and the room follows." },
 
-  { id:"alchemist", name:"The Alchemist", title:"Turns Ideas Into Gold", icon:"⚗️",
-    colors:["#FDBA74","#C084FC"],
-    image:"assets/archetypes/webp/06-alchemist.webp",
-    signature:[{dim:"creativity",w:2},{dim:"risk",w:1},{dim:"curiosity",w:1}],
-    description:"You take things nobody else would combine and make something that works. Half experiment, half instinct, your process looks like chaos until it isn't.",
-    strengths:["Original thinking","Comfort with ambiguity","Fast iteration"],
-    weaknesses:["Inconsistent focus","Underestimates structure","Can overcomplicate"],
-    workStyle:"Experimental, prototype-first, comfortable failing fast.",
-    stressResponse:"Starts a new creative project to process the old one.",
-    friendshipStyle:"Brings unexpected ideas and energy into every plan.",
-    datingStyle:"Playful, imaginative, keeps things from getting stale.",
-    leadershipStyle:"Leads by reframing the problem entirely.",
-    learningStyle:"Learns through experimentation, not instructions.",
-    communicationStyle:"Metaphor-heavy, associative, sometimes hard to follow at speed.",
-    decisionMaking:"Follows instinct, then justifies it with logic after.",
-    idealEnvironments:["Creative studios","R&D","Anywhere novelty is rewarded"],
-    hobbies:["Art in any medium","Cooking experiments","Inventing things"],
-    growthAdvice:"Not every idea needs a sequel, some are worth finishing all the way.",
-    bestTeammate:"A grounded executor who ships what you dream up.",
-    worstTeammate:"Someone who shuts down ideas before they're tested.",
-    quote:"Most 'impossible' things are just untested." },
+  { id:"catalyst", name:"The Catalyst", title:"Where It Starts", icon:"⚡",
+    colors:["#FDE047","#FB923C"],
+    image:"assets/archetypes/webp/catalyst.webp",
+    signature:[{dim:"humor",w:2},{dim:"adaptability",w:1},{dim:"drive",w:1}],
+    description:"Things move when you're in the room, conversations open up, plans actually happen. You're rarely the loudest, but you're often the reason it started.",
+    strengths:["Breaks the ice fast","Reads the room's energy","Turns talk into action"],
+    weaknesses:["Struggles to finish what it starts","Avoids sitting still","Uses humor to dodge hard topics"],
+    workStyle:"Gets things moving, hands off the follow-through happily.",
+    stressResponse:"Jokes through it, sometimes instead of feeling it.",
+    friendshipStyle:"The friend who turns a boring night into a story.",
+    datingStyle:"Playful first, sincere once it's earned trust.",
+    leadershipStyle:"Leads by making the first move so everyone else can too.",
+    learningStyle:"Learns by jumping in and making it fun.",
+    communicationStyle:"Quick, funny, disarms tension on instinct.",
+    decisionMaking:"Decides based on momentum, worries about the details later.",
+    idealEnvironments:["Fast-moving teams","Social, high-energy settings","Anywhere that needs a spark"],
+    hobbies:["Stand-up or improv","Hosting spontaneous plans","Anything mildly chaotic and fun"],
+    growthAdvice:"Starting things is a real skill. Finishing them is too.",
+    bestTeammate:"A steady closer who picks up exactly where you left off.",
+    worstTeammate:"Someone who needs everything serious, all the time.",
+    quote:"I didn't plan this, but I'm not mad about it." },
 
-  { id:"sentinel", name:"The Sentinel", title:"Quiet Protector", icon:"🛡️",
-    colors:["#34D399","#60A5FA"],
-    image:"assets/archetypes/webp/07-sentinel.webp",
-    signature:[{dim:"trust",w:2},{dim:"kindness",w:2},{dim:"discipline",w:1}],
-    description:"You notice who's missing from the group photo. Protecting the people around you isn't a role you were assigned, it's just what you do.",
-    strengths:["Fierce loyalty","Reliability","Notices what others miss"],
-    weaknesses:["Overextends for others","Struggles to ask for help","Avoids conflict too long"],
-    workStyle:"Supportive, dependable, quietly essential to team morale.",
-    stressResponse:"Focuses on protecting others before addressing their own needs.",
-    friendshipStyle:"The friend who remembers everything and shows up unasked.",
-    datingStyle:"Devoted, attentive, sometimes to their own detriment.",
-    leadershipStyle:"Leads by taking care of the people, not just the outcome.",
-    learningStyle:"Learns best when it helps someone else too.",
-    communicationStyle:"Warm, careful, reads the room before speaking.",
-    decisionMaking:"Considers everyone affected before deciding for themselves.",
-    idealEnvironments:["Tight-knit teams","Care-oriented roles","Long-term relationships"],
-    hobbies:["Volunteering","Cooking for others","Community organizing"],
-    growthAdvice:"Protecting yourself counts too, you're allowed to be looked after.",
-    bestTeammate:"Someone who notices and reciprocates the care you give.",
-    worstTeammate:"Someone who takes your loyalty for granted.",
-    quote:"I'd rather be needed than noticed." },
+  { id:"maverick", name:"The Maverick", title:"Own Rules", icon:"🗡️",
+    colors:["#94A3B8","#F87171"],
+    image:"assets/archetypes/webp/maverick.webp",
+    signature:[{dim:"independence",w:2},{dim:"openMindedness",w:1},{dim:"risk",w:1}],
+    description:"You'd rather be right and alone than comfortable and wrong. Rules get a fair hearing from you, then get questioned anyway.",
+    strengths:["Thinks independently","Unbothered by consensus","Genuinely original"],
+    weaknesses:["Resists structure on principle","Can isolate unnecessarily","Dismisses good advice too fast"],
+    workStyle:"Prefers full ownership, chafes under close oversight.",
+    stressResponse:"Pulls away to handle it alone, on its own terms.",
+    friendshipStyle:"Small, fiercely chosen circle, no interest in the rest.",
+    datingStyle:"Guarded at first, deeply loyal once someone's actually in.",
+    leadershipStyle:"Leads by doing it differently and being right often enough to earn it.",
+    learningStyle:"Learns by taking it apart and rebuilding it their own way.",
+    communicationStyle:"Blunt, unfiltered, says the thing others won't.",
+    decisionMaking:"Trusts its own read over the group's, most of the time.",
+    idealEnvironments:["Autonomous roles","Small teams with real trust","Anywhere original thinking is welcome"],
+    hobbies:["Solo projects and side quests","Unconventional interests","Anything nobody asked them to do"],
+    growthAdvice:"Being different isn't the same as being right. Check sometimes.",
+    bestTeammate:"Someone who earns trust slowly and doesn't push for it.",
+    worstTeammate:"Someone who needs constant consensus to move at all.",
+    quote:"I heard the rule. I have a different plan." },
 
-  { id:"comet", name:"The Comet", title:"Bright and Fast", icon:"☄️",
-    colors:["#FB923C","#F472B6"],
-    image:"assets/archetypes/webp/08-comet.webp",
-    signature:[{dim:"drive",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
-    description:"You appear, you're spectacular, and you move on before anyone quite catches up. Ambition isn't a phase for you, it's your natural orbit.",
-    strengths:["Relentless drive","Fast execution","Inspires urgency in others"],
-    weaknesses:["Can leave things unfinished","Impatient with slow progress","Burns bright, burns out"],
-    workStyle:"Fast, ambitious, always chasing the next milestone.",
-    stressResponse:"Doubles down and works harder rather than slower.",
-    friendshipStyle:"Exciting but occasionally hard to keep up with.",
-    datingStyle:"Whirlwind romance energy, thrilling, occasionally exhausting.",
-    leadershipStyle:"Leads by setting an almost unreasonable pace.",
-    learningStyle:"Fast absorption, low patience for repetition.",
-    communicationStyle:"Energetic, forward-moving, future-focused.",
-    decisionMaking:"Quick, ambition-led, rarely looks back.",
-    idealEnvironments:["High-growth environments","Competitive fields","Deadlines"],
-    hobbies:["Racing (any kind)","Goal-tracking apps","Personal records"],
-    growthAdvice:"Not everything worth having is worth rushing toward.",
-    bestTeammate:"A steady closer who finishes what you start.",
-    worstTeammate:"Someone with no urgency at all.",
-    quote:"Rest is for after the finish line." },
-
-  { id:"hearth-keeper", name:"The Hearth Keeper", title:"Warmth in Human Form", icon:"🕯️",
-    colors:["#FDBA74","#FACC15"],
-    image:"assets/archetypes/webp/09-hearth-keeper.webp",
-    signature:[{dim:"kindness",w:2},{dim:"empathy",w:2},{dim:"patience",w:1}],
-    description:"Wherever you are becomes the place people gather. You make warmth without trying, a steady, generous presence that people build memories around.",
-    strengths:["Deep empathy","Natural nurturing instinct","Makes others feel safe"],
-    weaknesses:["Neglects own needs","Overgives","Avoids asking for support"],
-    workStyle:"Collaborative, people-first, thrives supporting others' success.",
-    stressResponse:"Takes care of everyone else before themselves.",
-    friendshipStyle:"The one who remembers birthdays and shows up with soup.",
-    datingStyle:"Nurturing, attentive, deeply loyal.",
-    leadershipStyle:"Leads by making everyone feel genuinely valued.",
-    learningStyle:"Learns best in warm, low-pressure environments.",
-    communicationStyle:"Gentle, encouraging, generous with praise.",
-    decisionMaking:"Considers everyone's wellbeing before their own preference.",
-    idealEnvironments:["Community-centered roles","Small warm teams","Home-based work"],
-    hobbies:["Hosting gatherings","Cooking/baking","Caregiving"],
-    growthAdvice:"You're allowed to receive the warmth you give so freely.",
-    bestTeammate:"Someone who checks in on you as much as you check on them.",
-    worstTeammate:"Someone who only shows up when they need something.",
-    quote:"Home is a feeling I try to give people." },
-
-  { id:"puzzle-box", name:"The Puzzle Box", title:"Layers Within Layers", icon:"🧩",
-    colors:["#C084FC","#818CF8"],
-    image:"assets/archetypes/webp/10-puzzle-box.webp",
-    signature:[{dim:"logic",w:2},{dim:"selfAwareness",w:1},{dim:"independence",w:1}],
-    description:"There's more going on beneath the surface than you show, and that's exactly how you like it. People take longer to fully understand you, and you find that fair.",
-    strengths:["Deep, private intelligence","Hard to rattle","Sees what others overlook"],
-    weaknesses:["Hard to read","Overthinks social dynamics","Slow to open up"],
-    workStyle:"Independent, thorough, prefers depth to breadth.",
-    stressResponse:"Processes internally before saying anything.",
-    friendshipStyle:"Small trusted circle, intensely loyal once earned.",
-    datingStyle:"Takes time to open up, but goes all-in once they do.",
-    leadershipStyle:"Leads through quiet competence rather than visibility.",
-    learningStyle:"Prefers to fully understand before moving on.",
-    communicationStyle:"Reserved, precise, reveals more over time.",
-    decisionMaking:"Internally exhaustive, externally quiet.",
-    idealEnvironments:["Deep-focus work","Small trusted teams","Research"],
-    hobbies:["Puzzles and riddles","Reading","Solo strategy games"],
-    growthAdvice:"Letting people see the process, not just the result, builds trust faster.",
-    bestTeammate:"Someone patient enough to earn the full picture.",
-    worstTeammate:"Someone who demands instant openness.",
-    quote:"Not everything needs to be said to be understood." },
-
-  { id:"storm-caller", name:"The Storm Caller", title:"Commands the Room", icon:"🌩️",
-    colors:["#818CF8","#7DD3FC"],
-    image:"assets/archetypes/webp/11-storm-caller.webp",
-    signature:[{dim:"leadership",w:2},{dim:"confidence",w:2},{dim:"drive",w:1}],
-    description:"When decisions need making and no one else will make them, you do. Not out of ego, because someone has to, and you've never been afraid of that weight.",
-    strengths:["Decisive leadership","Commands attention naturally","Thrives under pressure"],
-    weaknesses:["Can dominate quieter voices","Impatient with indecision","Struggles to delegate"],
-    workStyle:"Takes charge, sets direction, comfortable being accountable.",
-    stressResponse:"Takes more control, not less.",
-    friendshipStyle:"The one who organizes the group and makes things happen.",
-    datingStyle:"Bold, direct, knows what they want.",
-    leadershipStyle:"Natural, commanding, decisive under pressure.",
-    learningStyle:"Learns by leading, even before fully ready.",
-    communicationStyle:"Assertive, clear, doesn't hedge.",
-    decisionMaking:"Fast and confident, owns the outcome either way.",
-    idealEnvironments:["High-stakes leadership roles","Crisis management","Competitive teams"],
-    hobbies:["Team sports (as captain)","Debate","Organizing events"],
-    growthAdvice:"Real strength includes making room for other voices too.",
-    bestTeammate:"A thoughtful second-in-command who tempers the pace.",
-    worstTeammate:"Someone competing for the same spotlight.",
-    quote:"Someone has to call it. Might as well be me." },
-
-  { id:"lantern", name:"The Lantern", title:"Guiding Light", icon:"🏮",
-    colors:["#FACC15","#FDBA74"],
-    image:"assets/archetypes/webp/12-lantern.webp",
-    signature:[{dim:"optimism",w:2},{dim:"empathy",w:1},{dim:"leadership",w:1}],
-    description:"You have a rare gift for making dark moments feel survivable. Not through denial, through steady, genuine hope that things can still work out.",
-    strengths:["Contagious optimism","Emotionally steadying presence","Encourages others naturally"],
-    weaknesses:["Can minimize real problems","Avoids sitting with negativity","Overextends emotionally"],
-    workStyle:"Motivational, morale-focused, keeps teams hopeful under pressure.",
-    stressResponse:"Reframes the situation to find the workable path forward.",
-    friendshipStyle:"The friend who always has a reason things will be okay.",
-    datingStyle:"Encouraging, affirming, believes in their partner deeply.",
-    leadershipStyle:"Leads by keeping morale and hope alive.",
-    learningStyle:"Learns best with encouragement rather than criticism.",
-    communicationStyle:"Warm, encouraging, forward-looking.",
-    decisionMaking:"Leans toward the option that keeps hope alive.",
-    idealEnvironments:["Team environments under pressure","Mentorship roles","Community work"],
-    hobbies:["Mentoring","Journaling gratitude","Group activities"],
-    growthAdvice:"Hope and honesty about hard truths can coexist.",
-    bestTeammate:"A realist who keeps the optimism grounded.",
-    worstTeammate:"Someone who mistakes your hope for naivety and exploits it.",
-    quote:"Even the smallest light changes a room." },
-
-  { id:"undercurrent", name:"The Undercurrent", title:"Quiet Influence", icon:"🌊",
-    colors:["#2DD4BF","#60A5FA"],
-    image:"assets/archetypes/webp/13-undercurrent.webp",
-    signature:[{dim:"selfAwareness",w:2},{dim:"patience",w:1},{dim:"independence",w:1}],
-    description:"You rarely lead from the front, but somehow the direction of the group often traces back to something you said quietly, once, and meant completely.",
-    strengths:["Subtle influence","Emotional intelligence","Thoughtful timing"],
-    weaknesses:["Underestimates own impact","Avoids visible credit","Can be too indirect"],
-    workStyle:"Behind-the-scenes, high-impact, prefers influence over authority.",
-    stressResponse:"Observes quietly before choosing how to respond.",
-    friendshipStyle:"The quiet advisor everyone eventually comes to.",
-    datingStyle:"Subtle, thoughtful gestures over grand declarations.",
-    leadershipStyle:"Leads through influence rather than position.",
-    learningStyle:"Absorbs quietly, applies precisely.",
-    communicationStyle:"Measured, timed carefully for maximum effect.",
-    decisionMaking:"Patient, observant, acts once the moment is right.",
-    idealEnvironments:["Advisory roles","Small trusted teams","Roles with real autonomy"],
-    hobbies:["Reading people and situations","Writing","Long walks"],
-    growthAdvice:"Claiming credit isn't arrogance, it's accurate information.",
-    bestTeammate:"Someone who notices and amplifies your quiet contributions.",
-    worstTeammate:"Someone who takes credit for your influence.",
-    quote:"The tide moves the ship. No one applauds the tide." },
-
-  { id:"tinkerer", name:"The Tinkerer", title:"Hands-On Problem Solver", icon:"🔧",
-    colors:["#CBD5E1","#FB923C"],
-    image:"assets/archetypes/webp/14-tinkerer.webp",
-    signature:[{dim:"curiosity",w:1},{dim:"logic",w:1},{dim:"adaptability",w:2}],
-    description:"You understand things by taking them apart. Theory only gets you so far, you trust what you've built, broken, and fixed with your own hands.",
-    strengths:["Practical problem-solving","Resourcefulness","Learns fast by doing"],
-    weaknesses:["Impatient with pure theory","Can skip documentation","Undervalues planning"],
-    workStyle:"Hands-on, iterative, prefers building over discussing.",
-    stressResponse:"Fixes something, anything, to feel in control again.",
-    friendshipStyle:"The one who actually shows up to help you move.",
-    datingStyle:"Shows love through fixing and doing, not just saying.",
-    leadershipStyle:"Leads by example, in the trenches with the team.",
-    learningStyle:"Trial and error, hands-on from the start.",
-    communicationStyle:"Practical, straightforward, low on abstraction.",
-    decisionMaking:"Tests it in the real world rather than debating it endlessly.",
-    idealEnvironments:["Workshops and labs","Fast-iteration teams","Startups"],
-    hobbies:["Building and repairing things","DIY projects","Gaming (especially building/crafting genres)"],
-    growthAdvice:"A little planning up front saves a lot of rebuilding later.",
-    bestTeammate:"A planner who gives your instincts some structure.",
-    worstTeammate:"Someone all talk and no action.",
-    quote:"If it's broken, I'd rather open it than google it." },
-
-  { id:"mirror", name:"The Mirror", title:"Self-Aware Observer", icon:"🪞",
-    colors:["#7DD3FC","#A78BFA"],
-    image:"assets/archetypes/webp/15-mirror.webp",
-    signature:[{dim:"selfAwareness",w:2},{dim:"empathy",w:1},{dim:"curiosity",w:1}],
-    description:"You've done more self-reflection than most people do in a decade, and it shows in how calmly you handle other people's chaos. You know exactly who you are.",
-    strengths:["Deep self-knowledge","Emotional regulation","Honest with themselves"],
-    weaknesses:["Can overanalyze","Sometimes too introspective to act","Slow to trust praise"],
-    workStyle:"Reflective, thoughtful, values meaning over speed.",
-    stressResponse:"Processes internally, often through writing or reflection.",
-    friendshipStyle:"Gives genuinely insightful advice, rarely surface-level.",
-    datingStyle:"Self-aware enough to communicate needs clearly.",
-    leadershipStyle:"Leads by modeling honest self-reflection for others.",
-    learningStyle:"Learns through reflection as much as instruction.",
-    communicationStyle:"Thoughtful, honest, comfortable with vulnerability.",
-    decisionMaking:"Checks in with their own values before deciding.",
-    idealEnvironments:["Therapeutic or reflective fields","Writing","Coaching"],
-    hobbies:["Journaling","Therapy or self-development","Quiet solo time"],
-    growthAdvice:"At some point, insight has to turn into action.",
-    bestTeammate:"A doer who turns your insight into momentum.",
-    worstTeammate:"Someone who never reflects on their own impact.",
-    quote:"I'd rather know myself than be flattered by a stranger." },
-
-  { id:"ronin", name:"The Ronin", title:"Independent Wanderer", icon:"🗡️",
-    colors:["#CBD5E1","#FB7185"],
-    image:"assets/archetypes/webp/16-ronin.webp",
-    signature:[{dim:"independence",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
-    description:"You answer to your own code, not the crowd's. Groups are fine in small doses, but your center of gravity has always been your own judgment.",
-    strengths:["Self-reliant","Principled","Comfortable being alone"],
-    weaknesses:["Struggles to rely on others","Can seem aloof","Avoids asking for help"],
-    workStyle:"Prefers autonomy, ownership, and minimal oversight.",
-    stressResponse:"Withdraws to handle it alone, on their own terms.",
-    friendshipStyle:"Low-maintenance but fiercely genuine when it matters.",
-    datingStyle:"Needs independence respected, even while committed.",
-    leadershipStyle:"Leads by personal example rather than direction-giving.",
-    learningStyle:"Self-taught, prefers figuring it out solo.",
-    communicationStyle:"Honest, unfiltered, doesn't perform for approval.",
-    decisionMaking:"Trusts their own judgment above outside opinion.",
-    idealEnvironments:["Freelance or independent work","Small autonomous roles"],
-    hobbies:["Solo travel","Martial arts or individual sports","Reading"],
-    growthAdvice:"Letting people in isn't weakness, it's a different kind of strength.",
-    bestTeammate:"Someone who respects the need for space without taking it personally.",
-    worstTeammate:"Someone overly dependent on group consensus.",
-    quote:"I don't need permission to be who I am." },
-
-  { id:"beacon", name:"The Beacon", title:"Inspiring Communicator", icon:"🗼",
-    colors:["#FACC15","#F472B6"],
-    image:"assets/archetypes/webp/17-beacon.webp",
-    signature:[{dim:"leadership",w:1},{dim:"humor",w:1},{dim:"socialEnergy",w:2}],
-    description:"You have a way of putting words to things other people were only feeling. Rooms brighten and conversations pick up energy when you're in them.",
-    strengths:["Natural communicator","Inspires others easily","High social energy"],
-    weaknesses:["Can talk more than listen","Overextends socially","Needs an audience sometimes"],
-    workStyle:"Thrives presenting, pitching, or rallying a group.",
-    stressResponse:"Talks it through, often out loud, with others.",
-    friendshipStyle:"The connector who introduces everyone to everyone.",
-    datingStyle:"Expressive, affectionate, communicates openly.",
-    leadershipStyle:"Leads by inspiring belief in a shared vision.",
-    learningStyle:"Learns best out loud, in discussion with others.",
-    communicationStyle:"Expressive, energetic, persuasive.",
-    decisionMaking:"Talks it out with others before finalizing.",
-    idealEnvironments:["Public-facing roles","Teams","Anything involving an audience"],
-    hobbies:["Public speaking","Performing","Hosting events"],
-    growthAdvice:"Silence can hold as much value as your next great line.",
-    bestTeammate:"A deep listener who balances your outward energy.",
-    worstTeammate:"Someone equally loud, competing for airtime.",
-    quote:"Say the thing. Someone in the room needs to hear it." },
-
-  { id:"glacier", name:"The Glacier", title:"Patient Force", icon:"🧊",
-    colors:["#7DD3FC","#CBD5E1"],
-    image:"assets/archetypes/webp/18-glacier.webp",
-    signature:[{dim:"patience",w:2},{dim:"discipline",w:2},{dim:"resilience",w:1}],
-    description:"You move slowly, deliberately, and completely reshape the landscape without anyone noticing until it's done. Rushing has never been your language.",
-    strengths:["Unmatched patience","Consistency over time","Rarely reactive"],
-    weaknesses:["Slow to start","Can seem passive","Resists urgency even when needed"],
-    workStyle:"Long-horizon, methodical, values consistency over speed.",
-    stressResponse:"Slows down further rather than speeding up.",
-    friendshipStyle:"A steady, low-drama presence over the long run.",
-    datingStyle:"Takes things slow but builds something lasting.",
-    leadershipStyle:"Leads through sustained, quiet consistency.",
-    learningStyle:"Prefers mastery through repetition over speed.",
-    communicationStyle:"Calm, unrushed, considers every word.",
-    decisionMaking:"Deliberately slow, rarely regretted.",
-    idealEnvironments:["Long-term projects","Roles that reward consistency"],
-    hobbies:["Long-distance activities","Craftsmanship","Slow travel"],
-    growthAdvice:"Some moments genuinely need urgency, practice recognizing them.",
-    bestTeammate:"Someone with urgency to balance your steady pace.",
-    worstTeammate:"Someone who mistakes your patience for lack of care.",
-    quote:"Given enough time, I reshape anything." },
-
-  { id:"spark", name:"The Spark", title:"Instant Connector", icon:"✨",
-    colors:["#FACC15","#FB923C"],
-    image:"assets/archetypes/webp/19-spark.webp",
-    signature:[{dim:"humor",w:2},{dim:"socialEnergy",w:1},{dim:"adaptability",w:1}],
-    description:"You lower the temperature of any tense room just by being in it. Humor isn't a deflection for you, it's how you show people you actually see them.",
-    strengths:["Quick wit","Puts people at ease","Naturally likeable"],
-    weaknesses:["Uses humor to avoid depth sometimes","Can undersell serious moments","Restless"],
-    workStyle:"Collaborative, energetic, great at defusing tension.",
-    stressResponse:"Uses humor to process and cope.",
-    friendshipStyle:"The friend who makes hard days feel lighter.",
-    datingStyle:"Playful, fun, keeps the relationship light and warm.",
-    leadershipStyle:"Leads by keeping morale genuinely high.",
-    learningStyle:"Learns best when it's engaging and a little fun.",
-    communicationStyle:"Witty, warm, quick on their feet.",
-    decisionMaking:"Trusts instinct, decides fast, laughs about it later either way.",
-    idealEnvironments:["Social, dynamic teams","Anything client- or people-facing"],
-    hobbies:["Comedy and improv","Social games","Hosting friends"],
-    growthAdvice:"It's safe to let a serious moment stay serious sometimes.",
-    bestTeammate:"Someone steady who grounds the fun with follow-through.",
-    worstTeammate:"Someone who takes the humor personally.",
-    quote:"If we're not laughing, we're doing it wrong." },
-
-  { id:"vault", name:"The Vault", title:"Private and Trustworthy", icon:"🔒",
-    colors:["#818CF8","#CBD5E1"],
-    image:"assets/archetypes/webp/20-vault.webp",
-    signature:[{dim:"trust",w:2},{dim:"discipline",w:1},{dim:"independence",w:1}],
-    description:"People tell you things they haven't told anyone else, and it never once occurs to them to worry about it. Discretion, for you, isn't effort, it's identity.",
-    strengths:["Absolute discretion","Steady reliability","Deep loyalty"],
-    weaknesses:["Overguards their own feelings too","Slow to open up","Can seem unreadable"],
-    workStyle:"Careful, confidential, trusted with sensitive responsibility.",
-    stressResponse:"Handles it privately, rarely burdens others.",
-    friendshipStyle:"The safest person to confide in, bar none.",
-    datingStyle:"Loyal and private; keeps the relationship's inner life protected.",
-    leadershipStyle:"Leads by earning quiet, total trust.",
-    learningStyle:"Learns privately, tests ideas before sharing them.",
-    communicationStyle:"Careful, deliberate, guards details until relevant.",
-    decisionMaking:"Weighs consequences for everyone involved before choosing.",
-    idealEnvironments:["High-trust roles","Small teams","Confidential work"],
-    hobbies:["Journaling privately","Collecting","One-on-one time over groups"],
-    growthAdvice:"You can be trusted with others' secrets and still share your own.",
-    bestTeammate:"Someone who earns trust patiently rather than demanding it.",
-    worstTeammate:"Someone careless with sensitive information.",
-    quote:"What you tell me stays exactly where you left it." },
-
-  { id:"pathfinder", name:"The Pathfinder", title:"First Through the Door", icon:"🧗",
-    colors:["#34D399","#FDBA74"],
-    image:"assets/archetypes/webp/21-pathfinder.webp",
-    signature:[{dim:"risk",w:2},{dim:"curiosity",w:1},{dim:"independence",w:1}],
-    description:"Uncharted territory doesn't scare you, it's the whole point. You'd rather take the unfamiliar route once than the safe one a hundred times.",
-    strengths:["Bold exploration","Comfortable with uncertainty","Resourceful under pressure"],
-    weaknesses:["Underestimates real risk sometimes","Impatient with caution","Can go it alone too often"],
-    workStyle:"Thrives pioneering new territory or untested approaches.",
-    stressResponse:"Seeks a new challenge to channel the energy.",
-    friendshipStyle:"The friend who drags everyone into the best bad idea.",
-    datingStyle:"Adventurous, spontaneous, keeps things exciting.",
-    leadershipStyle:"Leads by going first and proving it's possible.",
-    learningStyle:"Learns by throwing themselves directly into the unknown.",
-    communicationStyle:"Direct, energetic, low patience for overexplaining.",
-    decisionMaking:"Biased toward action over analysis.",
-    idealEnvironments:["Exploration-heavy roles","Startups","Travel"],
-    hobbies:["Hiking and outdoor exploration","Travel","Trying new things constantly"],
-    growthAdvice:"A little caution isn't the enemy of adventure.",
-    bestTeammate:"Someone cautious enough to catch the risks you miss.",
-    worstTeammate:"Someone equally reckless with no one watching the map.",
-    quote:"The trail isn't real until someone walks it." },
-
-  { id:"weaver", name:"The Weaver", title:"Social Connector", icon:"🧵",
-    colors:["#F472B6","#A78BFA"],
-    image:"assets/archetypes/webp/22-weaver.webp",
-    signature:[{dim:"empathy",w:1},{dim:"socialEnergy",w:2},{dim:"trust",w:1}],
-    description:"You remember how people are connected to each other better than they do. Left alone in any group, you'll have found the common thread within minutes.",
-    strengths:["Natural relationship-building","Reads group dynamics well","Bridges people together"],
-    weaknesses:["Can overextend socially","Avoids being alone too long","Takes on others' emotions"],
-    workStyle:"Collaborative, relationship-driven, thrives cross-team.",
-    stressResponse:"Reaches out to others rather than isolating.",
-    friendshipStyle:"The one who keeps the whole friend group actually connected.",
-    datingStyle:"Warm, communicative, invests deeply in connection.",
-    leadershipStyle:"Leads by building trust between people, not just tasks.",
-    learningStyle:"Learns best collaboratively, through discussion.",
-    communicationStyle:"Warm, inclusive, actively listens.",
-    decisionMaking:"Weighs the impact on relationships heavily.",
-    idealEnvironments:["People-centered roles","Community and network-based work"],
-    hobbies:["Hosting and organizing","Networking (the genuine kind)","Group activities"],
-    growthAdvice:"Solitude can recharge you just as much as connection does.",
-    bestTeammate:"Someone independent who still values the network you build.",
-    worstTeammate:"Someone who dismisses relationship-building as unimportant.",
-    quote:"Everyone's one good introduction away from a different life." },
-
-  { id:"foundry", name:"The Foundry", title:"Disciplined Builder", icon:"⚒️",
-    colors:["#FB923C","#CBD5E1"],
-    image:"assets/archetypes/webp/23-foundry.webp",
-    signature:[{dim:"discipline",w:2},{dim:"drive",w:1},{dim:"planning",w:1}],
-    description:"Consistency is your entire strategy. While others chase bursts of motivation, you show up, every day, and let the compounding do the rest.",
-    strengths:["Unshakeable discipline","Reliable output","Strong work ethic"],
-    weaknesses:["Rigid with routine","Struggles with spontaneity","Can be hard on themselves"],
-    workStyle:"Consistent, structured, values process as much as outcome.",
-    stressResponse:"Doubles down on routine and structure.",
-    friendshipStyle:"Dependable, shows up on time, every time.",
-    datingStyle:"Committed and consistent; actions over grand gestures.",
-    leadershipStyle:"Leads by modeling relentless consistency.",
-    learningStyle:"Repetition-based mastery, practice over theory.",
-    communicationStyle:"Straightforward, no-nonsense, dependable.",
-    decisionMaking:"Sticks to principles rather than shifting with mood.",
-    idealEnvironments:["Structured organizations","Craft-based or skill-building work"],
-    hobbies:["Fitness routines","Skill mastery (music, sport, craft)","Habit tracking"],
-    growthAdvice:"Rest isn't a break from discipline, it's part of it.",
-    bestTeammate:"Someone flexible who softens the rigidity a little.",
-    worstTeammate:"Someone inconsistent who derails the routine.",
-    quote:"Motivation is unreliable. Discipline shows up anyway." },
-
-  { id:"mirage", name:"The Mirage", title:"Creative Dreamer", icon:"🌫️",
-    colors:["#C084FC","#7DD3FC"],
-    image:"assets/archetypes/webp/24-mirage.webp",
-    signature:[{dim:"creativity",w:2},{dim:"optimism",w:1},{dim:"independence",w:1}],
-    description:"You live half in the world everyone shares and half in the one you're building in your head. The line between them is thinner than people assume.",
-    strengths:["Rich imagination","Original perspective","Comfortable in ambiguity"],
-    weaknesses:["Can drift from practical demands","Overpromises on ideas","Struggles with routine"],
-    workStyle:"Idea-driven, thrives with creative freedom.",
-    stressResponse:"Escapes into imagination or a creative outlet.",
-    friendshipStyle:"Brings a completely different way of seeing things.",
-    datingStyle:"Romantic, imaginative, deeply expressive.",
-    leadershipStyle:"Leads by painting a vision others want to chase.",
-    learningStyle:"Learns through imagination and association.",
-    communicationStyle:"Vivid, descriptive, sometimes abstract.",
-    decisionMaking:"Follows inspiration more than convention.",
-    idealEnvironments:["Creative industries","Flexible, low-structure roles"],
-    hobbies:["Writing fiction","Art","Daydreaming with intention"],
-    growthAdvice:"Grounding one idea fully can be more powerful than chasing ten.",
-    bestTeammate:"A practical executor who brings the dream into reality.",
-    worstTeammate:"Someone who dismisses imagination as impractical.",
-    quote:"Reality is just the first draft." },
-
-  { id:"compass", name:"The Compass", title:"Principled Decider", icon:"🧭",
-    colors:["#2DD4BF","#FACC15"],
-    image:"assets/archetypes/webp/25-compass.webp",
-    signature:[{dim:"logic",w:1},{dim:"trust",w:1},{dim:"selfAwareness",w:2}],
-    description:"You know exactly what you value, and it shows in every choice you make, even the small ones. People trust your decisions because they know what they're built on.",
-    strengths:["Strong personal values","Consistent integrity","Clear-headed under pressure"],
-    weaknesses:["Can be inflexible on principle","Judges quick compromise harshly","Overthinks ethics of small choices"],
-    workStyle:"Values-driven, principled, consistent regardless of pressure.",
-    stressResponse:"Returns to core values to decide what to do next.",
-    friendshipStyle:"The friend who gives advice you can actually trust.",
-    datingStyle:"Honest, values-aligned, seeks the same in a partner.",
-    leadershipStyle:"Leads by staying consistent when it's hardest to.",
-    learningStyle:"Wants to understand the ethical 'why' behind everything.",
-    communicationStyle:"Honest, direct, occasionally blunt in service of truth.",
-    decisionMaking:"Filters every choice through personal values first.",
-    idealEnvironments:["Mission-driven organizations","Ethics-heavy fields"],
-    hobbies:["Philosophy and ethics","Debate","Mentoring"],
-    growthAdvice:"Principles can flex without breaking, practice the difference.",
-    bestTeammate:"Someone pragmatic who helps values meet reality.",
-    worstTeammate:"Someone who compromises core values for convenience.",
-    quote:"I'd rather be right and alone than easy and wrong." },
-
-  { id:"firefly", name:"The Firefly", title:"Playful Spontaneity", icon:"🌟",
-    colors:["#FACC15","#6EE7B7"],
-    image:"assets/archetypes/webp/26-firefly.webp",
-    signature:[{dim:"humor",w:1},{dim:"risk",w:1},{dim:"adaptability",w:2}],
-    description:"You move through life catching the good moments as they appear, without much of a plan for the next one. Spontaneity isn't a flaw for you, it's how joy finds you.",
-    strengths:["Lives fully in the moment","Highly adaptable","Infectious playfulness"],
-    weaknesses:["Struggles with long-term follow-through","Avoids heavy commitment","Easily distracted"],
-    workStyle:"Flexible, energetic, better in bursts than long grinds.",
-    stressResponse:"Distracts and lightens the mood, for themselves and others.",
-    friendshipStyle:"Always down for the last-minute plan.",
-    datingStyle:"Fun, spontaneous, keeps things light and exciting.",
-    leadershipStyle:"Leads by keeping the group's energy alive.",
-    learningStyle:"Learns best through play and variety.",
-    communicationStyle:"Light, quick, easy to talk to.",
-    decisionMaking:"Follows what feels good in the moment.",
-    idealEnvironments:["Dynamic, varied roles","Anything social and unstructured"],
-    hobbies:["Spontaneous travel","Parties and social events","Trying new hobbies constantly"],
-    growthAdvice:"A little structure can hold your spontaneity without killing it.",
-    bestTeammate:"Someone steady who handles the follow-through.",
-    worstTeammate:"Someone equally scattered with no anchor.",
-    quote:"Plans are just suggestions I haven't broken yet." },
-
-  { id:"bastion", name:"The Bastion", title:"Resilient Under Fire", icon:"🏰",
-    colors:["#FB7185","#34D399"],
-    image:"assets/archetypes/webp/27-bastion.webp",
-    signature:[{dim:"resilience",w:2},{dim:"discipline",w:1},{dim:"confidence",w:1}],
-    description:"Pressure doesn't break you, it reveals you. You've been through enough that very little rattles you anymore, and people can feel that steadiness nearby.",
-    strengths:["Unshakeable resilience","Handles crisis calmly","Reliable under pressure"],
-    weaknesses:["Bottles up strain","Slow to ask for support","Can normalize too much hardship"],
-    workStyle:"Steady under deadline and crisis, handles high-pressure roles well.",
-    stressResponse:"Grinds through it, often without showing the strain.",
-    friendshipStyle:"The friend who's been through it and still shows up strong.",
-    datingStyle:"Steady and protective, even during hard times.",
-    leadershipStyle:"Leads by staying composed when everything else isn't.",
-    learningStyle:"Learns through hardship and hands-on experience.",
-    communicationStyle:"Direct, unflinching, doesn't sugarcoat.",
-    decisionMaking:"Stays clear-headed even under real pressure.",
-    idealEnvironments:["Crisis response","High-pressure leadership","Long-term challenges"],
-    hobbies:["Endurance sports","Mentoring others through hardship","Strength training"],
-    growthAdvice:"Strength includes letting others carry some of the weight sometimes.",
-    bestTeammate:"Someone who notices when you're carrying too much.",
-    worstTeammate:"Someone who adds pressure without contributing support.",
-    quote:"I've survived worse than this." },
-
-  { id:"tide", name:"The Tide", title:"Adaptable Flow", icon:"🌙",
-    colors:["#60A5FA","#22D3EE"],
-    image:"assets/archetypes/webp/28-tide.webp",
-    signature:[{dim:"adaptability",w:2},{dim:"optimism",w:1},{dim:"patience",w:1}],
-    description:"You don't fight the current, you find a way to move with it that still gets you where you're going. Change rarely rattles you; you've adjusted before.",
-    strengths:["Effortless adaptability","Goes with change gracefully","Rarely rigid"],
-    weaknesses:["Can lack firm direction","Avoids conflict to keep peace","Struggles to commit to one path"],
-    workStyle:"Flexible, comfortable with shifting priorities and ambiguity.",
-    stressResponse:"Adjusts expectations rather than fighting the situation.",
-    friendshipStyle:"Easygoing, low-drama, goes with the group's flow.",
-    datingStyle:"Flexible and accommodating, adapts to their partner's needs.",
-    leadershipStyle:"Leads by adjusting the plan as reality shifts.",
-    learningStyle:"Absorbs and adapts to whatever teaching style is offered.",
-    communicationStyle:"Easygoing, accommodating, non-confrontational.",
-    decisionMaking:"Stays open, adjusts as new information comes in.",
-    idealEnvironments:["Fast-changing environments","Roles requiring flexibility"],
-    hobbies:["Travel","Yoga or fluid movement practices","Anything unstructured"],
-    growthAdvice:"Sometimes holding your ground matters more than flowing around it.",
-    bestTeammate:"Someone decisive who gives your flexibility direction.",
-    worstTeammate:"Someone equally passive, with no one steering.",
-    quote:"I don't resist the current. I just choose my line through it." },
-
-  { id:"oracle", name:"The Oracle", title:"Intuitive Thinker", icon:"🔮",
-    colors:["#C084FC","#818CF8"],
-    image:"assets/archetypes/webp/29-oracle.webp",
-    signature:[{dim:"curiosity",w:1},{dim:"empathy",w:1},{dim:"selfAwareness",w:2}],
-    description:"You sense the undercurrent of a situation before anyone else names it out loud. Not psychic, just deeply attuned, to people, patterns, and meaning.",
-    strengths:["Sharp intuition","Sees patterns others miss","Comfortable with big questions"],
-    weaknesses:["Can overtrust instinct over evidence","Slow to explain their reasoning","Prone to overthinking"],
-    workStyle:"Reflective, insight-driven, prefers meaning over routine.",
-    stressResponse:"Turns inward to make sense of what's happening.",
-    friendshipStyle:"Gives advice that somehow always lands exactly right.",
-    datingStyle:"Deeply intuitive about their partner's needs.",
-    leadershipStyle:"Leads by naming what others haven't articulated yet.",
-    learningStyle:"Learns through reflection, pattern, and meaning-making.",
-    communicationStyle:"Thoughtful, sometimes cryptic, always intentional.",
-    decisionMaking:"Trusts intuition, then checks it against reason.",
-    idealEnvironments:["Reflective or advisory roles","Research into human behavior"],
-    hobbies:["Philosophy","Astrology, tarot, or similar symbolic systems","Deep conversation"],
-    growthAdvice:"Instinct is powerful, but it still benefits from a second opinion.",
-    bestTeammate:"A pragmatist who tests your intuition against reality.",
-    worstTeammate:"Someone who dismisses insight without evidence entirely.",
-    quote:"I usually know before I can explain why." },
-
-  { id:"catalyst", name:"The Catalyst", title:"Change Igniter", icon:"🌋",
-    colors:["#FB923C","#FB7185"],
-    image:"assets/archetypes/webp/30-catalyst.webp",
-    signature:[{dim:"drive",w:1},{dim:"leadership",w:1},{dim:"risk",w:2}],
-    description:"Rooms change when you enter them, not because you're loud, but because you make stagnant things feel possible to fix. You're allergic to 'that's just how it is'.",
-    strengths:["Sparks momentum in others","Comfortable disrupting the status quo","Energizing presence"],
-    weaknesses:["Impatient with slow systems","Can push change too fast","Underestimates resistance"],
-    workStyle:"Thrives initiating change, less interested in maintaining it.",
-    stressResponse:"Channels frustration into pushing for change.",
-    friendshipStyle:"The one who pushes the group out of a rut.",
-    datingStyle:"Energizing, pushes their partner to grow.",
-    leadershipStyle:"Leads by igniting momentum others couldn't start alone.",
-    learningStyle:"Learns by challenging assumptions directly.",
-    communicationStyle:"Direct, energizing, sometimes confrontational.",
-    decisionMaking:"Biased toward action and disruption over the status quo.",
-    idealEnvironments:["Change management","Early-stage ventures","Reform-minded teams"],
-    hobbies:["Activism or organizing","Debate","Starting new projects"],
-    growthAdvice:"Not every system that resists you is wrong, some just need patience.",
-    bestTeammate:"A steady maintainer who sustains the change you spark.",
-    worstTeammate:"Someone resistant to any change at all.",
-    quote:"Comfortable is usually just 'unexamined'." },
+  { id:"visionary", name:"The Visionary", title:"Sees It Finished", icon:"✨",
+    colors:["#C4B5FD","#5EEAD4"],
+    image:"assets/archetypes/webp/visionary.webp",
+    signature:[{dim:"persistence",w:2},{dim:"creativity",w:1},{dim:"confidence",w:1}],
+    description:"You see the finished version before anyone else believes it's possible, and you're stubborn enough to actually build toward it.",
+    strengths:["Big-picture thinking","Unshakeable persistence","Inspires belief in others"],
+    weaknesses:["Impatient with small steps","Can ignore inconvenient details","Sets the bar unreasonably high"],
+    workStyle:"Works backward from the end goal, fills in the middle as needed.",
+    stressResponse:"Zooms out further instead of narrowing in.",
+    friendshipStyle:"The friend who believes in your plans before you fully do.",
+    datingStyle:"Sees the long game early, sometimes too early.",
+    leadershipStyle:"Leads by painting the picture until everyone else can see it too.",
+    learningStyle:"Learns by connecting it to the bigger goal, not the isolated fact.",
+    communicationStyle:"Big-picture, persuasive, occasionally short on detail.",
+    decisionMaking:"Chooses whatever moves the long-term vision forward.",
+    idealEnvironments:["Ambitious, long-horizon work","Rooms open to big ideas","Anywhere the goal is allowed to be large"],
+    hobbies:["Goal-setting, unironically","Reading about the future","Building toward something personal"],
+    growthAdvice:"The next small step matters as much as the whole vision.",
+    bestTeammate:"A detail-oriented closer who makes the vision actually work.",
+    worstTeammate:"Someone who can't see past the next two weeks.",
+    quote:"I'm not there yet. I've just already seen it." },
 ];
 
 /* ---- Careers (fit computed from dimensions, not hardcoded per archetype) */
@@ -1642,19 +1246,6 @@ const RELATIONSHIP_TYPES = [
   { key:"roommate", label:"Roommate" },
 ];
 
-/* ---- Measured traits (formulas live in engine.js) ----------------------
-   These replace the earlier "fun stat" joke labels with grounded, serious
-   readings so the result feels like an actual assessment rather than a
-   novelty score. Each is still just a formula over the 20 hidden
-   dimensions, scaled 0 to 100. */
-const MEASURED_TRAITS = [
-  "Emotional Steadiness","Decision Confidence","Social Stamina",
-  "Creative Output","Focus Capacity","Risk Tolerance","Empathy Index",
-  "Leadership Presence","Adaptability Score","Resilience Rating",
-  "Trust Radius","Independence Level","Friendship Reliability",
-  "Growth Mindset","Communication Clarity","Stress Recovery"
-];
-
 /* ---- Lines shown during brief "calculating" transitions ----------------
    Rotated randomly, a mix of genuine-sounding processing steps and a
    couple of lighter ones, purely as a loading-state flourish. */
@@ -1708,36 +1299,18 @@ const COMPATIBILITY_CALC_LINES = [
    keep in sync. hiddenPotential is generated from each archetype's own
    strengths/weaknesses in engine.js, also with no separate authoring. */
 const ARCHETYPE_EXTRAS = {
-  "ember-strategist": { animal:"Fox", element:"Fire", symbol:"\u2694" },
-  "quiet-architect": { animal:"Beaver", element:"Earth", symbol:"\uD83C\uDFDB" },
-  "wildfire": { animal:"Falcon", element:"Fire", symbol:"\u26A1" },
-  "anchor": { animal:"Elephant", element:"Water", symbol:"\u2693" },
-  "cartographer": { animal:"Raven", element:"Air", symbol:"\uD83E\uDDED" },
-  "alchemist": { animal:"Fox", element:"Fire", symbol:"\u2697" },
+  "stormcaller": { animal:"Lion", element:"Storm", symbol:"\u26C8" },
+  "architect": { animal:"Beaver", element:"Earth", symbol:"\uD83C\uDFDB" },
   "sentinel": { animal:"Wolf", element:"Earth", symbol:"\uD83D\uDEE1" },
-  "comet": { animal:"Cheetah", element:"Fire", symbol:"\u2604" },
-  "hearth-keeper": { animal:"Deer", element:"Earth", symbol:"\uD83D\uDD6F" },
-  "puzzle-box": { animal:"Cat", element:"Shadow", symbol:"\uD83E\uDDE9" },
-  "storm-caller": { animal:"Lion", element:"Storm", symbol:"\uD83C\uDF29" },
-  "lantern": { animal:"Moth", element:"Light", symbol:"\uD83C\uDFEE" },
-  "undercurrent": { animal:"Eel", element:"Water", symbol:"\uD83C\uDF0A" },
-  "tinkerer": { animal:"Beaver", element:"Metal", symbol:"\uD83D\uDD27" },
-  "mirror": { animal:"Swan", element:"Water", symbol:"\uD83E\uDE9E" },
-  "ronin": { animal:"Wolf", element:"Metal", symbol:"\uD83D\uDDE1" },
-  "beacon": { animal:"Peacock", element:"Light", symbol:"\uD83D\uDF7C" },
-  "glacier": { animal:"Polar Bear", element:"Ice", symbol:"\uD83E\uDDCA" },
-  "spark": { animal:"Otter", element:"Fire", symbol:"\u2728" },
-  "vault": { animal:"Tortoise", element:"Earth", symbol:"\uD83D\uDD12" },
-  "pathfinder": { animal:"Mountain Goat", element:"Earth", symbol:"\uD83E\uDDD7" },
-  "weaver": { animal:"Honeybee", element:"Air", symbol:"\uD83E\uDDF5" },
-  "foundry": { animal:"Ox", element:"Metal", symbol:"\u2692" },
-  "mirage": { animal:"Cat", element:"Air", symbol:"\uD83C\uDF2B" },
-  "compass": { animal:"Heron", element:"Water", symbol:"\u2696" },
-  "firefly": { animal:"Firefly", element:"Light", symbol:"\uD83C\uDF1F" },
-  "bastion": { animal:"Bear", element:"Earth", symbol:"\uD83C\uDFF0" },
-  "tide": { animal:"Dolphin", element:"Water", symbol:"\uD83C\uDF19" },
+  "pathfinder": { animal:"Mountain Goat", element:"Earth", symbol:"\uD83E\uDDED" },
+  "archivist": { animal:"Tortoise", element:"Shadow", symbol:"\uD83D\uDCDC" },
+  "dreamweaver": { animal:"Moth", element:"Dream", symbol:"\uD83C\uDF19" },
+  "vanguard": { animal:"Cheetah", element:"Fire", symbol:"\u2604" },
   "oracle": { animal:"Owl", element:"Shadow", symbol:"\uD83D\uDD2E" },
-  "catalyst": { animal:"Hawk", element:"Fire", symbol:"\uD83C\uDF0B" },
+  "luminary": { animal:"Firefly", element:"Light", symbol:"\uD83C\uDFEE" },
+  "catalyst": { animal:"Hawk", element:"Fire", symbol:"\u26A1" },
+  "maverick": { animal:"Raven", element:"Metal", symbol:"\uD83D\uDDE1" },
+  "visionary": { animal:"Falcon", element:"Air", symbol:"\u2728" },
 };
 
 /* ---- Narrative roles ---------------------------------------- */
@@ -2037,6 +1610,26 @@ const COMPATIBILITY_CATEGORIES = [
   { name:"Reliability", type:"similarity", dims:["responsibility","discipline","trust"] },
   { name:"Fun Together", type:"combined", dims:["humor","socialEnergy","optimism"] },
   { name:"Chaos Together", type:"combined", dims:["risk","humor"] },
+  { name:"Teamwork", type:"combined", dims:["leadership","adaptability","responsibility"] },
+  { name:"Growth Potential", type:"combined", dims:["optimism","curiosity","resilience"] },
+];
+
+/* Overview metrics (Compare 2.0): a fixed, human-labeled subset of the
+   categories above, in the order the overview grid shows them. Keeping
+   this as a name->category mapping instead of duplicating scoring logic
+   means the overview numbers and the "all categories" list underneath
+   are always the exact same computation, never two slightly different
+   ideas of "Trust" or "Communication". */
+const COMPARE_OVERVIEW_METRICS = [
+  { label:"Friendship", category:"Friendship" },
+  { label:"Teamwork", category:"Teamwork" },
+  { label:"Leadership", category:"Leadership Balance" },
+  { label:"Communication", category:"Communication" },
+  { label:"Conflict", category:"Conflict Resolution" },
+  { label:"Trust", category:"Trust" },
+  { label:"Decision Making", category:"Decision Style" },
+  { label:"Creativity", category:"Creative Partner" },
+  { label:"Growth Potential", category:"Growth Potential" },
 ];
 
 /* ---- "Who does X more" comparisons -------------------------------------- */
@@ -2129,22 +1722,39 @@ const MOTIVATION_STYLES = [
    Not the archetype system and not scored against it — this is a second,
    independent read of the same normDims, structured like the other
    scoreBySignature() lookups above (mythical creature, motivation style,
-   etc.), just with a fixed 7-item palette instead of 30 archetypes. The
-   archetype answers "which of 30 patterns fits your answers best"; soul
-   type answers "which single core value shows up strongest," a coarser,
-   more elemental read that intentionally overlaps with (rather than
-   derives from) the archetype score. Colors and their meanings are a
+   etc.), just with a fixed 6-item palette instead of 12 archetypes. The
+   archetype answers "which of 12 patterns fits your answers best"; soul
+   type answers "which single core motivation shows up strongest," a
+   coarser, more elemental read that intentionally overlaps with (rather
+   than derives from) the archetype score. Colors and their meanings are a
    fixed, non-negotiable palette — do not add or reorder entries. */
 const SOUL_TYPES = [
-  { name:"Red", hex:"#EF4444", trait:"Determination", meaning:"Willpower, persistence, refusing to give up.", signature:[{dim:"persistence",w:2},{dim:"drive",w:1},{dim:"resilience",w:1}] },
-  { name:"Orange", hex:"#F97316", trait:"Bravery", meaning:"Courage, facing danger head-on.", signature:[{dim:"risk",w:2},{dim:"confidence",w:1}] },
-  { name:"Yellow", hex:"#EAB308", trait:"Justice", meaning:"Fairness, righteousness.", signature:[{dim:"logic",w:1},{dim:"trust",w:1},{dim:"responsibility",w:1}] },
-  { name:"Green", hex:"#22C55E", trait:"Kindness", meaning:"Compassion, caring for others.", signature:[{dim:"kindness",w:2},{dim:"empathy",w:1}] },
-  { name:"Blue", hex:"#3B82F6", trait:"Integrity", meaning:"Honesty, strong moral principles.", signature:[{dim:"responsibility",w:2},{dim:"discipline",w:1}] },
-  { name:"Purple", hex:"#A855F7", trait:"Perseverance", meaning:"Endurance, continuing despite hardship.", signature:[{dim:"resilience",w:2},{dim:"patience",w:1}] },
-  { name:"Light Blue", hex:"#38BDF8", trait:"Patience", meaning:"Calmness, waiting and enduring.", signature:[{dim:"patience",w:2},{dim:"emotionalStability",w:1}] },
+  { name:"Crimson", hex:"#DC2626", trait:"Passion", meaning:"Intensity, desire, chasing what actually lights you up.", signature:[{dim:"drive",w:2},{dim:"competitiveness",w:1},{dim:"confidence",w:1}] },
+  { name:"Ember", hex:"#F59E0B", trait:"Growth", meaning:"Steady growth, building something that lasts through the setbacks.", signature:[{dim:"persistence",w:2},{dim:"resilience",w:1},{dim:"optimism",w:1}] },
+  { name:"Dawn", hex:"#FDE047", trait:"Hope", meaning:"Hope, believing the next chapter is worth showing up for.", signature:[{dim:"optimism",w:2},{dim:"trust",w:1}] },
+  { name:"Verdant", hex:"#22C55E", trait:"Compassion", meaning:"Compassion, caring for people without needing credit for it.", signature:[{dim:"kindness",w:2},{dim:"empathy",w:1}] },
+  { name:"Azure", hex:"#38BDF8", trait:"Wisdom", meaning:"Wisdom, the kind that comes from actually paying attention.", signature:[{dim:"selfAwareness",w:1},{dim:"logic",w:1},{dim:"patience",w:1}] },
+  { name:"Astral", hex:"#818CF8", trait:"Vision", meaning:"Vision, seeing the shape of something before it exists.", signature:[{dim:"creativity",w:1},{dim:"openMindedness",w:2},{dim:"curiosity",w:1}] },
 ];
-function computeSoulType(normDims){ return scoreBySignature(SOUL_TYPES, normDims)[0].item; }
+// Signature totals aren't all equal (Crimson/Ember/Astral sum to 4,
+// Dawn/Verdant/Azure sum to 3), so a raw weighted-sum comparison gives the
+// lighter signatures a permanently lower ceiling regardless of how well
+// their dims are satisfied. Scaling each item's raw score by
+// maxWeight/itsOwnWeight puts every item on the same max-achievable scale
+// before they're compared, without changing anything for the ones already
+// at maxWeight.
+function signatureMaxWeight(list){
+  return Math.max(...list.map(item => item.signature.reduce((s, x) => s + x.w, 0)));
+}
+const SOUL_MAX_WEIGHT = signatureMaxWeight(SOUL_TYPES);
+function scoreSoulTypes(normDims){
+  return SOUL_TYPES.map(s => {
+    const totalWeight = s.signature.reduce((sum, x) => sum + x.w, 0);
+    const raw = s.signature.reduce((sum, x) => sum + (normDims[x.dim] || 0) * x.w, 0);
+    return { item: s, score: raw * (SOUL_MAX_WEIGHT / totalWeight) };
+  }).sort((a, b) => b.score - a.score);
+}
+function computeSoulType(normDims){ return scoreSoulTypes(normDims)[0].item; }
 
 /* ---- Fun extra profiles: mythical creature, season, weather, planet ------- */
 const MYTHICAL_CREATURES = [
@@ -2422,20 +2032,23 @@ const COFFEE_ORDERS = [
    ========================================================================= */
 
 const CLUSTERS = Object.keys(QUESTION_BANK);
-const MIN_QUESTIONS = 35;          // Stages 1-3 always run to exactly this many (15 fixed + 20 adaptive)
-const MAX_QUESTIONS = 45;          // never exceeds this many (35 baseline + at most 10 extra)
-// Empirically calibrated (not the original 95): a per-step greedy search
-// that simulates every candidate option at every question and always
-// picks whichever maximizes computeAssessmentConfidence().overall right
-// now — i.e. the best any answering strategy can realistically do —
-// still only reached ~81-85 overall by Q35-45 across dozens of trialed
-// target archetypes. 95 was consequently unreachable by any answer
-// pattern, silently turning "stop early once confident" into dead code
-// (every adaptive session ran to MAX_QUESTIONS regardless of how clear
-// the profile was). 80 sits just under that empirical ceiling: a
-// genuinely clear, consistent profile can still cross it and stop at
-// 35, while a noisy/inconsistent one (measured ~73-78 in the same
-// testing) correctly does not and keeps extending.
+const MIN_QUESTIONS = 35;          // Stages 1-3 always run to exactly this many (15 fixed + 20 adaptive) -- "Balanced"'s early-stop point
+const MAX_QUESTIONS = 50;          // never exceeds this many (35 baseline + at most 15 extra) -- "Balanced"'s ceiling and "Deep Dive"'s fixed length
+// Empirically calibrated against the original 45-question ceiling: a
+// per-step greedy search that simulates every candidate option at every
+// question and always picks whichever maximizes
+// computeAssessmentConfidence().overall right now — i.e. the best any
+// answering strategy can realistically do — still only reached ~81-85
+// overall by Q35-45 across dozens of trialed target archetypes. 95 was
+// consequently unreachable by any answer pattern, silently turning "stop
+// early once confident" into dead code (every adaptive session ran to
+// the cap regardless of how clear the profile was). 80 sits just under
+// that empirical ceiling: a genuinely clear, consistent profile can
+// still cross it and stop at 35, while a noisy/inconsistent one
+// (measured ~73-78 in the same testing) correctly does not and keeps
+// extending. Raising the cap from 45 to 50 (to match Deep Dive's fixed
+// length) only gives a low-confidence profile more room to climb before
+// hitting it, so 80 stays a valid, still-below-ceiling target.
 const CONFIDENCE_TARGET = 80;      // stop early once this confident
 const CONFIDENCE_SCALE = 7;        // score-gap that counts as "fully confident", tuned against real score distributions
 // NOTE ON SCALING: the question bank holds 200 questions across 10
@@ -2444,7 +2057,7 @@ const CONFIDENCE_SCALE = 7;        // score-gap that counts as "fully confident"
 // adaptively-selected questions (Stages 2-3, 10 each). From there,
 // Stage 4/5 re-checks confidence after every answer and keeps going
 // only if the top two archetype candidates are still close, up to
-// MAX_QUESTIONS (at most 10 more beyond the 35 baseline).
+// MAX_QUESTIONS (at most 15 more beyond the 35 baseline).
 
 /* ---- Which dimensions matter most to the framework projections ---------
    Same idea as the old cluster-weight table, but for MBTI/Big
@@ -2474,7 +2087,16 @@ QUESTIONS.forEach(q => { QUESTIONS_BY_ID[q.id] = q; });
    once and all 10 clusters at least once, in as few questions as
    possible, so Stage 1 is a genuine broad foundation rather than an
    arbitrary first slice of the bank. */
-const CORE_QUESTION_IDS = ["ana6","ana8","pla4","amb13","cre18","soc3","phi17","cau2","emp3","imp4","lea12","pla1","amb16","ana1","cre5"];
+// ana8 and pla4 were swapped for phi8 and pla15: the original 15 left
+// emotionalStability/trust/responsibility/optimism/humor/competitiveness/
+// resilience at a fraction of the coverage of the rest of the bank, and
+// since Quick Read never asks anything beyond these 15, that permanently
+// starved Sentinel/Luminary/Catalyst of any real signal in that mode
+// specifically (confirmed dead/near-dead in Quick Read-only simulation,
+// while healthy in Balanced/Deep Dive). phi8 and pla15 stay in the same
+// spirit (philosophical and playful were already represented, just less
+// so) while covering the starved dims.
+const CORE_QUESTION_IDS = ["ana6","phi8","pla15","amb13","cre18","soc3","phi17","cau2","emp3","imp4","lea12","pla1","amb16","ana1","cre5"];
 
 /* -------------------------------------------------------------------------
    ALGORITHM: Deterministic staged adaptive question selection
@@ -2497,13 +2119,13 @@ const CORE_QUESTION_IDS = ["ana6","ana8","pla4","amb13","cre18","soc3","phi17","
    Stage 4 (after Q35): confidence check using the evidence-based
      computeAssessmentConfidence(). Stops here if the target is met —
      this is the common "35 was enough" exit.
-   Stage 5 (Q36-45): only if Stage 4 wasn't confident enough. Unlike
+   Stage 5 (Q36-50): only if Stage 4 wasn't confident enough. Unlike
      Stages 2-3, this re-checks confidence after every single answer
      (not in batches of 5) and stops the instant the target is reached,
      since minimizing extra questions matters most this late in the
      quiz — a profile that becomes confident at, say, Q39 never gets
-     asked Q40-45 just because it started down this path. Hard-capped
-     at MAX_QUESTIONS (45) either way.
+     asked Q40-50 just because it started down this path. Hard-capped
+     at MAX_QUESTIONS (50) either way.
 
    Question selection itself (_pickInformativeBatch) ranks every unused
    question by computeQuestionInfoValue(): how much it addresses
@@ -2521,21 +2143,31 @@ const CORE_QUESTION_IDS = ["ana6","ana8","pla4","amb13","cre18","soc3","phi17","
 ------------------------------------------------------------------------- */
 
 /* Every signal here is derived from data that already exists (question
-   deltas, archetype signatures, framework dimension maps, running answer
-   history) - nothing new was authored onto the question bank.
-     - uncertainty:  favors dimensions this session has the least evidence
-                     for yet (getDimensionConfidence), weighted by how
-                     strongly this question would move that dimension
-     - separation:   favors questions whose dimension profile lines up
-                     with what currently separates the top-2 archetype
-                     candidates (same signature-diff idea the old
-                     disambiguation boost used, applied per-question)
-     - framework:    favors dimensions that matter to MBTI/Big Five/DISC/
-                     Enneagram, a small signal so framework confidence
-                     improves alongside archetype confidence
-     - redundancy:   penalizes overlap with dimensions already answered
-                     about a lot, so the same ground isn't covered twice */
-function computeQuestionInfoValue(q, session, top, second){
+   deltas, archetype/soul signatures, framework dimension maps, running
+   answer history) - nothing new was authored onto the question bank.
+     - uncertainty:      favors dimensions this session has the least
+                         evidence for yet (getDimensionConfidence),
+                         weighted by how strongly this question would
+                         move that dimension
+     - separation:       favors questions whose dimension profile lines
+                         up with what currently separates the top-2
+                         archetype candidates (same signature-diff idea
+                         the old disambiguation boost used, applied per
+                         question)
+     - soulSeparation:   the same idea, for the top-2 soul type
+                         candidates — archetype and soul are meant to be
+                         determined together from the same answers, so
+                         the picker should narrow down both at once
+                         rather than only ever chasing archetype
+                         clarity and leaving soul type to chance
+     - framework:        favors dimensions that matter to MBTI/Big
+                         Five/DISC/Enneagram, a small signal so
+                         framework confidence improves alongside
+                         archetype confidence
+     - redundancy:       penalizes overlap with dimensions already
+                         answered about a lot, so the same ground isn't
+                         covered twice */
+function computeQuestionInfoValue(q, session, top, second, soulTop, soulSecond){
   const dimSet = new Set();
   q.options.forEach(opt => Object.keys(opt.d).forEach(d => dimSet.add(d)));
   const avgMag = (d) => q.options.reduce((s,o) => s + Math.abs(o.d[d] || 0), 0) / q.options.length;
@@ -2554,6 +2186,14 @@ function computeQuestionInfoValue(q, session, top, second){
     dimSet.forEach(d => { separation += Math.abs(diff[d] || 0) * avgMag(d); });
   }
 
+  let soulSeparation = 0;
+  if (soulTop && soulSecond){
+    const soulDiff = {};
+    soulTop.signature.forEach(s => { soulDiff[s.dim] = (soulDiff[s.dim] || 0) + s.w; });
+    soulSecond.signature.forEach(s => { soulDiff[s.dim] = (soulDiff[s.dim] || 0) - s.w; });
+    dimSet.forEach(d => { soulSeparation += Math.abs(soulDiff[d] || 0) * avgMag(d); });
+  }
+
   let framework = 0;
   dimSet.forEach(d => { framework += (FRAMEWORK_DIMENSION_WEIGHTS[d] || 0) * 0.3; });
 
@@ -2563,19 +2203,22 @@ function computeQuestionInfoValue(q, session, top, second){
     dimSet.forEach(d => { if (d in a.d) redundancy += Math.min(Math.abs(a.d[d]), 1); });
   });
 
-  return uncertainty * 1.0 + separation * 0.8 + framework * 0.2 - redundancy * 0.35;
+  return uncertainty * 1.0 + separation * 0.65 + soulSeparation * 0.5 + framework * 0.15 - redundancy * 0.35;
 }
 
 class QuizSession {
   // questionMode comes from the "Your Experience" onboarding step's one
-  // depth choice: "15"/"35"/"50" all pin the assessment to exactly that
-  // many questions (never extended). "adaptive" isn't offered by that
-  // screen at all — it's only the fallback for someone who skipped
-  // onboarding entirely (the name screen's "Skip for now"), preserving
-  // the app's original default behavior: start at MIN_QUESTIONS and let
-  // _maybeAdjustLength() extend up to MAX_QUESTIONS when confidence is
-  // still low. See _maybeAdjustLength()'s own guard for the other half
-  // of this.
+  // depth choice: "15" (Quick Read) and "50" (Deep Dive) pin the
+  // assessment to exactly that many questions, never extended. "adaptive"
+  // is "Balanced": starts at MIN_QUESTIONS (35 = the 15 fixed + 20
+  // adaptive questions) and lets _maybeAdjustLength() extend up to
+  // MAX_QUESTIONS only if confidence is still low there — see that
+  // method's own guard for the mechanics. "adaptive" is also the fallback
+  // for someone who skipped onboarding entirely (the name screen's "Skip
+  // for now"), so it never needs its own separate default. "35" is kept
+  // as a valid fixed-length value at this layer for backward
+  // compatibility (old in-progress saves, direct construction) even
+  // though no onboarding screen offers it anymore.
   constructor(seed = Date.now() % 100000, name = "", questionMode = "adaptive"){
     // seed is kept only for the save/resume payload shape (harmless,
     // unused for question selection now) so older in-progress saves in
@@ -2628,37 +2271,38 @@ class QuizSession {
     const nd = this.normalizedDims();
     const match = matchArchetype(nd);
     const top = match.ranked[0].archetype, second = match.ranked[1].archetype;
+    const soulRanked = scoreSoulTypes(nd);
+    const soulTop = soulRanked[0].item, soulSecond = soulRanked[1].item;
     const planned = new Set(this.plan.map(p => p.id));
     const candidates = QUESTIONS.filter(q => !this.usedIds.has(q.id) && !planned.has(q.id));
-    const scored = candidates.map(q => ({ q, score: computeQuestionInfoValue(q, this, top, second) }));
+    const scored = candidates.map(q => ({ q, score: computeQuestionInfoValue(q, this, top, second, soulTop, soulSecond) }));
     scored.sort((a, b) => b.score - a.score);
     return scored.slice(0, count).map(x => x.q);
   }
 
-  /* ---- Stage 4/5: confidence check and continued questioning -----------
+  /* ---- Stage 4: the single Balanced-mode confidence checkpoint ---------
      Stages 1-3 (questions 1-35) always run to completion regardless of
-     confidence, per the fixed/batch design above. From question 35
-     onward this runs after every single answer (not in batches of 5, the
-     old checkpoint cadence), using the evidence-based
-     computeAssessmentConfidence() rather than the old archetype-gap-only
-     measure, and stops the instant the target is reached instead of
-     always committing to another full batch. The old
-     _boostForDisambiguation step is gone as a separate method, its idea
-     (bias toward whatever separates the top-2 candidates) now lives
-     directly inside computeQuestionInfoValue's separation term, computed
-     fresh per question rather than as a one-time affinity nudge. */
+     confidence, per the fixed/batch design above. Exactly once, right at
+     question 35, this checks computeAssessmentConfidence(): confident
+     enough and the assessment stops there (the "35 was enough" exit);
+     not confident and it commits to the full remaining stretch in one
+     jump, straight to MAX_QUESTIONS (50), with no further re-checks in
+     between — a deliberately binary outcome (35 or 50, nothing in
+     between) rather than the finer-grained "stop the instant confidence
+     is reached at 36, 37, 38..." this used to do, so "Balanced" reads as
+     a simple two-outcome choice, not an unpredictable in-between length. */
   _maybeAdjustLength(){
-    // Fixed-length modes ("15"/"35") never extend past their chosen
-    // length regardless of confidence — only "adaptive" does.
+    // Fixed-length modes ("15"/"50") never extend past their chosen
+    // length regardless of confidence — only "adaptive" does, and only
+    // at the one checkpoint (question 35).
     if (this.questionMode !== "adaptive") return;
-    if (this.cursor < MIN_QUESTIONS) return;
-    if (this.cursor >= MAX_QUESTIONS){ this.targetLength = MAX_QUESTIONS; return; }
+    if (this.cursor !== MIN_QUESTIONS) return;
     const nd = this.normalizedDims();
     const match = matchArchetype(nd);
     const conf = computeAssessmentConfidence(match.ranked, nd, this, false);
     this.confidencePct = conf.overall;
     if (conf.overall >= CONFIDENCE_TARGET){ this.targetLength = this.cursor; return; }
-    this.targetLength = Math.min(MAX_QUESTIONS, this.cursor + 1);
+    this.targetLength = MAX_QUESTIONS;
     this.justExtended = true;
   }
 
@@ -2810,9 +2454,17 @@ function restoreQuizSession(saved){
    show how every other archetype scored, not just the top one.
 ------------------------------------------------------------------------- */
 
+// Same fix as scoreSoulTypes below: The Catalyst/Maverick/Visionary sum to
+// 4 while every other archetype sums to 5, which gave them a permanently
+// lower ceiling in a raw weighted-sum comparison. Scale each archetype's
+// raw score by maxWeight/itsOwnWeight so they're compared on the same
+// max-achievable scale.
+const ARCHETYPE_MAX_WEIGHT = signatureMaxWeight(ARCHETYPES);
 function matchArchetype(normDims){
   const scored = ARCHETYPES.map(a => {
-    const score = a.signature.reduce((sum, s) => sum + (normDims[s.dim] || 0) * s.w, 0);
+    const totalWeight = a.signature.reduce((sum, s) => sum + s.w, 0);
+    const raw = a.signature.reduce((sum, s) => sum + (normDims[s.dim] || 0) * s.w, 0);
+    const score = raw * (ARCHETYPE_MAX_WEIGHT / totalWeight);
     return { archetype: a, score };
   }).sort((x, y) => y.score - x.score);
   return { primary: scored[0].archetype, runnerUp: scored[1].archetype, ranked: scored };
@@ -3105,6 +2757,19 @@ function decodeCode(code){
   } catch (e){
     return null;
   }
+}
+
+// decodeCode()'s own .archetype is whatever archIdx was baked into the
+// code string at encode time -- correct then, but stale the moment
+// matchArchetype's scoring changes, since (unlike normDims) it's never
+// recomputed just from decoding. Every page that displays an archetype
+// from a decoded code (Compare, Party Compare, the inline compare-with-a-
+// code widget on Results) should run it through this first, so none of
+// them can show a different archetype than the same person's own Result/
+// Profile/Growth pages, which already recompute fresh.
+function freshenDecoded(decoded){
+  if (!decoded) return decoded;
+  return { ...decoded, archetype: matchArchetype(decoded.normDims).primary };
 }
 
 /* -------------------------------------------------------------------------
@@ -3416,33 +3081,41 @@ function computeFunStats(normDims){
 
 /* ---- Personality confidence and stability ------------------------------- */
 /* -------------------------------------------------------------------------
-   ALGORITHM: Assessment Confidence (Phase 1 rewrite)
-   The old version was a single signal: how far ahead the top archetype's
-   score was over the runner-up. That's real information (it's kept below
-   as archetypeSeparation) but it's not the whole picture, a person could
-   have a wide archetype gap from a short, sloppy run just as easily as a
-   thorough one. This version blends six components:
-     - coverage:            fraction of the 25 dimensions with any real
-                             evidence behind them
+   ALGORITHM: Assessment Confidence
+   Five components, matched one-to-one to what "confident" is actually
+   supposed to mean for a layered archetype+soul read, not a speed proxy
+   and not a single archetype-gap number:
+     - archetypeSeparation: how far the top archetype candidate is ahead
+                             of the runner-up (the original gap-based
+                             signal)
      - consistency:         agreement across paired situations that touch
                              similar ground (computeConsistency)
-     - evidenceStrength:    average per-dimension confidence across all 25
-                             dimensions (getDimensionConfidence)
-     - archetypeSeparation: the original gap-based signal, kept as-is
-     - frameworkConfidence: how decisive the MBTI axis margins are, as a
-                             cheap proxy for framework certainty pending a
-                             fuller independent-projection model
-     - versionPenalty:      a small deduction for PF1-origin profiles that
-                             haven't been upgraded, since 5 dimensions were
-                             never actually measured for them
-   Every component is exposed, not just the final number, since collapsing
-   them into one score would hide exactly the kind of nuance ("evidence is
-   strong but consistency is shaky") this was meant to capture. When no
-   session is available (a profile decoded from a shared code), coverage,
-   consistency, evidenceStrength and frameworkConfidence are reported as
-   null (genuinely unknown) rather than guessed at, and overall falls back
-   to archetypeSeparation alone with a visible note explaining why.
-------------------------------------------------------------------------- */
+     - soulCertainty:       the equivalent gap-based signal for the 6 soul
+                             types — archetype and soul are determined
+                             together from the same answers, so soul
+                             ambiguity should drag overall confidence down
+                             exactly like archetype ambiguity does, not be
+                             invisible to it
+     - sinVirtueCertainty:  how polarized the 7 sin/virtue axes are (close
+                             to 50/50 on every axis means the "dominant"
+                             sin or virtue is barely dominant at all, a
+                             coin flip dressed up as an insight)
+     - tieBreakerScore:     did Balanced mode need the extra 15 questions
+                             beyond the 35-question checkpoint? Needing
+                             them is itself a signal the profile wasn't
+                             clear-cut going in, so it costs a modest
+                             amount even if the extra questions eventually
+                             cleared things up. Neutral (100) for Quick
+                             Read/Deep Dive, where the concept doesn't
+                             apply, and for Balanced runs that resolved at
+                             the checkpoint without needing them.
+   versionPenalty is a small deduction for PF1-origin profiles that
+   haven't been upgraded, since 5 dimensions were never actually measured
+   for them. When no session is available (a profile decoded from a
+   shared code), consistency and tieBreakerScore can't be measured, so
+   overall is computed from the three signals that only need normDims
+   (archetypeSeparation, soulCertainty, sinVirtueCertainty) with a visible
+   note explaining why. */
 function computeAssessmentConfidence(ranked, normDims, session, upgradedFromV1){
   const gap = ranked[0].score - ranked[1].score;
   const archetypeSeparation = Math.max(0, Math.min(100, Math.round((gap / CONFIDENCE_SCALE) * 100)));
@@ -3450,44 +3123,53 @@ function computeAssessmentConfidence(ranked, normDims, session, upgradedFromV1){
   const stabilityRaw = ranked[0].score - avgOthers;
   const stabilityPct = Math.max(0, Math.min(100, Math.round((stabilityRaw / (CONFIDENCE_SCALE * 1.5)) * 100)));
 
-  const mbtiMargins = MBTI_AXES.map(axis => {
-    const posSum = axis.posDims.reduce((s,d) => s + getDimensionScore(normDims, d), 0);
-    const negSum = axis.negDims.reduce((s,d) => s + getDimensionScore(normDims, d), 0);
-    return Math.abs(posSum - negSum);
-  });
-  const frameworkConfidence = Math.round(Math.min(100, (mbtiMargins.reduce((s,v)=>s+v,0) / mbtiMargins.length) * 6));
+  const soulRanked = scoreSoulTypes(normDims);
+  const soulGap = soulRanked[0].score - soulRanked[1].score;
+  const soulCertainty = Math.max(0, Math.min(100, Math.round((soulGap / CONFIDENCE_SCALE) * 100)));
+
+  const sinVirtueAxes = computeSinVirtueProfile(normDims);
+  const sinVirtueCertainty = Math.round(
+    sinVirtueAxes.reduce((s, ax) => s + Math.abs(ax.sinPct - 50) * 2, 0) / sinVirtueAxes.length
+  );
 
   const versionPenalty = upgradedFromV1 ? 6 : 0;
 
   if (!session || !session.answers){
+    const overall = Math.max(0, Math.min(100, Math.round(
+      archetypeSeparation * 0.45 + soulCertainty * 0.35 + sinVirtueCertainty * 0.2 - versionPenalty
+    )));
     return {
-      confidencePct: archetypeSeparation,
+      confidencePct: overall,
       stabilityPct,
-      overall: archetypeSeparation,
-      coverage: null, consistency: null, evidenceStrength: null, frameworkConfidence: null,
-      archetypeSeparation, versionPenalty,
-      note: "This code carries no answer history to measure coverage or consistency from, so this reflects archetype separation only.",
+      overall,
+      consistency: null, tieBreakerScore: null,
+      archetypeSeparation, soulCertainty, sinVirtueCertainty, versionPenalty,
+      note: "This code carries no answer history to measure consistency or tie-breaker use from, so this reflects separation and certainty only.",
     };
   }
 
-  const dimConfidences = DIMENSIONS.map(d => getDimensionConfidence(session, d));
-  const coverage = Math.round((DIMENSIONS.filter(d => {
-    const ev = getDimensionEvidence(session, d);
-    return ev && ev.count > 0;
-  }).length / DIMENSIONS.length) * 100);
-  const evidenceStrength = Math.round((dimConfidences.reduce((s,v)=>s+v,0) / dimConfidences.length) * 100);
   const consistencyResult = computeConsistency(session);
   const consistency = consistencyResult.pct;
 
+  // Tie-breakers only mean something for Balanced ("adaptive") runs, where
+  // going past the 35-question checkpoint means the checkpoint genuinely
+  // wasn't confident yet. Quick Read and Deep Dive always run a fixed
+  // length regardless of confidence, so the concept doesn't apply to them.
+  let tieBreakerScore = 100;
+  if (session.questionMode === "adaptive" && session.cursor > MIN_QUESTIONS){
+    const extra = Math.min(session.cursor - MIN_QUESTIONS, MAX_QUESTIONS - MIN_QUESTIONS);
+    tieBreakerScore = Math.round(100 - (extra / (MAX_QUESTIONS - MIN_QUESTIONS)) * 40);
+  }
+
   const overall = Math.max(0, Math.min(100, Math.round(
-    coverage * 0.2 + consistency * 0.2 + evidenceStrength * 0.25 +
-    archetypeSeparation * 0.25 + frameworkConfidence * 0.1 - versionPenalty
+    archetypeSeparation * 0.30 + consistency * 0.20 + soulCertainty * 0.20 +
+    sinVirtueCertainty * 0.15 + tieBreakerScore * 0.15 - versionPenalty
   )));
 
   return {
     confidencePct: overall, // kept as the headline field existing UI already reads
     stabilityPct,
-    overall, coverage, consistency, evidenceStrength, archetypeSeparation, frameworkConfidence, versionPenalty,
+    overall, consistency, archetypeSeparation, soulCertainty, sinVirtueCertainty, tieBreakerScore, versionPenalty,
     note: null,
   };
 }
@@ -3682,7 +3364,105 @@ function computeGroupCompatibility(profiles, names){
   else if (avgDims.creativity > 3) vibe = "The Collective";
   else if (avgDims.discipline > 3) vibe = "The Operation";
 
-  return { n, pairwise, overallScore, bestPair, toughestPair, roles, groupSharedStrengths, groupFriction, vibe };
+  /* ------------------- PARTY COMPARE 2.0 -------------------------------
+     Everything below reads the whole group as one system rather than a
+     stack of pairs: dominant type/soul, group-wide strength/blind-spot
+     reads, and a set of named "team" metrics, each a simple, clearly
+     labeled aggregate (an average or a spread) over normDims the group
+     already has — no field here needs anything a pasted party code
+     doesn't actually carry. */
+  const g = (k) => pct(avgDims[k] || 0);
+  const stdevPct = (dims) => {
+    const vals = profiles.map(p => dims.reduce((s,d) => s + pct(p.normDims[d]||0), 0) / dims.length);
+    const mean = vals.reduce((a,b)=>a+b,0) / n;
+    const variance = vals.reduce((s,v) => s + (v-mean)*(v-mean), 0) / n;
+    return Math.sqrt(variance);
+  };
+
+  const archCounts = {};
+  profiles.forEach(p => { archCounts[p.archetype.id] = (archCounts[p.archetype.id] || 0) + 1; });
+  const archOrder = Object.entries(archCounts).sort((a,b) => b[1] - a[1]);
+  const dominantArchetype = archOrder[0][1] > 1
+    ? { archetype: ARCHETYPES.find(a => a.id === archOrder[0][0]), count: archOrder[0][1] }
+    : null;
+
+  const souls = profiles.map(p => computeSoulType(p.normDims));
+  const soulCounts = {};
+  souls.forEach(s => { soulCounts[s.name] = (soulCounts[s.name] || 0) + 1; });
+  const soulOrder = Object.entries(soulCounts).sort((a,b) => b[1] - a[1]);
+  const dominantSoul = soulOrder[0][1] > 1
+    ? { soul: souls.find(s => s.name === soulOrder[0][0]), count: soulOrder[0][1] }
+    : null;
+
+  const groupStrengths = DIMENSIONS.filter(d => avgDims[d] >= 2.5).sort((a,b) => avgDims[b]-avgDims[a]).slice(0,5).map(d => DIM_LABELS[d]);
+  const groupWeaknesses = DIMENSIONS.filter(d => avgDims[d] <= -2.5).sort((a,b) => avgDims[a]-avgDims[b]).slice(0,5).map(d => DIM_LABELS[d]);
+  const sharedBlindSpots = DIMENSIONS.filter(d => profiles.every(p => (p.normDims[d]||0) <= -2)).map(d => DIM_LABELS[d]).slice(0,4);
+
+  const presentArchIds = new Set(profiles.map(p => p.archetype.id));
+  const missingArchetypes = ARCHETYPES.filter(a => !presentArchIds.has(a.id)).slice(0, 5).map(a => a.name);
+
+  // "Average Confidence" for a group: pasted party codes carry no saved
+  // confidence score (only a freshly-completed quiz does), so this reads
+  // as how far each person's answers sit from neutral on average — a
+  // consistently available proxy for "how defined a read this is",
+  // clearly labeled as such wherever it's shown rather than passed off
+  // as the same confidence percentage the individual result page shows.
+  const avgSignalStrength = Math.round(profiles.reduce((s,p) => {
+    const vals = DIMENSIONS.map(d => Math.abs(p.normDims[d]||0));
+    return s + (vals.reduce((a,b)=>a+b,0) / vals.length) / 10 * 100;
+  }, 0) / n);
+
+  const metrics = {
+    creativityIndex: Math.round((g("creativity") + g("openMindedness") + g("curiosity")) / 3),
+    leadershipBalance: Math.round((g("leadership") + g("confidence")) / 2),
+    empathyBalance: Math.round((g("empathy") + g("kindness")) / 2),
+    conflictRisk: Math.round(Math.min(100, stdevPct(["patience","trust","risk","planning","independence"]) * 2.2)),
+    innovationScore: Math.round((g("creativity") + g("adaptability") + g("curiosity")) / 3),
+    teamStability: Math.round((g("emotionalStability") + g("resilience") + g("discipline")) / 3),
+    decisionSpeed: Math.round((g("confidence") + (100 - g("patience"))) / 2),
+    socialEnergy: g("socialEnergy"),
+    planningPct: Math.round((g("planning") + g("discipline")) / 2),
+    riskTolerance: g("risk"),
+    communicationHealth: Math.round((g("empathy") + g("socialEnergy") + g("trust")) / 3),
+    groupDiversity: Math.round(Math.min(100, stdevPct(DIMENSIONS) * 2)),
+    growthPotential: Math.round((g("optimism") + g("curiosity") + g("resilience")) / 3),
+    avgConfidence: avgSignalStrength,
+  };
+  metrics.actionPct = 100 - metrics.planningPct;
+
+  const identity = vibe;
+  const report = generateGroupReport({ metrics, dominantArchetype, dominantSoul, groupStrengths, groupWeaknesses, sharedBlindSpots, overallScore, n });
+
+  return {
+    n, pairwise, overallScore, bestPair, toughestPair, roles, groupSharedStrengths, groupFriction, vibe,
+    identity, dominantArchetype, dominantSoul, groupStrengths, groupWeaknesses, sharedBlindSpots, missingArchetypes,
+    metrics, report,
+  };
+}
+
+const GROUP_REPORT_TEMPLATES = [
+  { test: m => m.leadershipBalance >= 60 && m.teamStability <= 45, text: g => `This group has strong leadership but lacks stabilizing personalities to keep that momentum steady under pressure.` },
+  { test: m => m.creativityIndex >= 60 && m.conflictRisk >= 55, text: g => `Most members approach problems creatively, but conflict resolution may become difficult once pressure builds.` },
+  { test: m => m.communicationHealth >= 60 && m.groupDiversity >= 55, text: g => `Communication runs healthy here even across a genuinely diverse mix of personalities, a combination that usually takes real effort to earn.` },
+  { test: m => m.socialEnergy >= 60 && m.riskTolerance >= 55, text: g => `This is a high-energy, risk-tolerant group, plans will move fast, but someone will need to occasionally ask "should we, though?"` },
+  { test: m => m.socialEnergy <= 40 && m.teamStability >= 55, text: g => `A quieter, steadier group than a loud one, decisions here are more likely to be careful than fast.` },
+  { test: m => m.groupDiversity <= 35, text: g => `This group thinks unusually alike for its size, which makes coordination easy but leaves real blind spots uncovered.` },
+  { test: m => m.groupDiversity >= 65, text: g => `A genuinely wide spread of personalities here, that's a real asset for covering blind spots, but it also means less shared default behavior to fall back on.` },
+  { test: m => m.conflictRisk >= 60, text: g => `Conflict risk runs on the higher side, mostly from real differences in trust, patience, and risk tolerance rather than personal friction.` },
+  { test: m => m.growthPotential >= 60, text: g => `Individually and together, this group tends to lean into change rather than resist it.` },
+];
+function generateGroupReport(ctx){
+  const { metrics, dominantArchetype, dominantSoul, groupStrengths, groupWeaknesses, sharedBlindSpots, overallScore, n } = ctx;
+  const lines = [];
+  if (dominantArchetype) lines.push(`${dominantArchetype.count} of ${n} lean toward ${dominantArchetype.archetype.name}, the closest thing this group has to a shared default.`);
+  else lines.push(`No archetype repeats in this group, everyone's read as a genuinely different type.`);
+  if (dominantSoul) lines.push(`${dominantSoul.count} share a ${dominantSoul.soul.name} soul type (${dominantSoul.soul.trait.toLowerCase()}).`);
+  GROUP_REPORT_TEMPLATES.forEach(t => { if (lines.length < 5 && t.test(metrics)) lines.push(t.text(metrics)); });
+  if (groupStrengths.length) lines.push(`As a group, ${groupStrengths.slice(0,3).join(", ")} stand out as shared strengths.`);
+  if (groupWeaknesses.length) lines.push(`${groupWeaknesses.slice(0,2).join(" and ")} run low across most of the group, worth planning around rather than assuming someone else will cover it.`);
+  if (sharedBlindSpots.length) lines.push(`Everyone here is quietly weaker on ${sharedBlindSpots.slice(0,2).join(" and ")}, a genuine shared blind spot, not just one person's gap.`);
+  if (lines.length < 2) lines.push(overallScore >= 60 ? "Overall, this group reads as genuinely well-matched." : "Overall, this group is more a set of real differences than a single shared type, which can still work well with a little intention.");
+  return lines.slice(0, 6);
 }
 
 function computeDeepCompatibility(profileA, profileB, nameA, nameB){
@@ -3701,6 +3481,136 @@ function computeDeepCompatibility(profileA, profileB, nameA, nameB){
     `What makes this pairing unique: ${base.sharedStrengths.length ? "a real overlap in " + base.sharedStrengths.slice(0,2).join(" and ") : "how differently you each approach the same situations"}.`,
   ];
   return { ...base, categories, explanations, whoComparisons, activities, funFacts };
+}
+
+/* -------------------------------------------------------------------------
+   COMPARE 2.0
+   Everything computeDeepCompatibility doesn't already cover: a fixed
+   Overview scorecard (COMPARE_OVERVIEW_METRICS, read straight off the
+   categories list computeDeepCompatibility already scored, so the two
+   never disagree), a side-by-side "Layer Comparison" pulling from fields
+   that already exist per-profile (archetype narrative fields, soul type,
+   sin/virtue, thinking/decision profiles, fun stats — nothing here is
+   newly authored data, just newly paired up), and a generic per-dimension
+   agree/disagree/balance pass that replaces "just a percentage" with an
+   actual reason, built from the same normDims two profiles already carry.
+------------------------------------------------------------------------- */
+function computeCompareOverview(categories){
+  const byName = {};
+  categories.forEach(c => { byName[c.name] = c.score; });
+  return COMPARE_OVERVIEW_METRICS.map(m => ({ label: m.label, score: byName[m.category] || 0 }));
+}
+
+// Friction-prone dims: a large gap here is worth calling out as a real
+// conflict risk, not just "a difference" — these are the defaults people
+// actually clash over day to day, not e.g. a harmless creativity gap.
+const CONFLICT_RISK_DIMS = new Set(["patience","trust","risk","planning","independence","emotionalStability","responsibility"]);
+
+function computeAgreementMap(a, b, nameA, nameB){
+  const A = nameA || "Person A", B = nameB || "Person B";
+  const rows = DIMENSIONS.map(d => {
+    const av = a[d] || 0, bv = b[d] || 0;
+    return {
+      d, av, bv, gap: av - bv,
+      bothStrongSame: Math.abs(av) >= 3 && Math.abs(bv) >= 3 && Math.sign(av) === Math.sign(bv) && av !== 0,
+      opposite: Math.sign(av) !== Math.sign(bv) && Math.abs(av) >= 2 && Math.abs(bv) >= 2,
+    };
+  });
+
+  const agree = rows.filter(r => r.bothStrongSame)
+    .sort((x, y) => Math.min(Math.abs(y.av), Math.abs(y.bv)) - Math.min(Math.abs(x.av), Math.abs(x.bv)))
+    .slice(0, 4)
+    .map(r => ({ dim: r.d, label: DIM_LABELS[r.d],
+      text: `${A} and ${B} both lean strongly toward ${DIM_LABELS[r.d].toLowerCase()}, so this rarely needs negotiating, it's just how you both already operate.` }));
+
+  const disagree = rows.filter(r => r.opposite && Math.abs(r.gap) >= 5)
+    .sort((x, y) => Math.abs(y.gap) - Math.abs(x.gap))
+    .slice(0, 4)
+    .map(r => {
+      const leader = r.av > r.bv ? A : B, other = leader === A ? B : A;
+      return { dim: r.d, label: DIM_LABELS[r.d],
+        text: `${leader} leans one way on ${DIM_LABELS[r.d].toLowerCase()} while ${other} leans the opposite, a real difference in default setting, worth naming directly rather than assuming it'll just resolve itself.`,
+        conflictRisk: CONFLICT_RISK_DIMS.has(r.d) };
+    });
+
+  const balance = rows.filter(r => !r.opposite && !r.bothStrongSame && Math.abs(r.gap) >= 5)
+    .sort((x, y) => Math.abs(y.gap) - Math.abs(x.gap))
+    .slice(0, 4)
+    .map(r => {
+      const higher = r.av > r.bv ? A : B, lower = higher === A ? B : A;
+      return { dim: r.d, label: DIM_LABELS[r.d],
+        text: `${higher} carries more ${DIM_LABELS[r.d].toLowerCase()} than ${lower} does, so ${lower} can lean on ${higher} here rather than trying to match it, a complementary strength, not a gap to close.` };
+    });
+
+  return { agree, disagree, balance, conflictAreas: disagree.filter(r => r.conflictRisk) };
+}
+
+// What each person brings that the other is comparatively lighter on: the
+// two dims where they most exceed the other, one-directional (unlike
+// computeAgreementMap's balance list, which is symmetric).
+function computeWhatEachBrings(a, b, nameA, nameB){
+  const bringsFor = (self, other) => DIMENSIONS
+    .map(d => ({ d, gap: (self[d]||0) - (other[d]||0) }))
+    .sort((x, y) => y.gap - x.gap)
+    .slice(0, 2)
+    .filter(r => r.gap >= 3)
+    .map(r => DIM_LABELS[r.d]);
+  return {
+    a: { name: nameA || "Person A", traits: bringsFor(a, b) },
+    b: { name: nameB || "Person B", traits: bringsFor(b, a) },
+  };
+}
+
+function topVirtues(sinVirtue){
+  return [...sinVirtue].sort((x, y) => y.virtuePct - x.virtuePct).slice(0, 3).map(v => v.virtueLabel);
+}
+function topTendencies(normDims){
+  return DIMENSIONS.map(d => ({ d, v: normDims[d] || 0 }))
+    .sort((x, y) => Math.abs(y.v) - Math.abs(x.v)).slice(0, 3)
+    .map(r => DIM_LABELS[r.d]);
+}
+const COMPARE_FUN_STAT_KEYS = ["Aura", "Rizz", "Charisma", "Chaos", "Main Character Energy", "Adventure"];
+
+// Emotion-relevant subset of the 25 dims, used by Compare 2.0's "Emotion
+// Radar" (a second, narrower overlay chart than the full "Mind Map" one).
+const EMOTION_RADAR_DIMS = ["empathy","emotionalStability","optimism","trust","kindness","socialEnergy","humor","resilience","selfAwareness"];
+
+// Deliberately re-derives everything from normDims via the same compute*()
+// functions the result page uses, rather than reading precomputed fields
+// (.soul, .sinVirtue, .funStats, ...) off profileA/profileB — a pasted
+// Compare code only ever decodes to { archetype, normDims, name, version },
+// never the full extras bundle a freshly computed result carries, so this
+// has to work from normDims alone to be correct on every call site.
+function computeCompareLayers(profileA, archA, profileB, archB, nameA, nameB){
+  const a = profileA.normDims, b = profileB.normDims;
+  const A = nameA || "Person A", B = nameB || "Person B";
+  const pair = (av, bv) => ({ a: av, b: bv });
+  const soulA = computeSoulType(a), soulB = computeSoulType(b);
+  const sinVirtueA = computeSinVirtueProfile(a), sinVirtueB = computeSinVirtueProfile(b);
+  const funStatsA = computeFunStats(a), funStatsB = computeFunStats(b);
+  const relA = computeRelationshipProfile(a), relB = computeRelationshipProfile(b);
+  const decA = computeDecisionProfile(a), decB = computeDecisionProfile(b);
+  const thinkA = computeThinkingProfile(a), thinkB = computeThinkingProfile(b);
+  return {
+    archetype: pair({ name: archA.name, icon: archA.icon }, { name: archB.name, icon: archB.icon }),
+    soul: pair(soulA, soulB),
+    topVirtues: pair(topVirtues(sinVirtueA), topVirtues(sinVirtueB)),
+    topTendencies: pair(topTendencies(a), topTendencies(b)),
+    funStats: COMPARE_FUN_STAT_KEYS.map(k => ({ label: k, a: funStatsA[k], b: funStatsB[k] })),
+    strengths: pair(archA.strengths, archB.strengths),
+    weaknesses: pair(archA.weaknesses, archB.weaknesses),
+    stressResponse: pair(archA.stressResponse, archB.stressResponse),
+    leadershipStyle: pair(archA.leadershipStyle, archB.leadershipStyle),
+    learningStyle: pair(archA.learningStyle, archB.learningStyle),
+    workStyle: pair(archA.workStyle, archB.workStyle),
+    communicationStyle: pair(archA.communicationStyle, archB.communicationStyle),
+    growthAdvice: pair(archA.growthAdvice, archB.growthAdvice),
+    relationshipStyle: pair(relA.relationshipDynamic, relB.relationshipDynamic),
+    decisionStyle: pair(decA[0].name, decB[0].name),
+    thinkingStyle: pair(thinkA[0].name, thinkB[0].name),
+    agreement: computeAgreementMap(a, b, A, B),
+    brings: computeWhatEachBrings(a, b, A, B),
+  };
 }
 
 /* =========================================================================
@@ -3761,6 +3671,93 @@ function computeMBTI(normDims){
     type += positive ? axis.letters[0] : axis.letters[1];
   });
   return type;
+}
+
+/* =========================================================================
+   FRAMEWORKS DEEP DIVE (frameworks.html)
+   The compact framework card on the result page already shows the MBTI
+   type, Enneagram type, and DISC/Big Five bars — this expands the exact
+   same computed numbers (nothing here is a second scoring system) into a
+   full per-letter/per-trait breakdown with real strength percentages and
+   plain-language explanations, for the "read the whole thing" crowd.
+   Every one of these frameworks is explicitly a Forge-generated
+   projection, not a licensed or certified instrument (see legal.html's
+   disclaimer) — the explanations below keep that framing rather than
+   presenting it as clinical fact.
+   ========================================================================= */
+const MBTI_LETTER_MEANINGS = {
+  E: "Energized by people and external activity, thinks out loud, recharges by being around others.",
+  I: "Energized by solitude and internal reflection, thinks things through before speaking, recharges alone.",
+  N: "Drawn to patterns, possibilities, and the abstract over the immediate and concrete.",
+  S: "Grounded in the concrete and the present, trusts direct experience over speculation.",
+  F: "Decides by weighing people and values, asks who a decision actually affects.",
+  T: "Decides by weighing logic and consistency, asks whether a decision actually holds up.",
+  P: "Keeps options open, comfortable improvising, prefers flexibility to a fixed plan.",
+  J: "Prefers a decided plan, comfortable committing early, prefers structure to open-endedness.",
+};
+function computeMBTIBreakdown(normDims){
+  return MBTI_AXES.map(axis => {
+    const posSum = axis.posDims.reduce((s,d) => s + getDimensionScore(normDims,d), 0);
+    const negSum = axis.negDims.reduce((s,d) => s + getDimensionScore(normDims,d), 0);
+    const maxPossible = (axis.posDims.length + axis.negDims.length) * 10 || 10;
+    const diff = posSum - negSum;
+    const strengthPct = Math.max(0, Math.min(100, Math.round(((diff + maxPossible) / (2 * maxPossible)) * 100)));
+    const letter = diff >= 0 ? axis.letters[0] : axis.letters[1];
+    return { letter, otherLetter: diff >= 0 ? axis.letters[1] : axis.letters[0], strengthPct: diff >= 0 ? strengthPct : 100 - strengthPct, meaning: MBTI_LETTER_MEANINGS[letter] };
+  });
+}
+
+const BIG_FIVE_EXPLANATIONS = {
+  Openness: { high: "Curious and drawn to new ideas, art, and unfamiliar experience over the tried-and-true.", low: "Prefers the familiar and proven over novelty for its own sake." },
+  Conscientiousness: { high: "Organized, follows through, comfortable with structure and long-term commitments.", low: "Improvises well, resists over-planning, comfortable leaving things loosely structured." },
+  Extraversion: { high: "Draws energy from people and activity, comfortable being the center of a room.", low: "Draws energy from quiet and solitude, prefers smaller, calmer settings." },
+  Agreeableness: { high: "Cooperative and trusting by default, prioritizes harmony and other people's comfort.", low: "Direct and skeptical by default, prioritizes honesty over smoothing things over." },
+  Neuroticism: { high: "Feels emotional shifts vividly and quickly, more reactive to stress in the moment.", low: "Emotionally steady under pressure, slower to react, harder to rattle." },
+};
+function computeBigFiveBreakdown(normDims){
+  return computeBigFive(normDims).map(t => ({
+    ...t,
+    explanation: t.pct >= 55 ? BIG_FIVE_EXPLANATIONS[t.name].high : t.pct <= 45 ? BIG_FIVE_EXPLANATIONS[t.name].low : "Sits close to the middle here, genuinely situational rather than a strong lean either way.",
+  }));
+}
+
+const DISC_EXPLANATIONS = {
+  "D, Dominance": "Direct, results-focused, comfortable taking charge and pushing for a decision.",
+  "I, Influence": "Persuasive and social, moves people through enthusiasm and connection rather than authority.",
+  "S, Steadiness": "Steady and cooperative, prefers consistency and dislikes sudden, forced change.",
+  "C, Conscientiousness": "Careful and precise, prioritizes accuracy and doing it right over doing it fast.",
+};
+function computeDISCBreakdown(normDims){
+  const ranked = computeDISC(normDims);
+  return ranked.map((d, i) => ({ ...d, explanation: DISC_EXPLANATIONS[d.name], isPrimary: i === 0 }));
+}
+
+const ENNEAGRAM_EXPLANATIONS = {
+  "Type 1, The Reformer": "Principled and improvement-driven, holds itself (and often others) to a real standard.",
+  "Type 2, The Helper": "Relationship-focused and generous, finds meaning in being genuinely needed.",
+  "Type 3, The Achiever": "Driven by visible success and momentum, uncomfortable standing still.",
+  "Type 4, The Individualist": "Identity-driven and introspective, wants to feel genuinely distinct, not interchangeable.",
+  "Type 5, The Investigator": "Knowledge-driven and self-contained, needs to actually understand something before engaging.",
+  "Type 6, The Loyalist": "Security-driven and loyal, plans for what could go wrong before it happens.",
+  "Type 7, The Enthusiast": "Possibility-driven and upbeat, allergic to boredom and closed doors.",
+  "Type 8, The Challenger": "Control-driven and assertive, uncomfortable being vulnerable or pushed around.",
+  "Type 9, The Peacemaker": "Harmony-driven and easygoing, avoids conflict and forced confrontation when it can.",
+};
+function computeEnneagramBreakdown(normDims){
+  const ranked = scoreBySignature(ENNEAGRAM_TYPES, normDims);
+  return {
+    core: ranked[0].item, coreExplanation: ENNEAGRAM_EXPLANATIONS[ranked[0].item.name],
+    wing: ranked[1].item, wingExplanation: ENNEAGRAM_EXPLANATIONS[ranked[1].item.name],
+  };
+}
+
+function computeFrameworksDeepDive(normDims){
+  return {
+    mbti: { type: computeMBTI(normDims), axes: computeMBTIBreakdown(normDims) },
+    bigFive: computeBigFiveBreakdown(normDims),
+    disc: computeDISCBreakdown(normDims),
+    enneagram: computeEnneagramBreakdown(normDims),
+  };
 }
 /* -------------------------------------------------------------------------
    ALGORITHM: Human Values
@@ -3913,6 +3910,27 @@ function clearQuizProgress(){
   try{ localStorage.removeItem(QUIZ_PROGRESS_KEY); } catch(e){ /* ignore */ }
 }
 
+/* ---------------- ONBOARDING PROGRESS PERSISTENCE ------------------------
+   Mirrors QUIZ_PROGRESS_KEY above: a refresh mid-onboarding (name / about
+   you / your experience) should never reset the wizard back to step 1.
+   Cleared the moment the actual quiz starts (startQuiz() -> clearQuizProgress
+   already runs alongside it) since at that point the real quiz-progress
+   key takes over as the thing worth resuming. */
+const ONBOARDING_PROGRESS_KEY = "pf_onboarding_progress";
+function saveOnboardingProgress(step, name, meta){
+  try{ localStorage.setItem(ONBOARDING_PROGRESS_KEY, JSON.stringify({ step, name: name || "", meta: meta || {}, savedAt: Date.now() })); }
+  catch(e){ /* storage unavailable, skip silently */ }
+}
+function getSavedOnboardingProgress(){
+  try{
+    const raw = localStorage.getItem(ONBOARDING_PROGRESS_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch(e){ return null; }
+}
+function clearOnboardingProgress(){
+  try{ localStorage.removeItem(ONBOARDING_PROGRESS_KEY); } catch(e){ /* ignore */ }
+}
+
 /* ---------------- shareable profile links --------------------------------
    The QR already encodes a URL with ?code=..., but until now nothing on
    load ever read that parameter back out, so scanning it just opened a
@@ -4038,8 +4056,425 @@ function computeResult(session){
   };
   localStorage.setItem("pf_last_code", code);
   saveToTimeline(result);
+  ensureLocalProfile(result);
   clearQuizProgress();
   return result;
+}
+
+/* ---------------- LOCAL PROFILE ------------------------------------------
+   The "identity hub" behind the Profile page (see profile.html/js). Not an
+   account: nothing here ever leaves the device, there's no login, and it's
+   provisioned automatically the moment a first result exists — completing
+   the assessment IS creating a local profile, no separate signup step.
+   A retake just updates it in place with the newest read; name/avatar are
+   the only fields a person edits directly, from the Profile page. */
+const PF_PROFILE_KEY = "pf_local_profile";
+function getLocalProfile(){
+  try{ return JSON.parse(localStorage.getItem(PF_PROFILE_KEY) || "null"); }
+  catch(e){ return null; }
+}
+function saveLocalProfile(p){
+  try{ localStorage.setItem(PF_PROFILE_KEY, JSON.stringify(p)); } catch(e){ /* storage unavailable, skip silently */ }
+}
+function ensureLocalProfile(result){
+  try{
+    const existing = getLocalProfile();
+    const p = existing || { createdAt: Date.now(), avatar: null, name: "" };
+    // Only overwrite the name from a fresh result if the person hasn't
+    // already set a custom one on the Profile page — a retake taken
+    // anonymously ("Skip for now") shouldn't blank out a name they typed
+    // in afterward.
+    if (result.name && !p.nameIsCustom) p.name = result.name;
+    p.code = result.code;
+    p.archetypeId = result.archetype.id;
+    p.archetypeName = result.archetype.name;
+    p.archetypeIcon = result.archetype.icon;
+    p.soul = result.soul.name;
+    p.soulHex = result.soul.hex;
+    p.confidencePct = result.confidence ? result.confidence.confidencePct : null;
+    p.updatedAt = Date.now();
+    saveLocalProfile(p);
+    return p;
+  } catch(e){ return null; }
+}
+function updateLocalProfile(fields){
+  const p = getLocalProfile() || { createdAt: Date.now(), avatar: null, name: "" };
+  Object.assign(p, fields, { updatedAt: Date.now() });
+  saveLocalProfile(p);
+  return p;
+}
+/* ---------------- RECOMMENDATION ENGINE (Improve page) --------------------
+   Six broad "tendency tags" that curated content (books/films/music/
+   habits/social actions/reflection prompts) is authored against, each
+   scored against normDims with the exact same weighted-signature pattern
+   ARCHETYPES/SOUL_TYPES already use (scoreBySignature) — so which tag(s)
+   a person gets is a real read of their actual profile, not a random
+   pick. The top two tags blend together (more weight from the primary),
+   so the result feels specific without being a rigid 1-of-6 bucket. */
+const RECOMMENDATION_TAGS = [
+  {
+    id: "calm-reflective", label: "Calm & Reflective",
+    signature: [{dim:"patience",w:2},{dim:"selfAwareness",w:2},{dim:"emotionalStability",w:1},{dim:"risk",w:-1},{dim:"socialEnergy",w:-1}],
+    content: {
+      books: ["Man's Search for Meaning — Viktor Frankl", "The Untethered Soul — Michael Singer", "Quiet — Susan Cain"],
+      films: ["Lost in Translation", "Paterson", "My Neighbor Totoro"],
+      music: ["Nils Frahm", "Bon Iver", "a slow instrumental playlist"],
+      podcasts: ["On Being with Krista Tippett", "The Slow Home Podcast"],
+      habits: ["A 10-minute unplugged walk before checking your phone", "One page of journaling before bed", "A single-tasking hour, notifications off"],
+      socialActions: ["Text one person you've been meaning to check on, just to check on them", "Suggest a quiet one-on-one instead of a group hangout this week"],
+      reflectionPrompts: ["What's one thing that felt like \"too much\" this week, and why?", "When did you last feel fully at ease, and what made that possible?"],
+    },
+  },
+  {
+    id: "high-energy-ambitious", label: "High-Energy & Ambitious",
+    signature: [{dim:"drive",w:2},{dim:"competitiveness",w:2},{dim:"confidence",w:1},{dim:"risk",w:1}],
+    content: {
+      books: ["Can't Hurt Me — David Goggins", "The Obstacle Is the Way — Ryan Holiday", "Atomic Habits — James Clear"],
+      films: ["Whiplash", "Rocky", "The Social Network"],
+      music: ["a high-tempo workout playlist", "Kendrick Lamar", "The Prodigy"],
+      podcasts: ["The Diary of a CEO", "Rich Roll"],
+      habits: ["Pick one goal and give it a hard deadline this week", "A short, intense workout instead of a long easy one", "Timebox your biggest task to the first hour of your day"],
+      socialActions: ["Challenge a friend to something with a real stake", "Ask someone you respect for one piece of direct feedback"],
+      reflectionPrompts: ["What's the thing you're avoiding because it's actually hard, not because it's pointless?", "Where is your speed helping you, and where is it costing you?"],
+    },
+  },
+  {
+    id: "compassionate-connector", label: "Compassionate & Connected",
+    signature: [{dim:"empathy",w:2},{dim:"kindness",w:2},{dim:"socialEnergy",w:1}],
+    content: {
+      books: ["The Four Agreements — Don Miguel Ruiz", "Braiding Sweetgrass — Robin Wall Kimmerer", "Tuesdays with Morrie — Mitch Albom"],
+      films: ["Paddington 2", "Coco", "Won't You Be My Neighbor?"],
+      music: ["a warm acoustic/folk playlist", "Sufjan Stevens", "a community choir recording"],
+      podcasts: ["We Can Do Hard Things", "Ten Percent Happier"],
+      habits: ["Cook for someone else this week, not just yourself", "Write one honest thank-you message and actually send it", "Volunteer an hour somewhere local"],
+      socialActions: ["Organize a small gathering, even a low-key one", "Reach out to someone who's been quiet lately"],
+      reflectionPrompts: ["Who made your week better, and have they heard that from you?", "Where are you giving more than you're receiving, and is that sustainable?"],
+    },
+  },
+  {
+    id: "visionary-creative", label: "Visionary & Creative",
+    signature: [{dim:"creativity",w:2},{dim:"openMindedness",w:2},{dim:"curiosity",w:1}],
+    content: {
+      books: ["The War of Art — Steven Pressfield", "Sapiens — Yuval Noah Harari", "Steal Like an Artist — Austin Kleon"],
+      films: ["Everything Everywhere All at Once", "Spirited Away", "Arrival"],
+      music: ["Tame Impala", "an ambient/experimental electronic playlist", "a film-score playlist"],
+      podcasts: ["99% Invisible", "Song Exploder"],
+      habits: ["Sketch, write, or build something with zero goal of finishing it", "Change one part of your routine just to see what happens", "Spend 20 minutes somewhere you've never been in your own city"],
+      socialActions: ["Share an unfinished idea with someone instead of waiting until it's polished", "Ask someone wildly different from you what they're excited about right now"],
+      reflectionPrompts: ["What idea have you been sitting on because it feels \"too weird\"?", "If nobody would judge the outcome, what would you actually try?"],
+    },
+  },
+  {
+    id: "structured-builder", label: "Structured & Steady",
+    signature: [{dim:"discipline",w:2},{dim:"planning",w:2},{dim:"responsibility",w:1}],
+    content: {
+      books: ["Deep Work — Cal Newport", "The Compound Effect — Darren Hardy", "Getting Things Done — David Allen"],
+      films: ["The Martian", "Apollo 13", "Ford v Ferrari"],
+      music: ["a focus/instrumental playlist", "steady, low-lyric background music"],
+      podcasts: ["The Tim Ferriss Show", "Cortex"],
+      habits: ["Batch your small tasks into one block instead of scattering them", "Set up one system this week that removes a decision you keep re-making", "A short end-of-day review of what actually got done"],
+      socialActions: ["Offer to organize something for a group that keeps almost-happening", "Share a system or template that's helped you with someone who's struggling"],
+      reflectionPrompts: ["What keeps falling through the cracks, and is it a discipline problem or a system problem?", "Where would one small process actually save you real time?"],
+    },
+  },
+  {
+    id: "curious-explorer", label: "Curious & Exploring",
+    signature: [{dim:"curiosity",w:2},{dim:"adaptability",w:2},{dim:"independence",w:1}],
+    content: {
+      books: ["Born to Run — Christopher McDougall", "The Alchemist — Paulo Coelho", "In Patagonia — Bruce Chatwin"],
+      films: ["Into the Wild", "The Secret Life of Walter Mitty", "180° South"],
+      music: ["a global/world-music playlist", "travel-podcast-style storytelling audio"],
+      podcasts: ["No Such Thing as Fish", "Radiolab"],
+      habits: ["Take a genuinely new route somewhere this week", "Try one food, place, or activity you've never tried", "Ask a stranger (safely, publicly) one real question"],
+      socialActions: ["Invite someone to try something neither of you has done before", "Ask a friend from a different background how they see a situation you're in"],
+      reflectionPrompts: ["What's a question you're curious about but haven't looked into yet?", "When did \"not knowing what would happen\" work out better than planning would have?"],
+    },
+  },
+];
+/* ---------------- SUGGESTION FEEDBACK ("completed"/"skipped") -----------
+   A single lightweight per-visit signal per tag ("tried something today"
+   vs "not for me today") rather than tracking every individual bullet —
+   simpler to store, simpler to show, and still a real local-behavior
+   input into which tag gets picked next time (see the affinity bonus in
+   computeRecommendationProfile() below). */
+const SUGGESTION_FEEDBACK_KEY = "pf_suggestion_feedback";
+function getSuggestionFeedback(){
+  try{ return JSON.parse(localStorage.getItem(SUGGESTION_FEEDBACK_KEY) || "[]"); } catch(e){ return []; }
+}
+function recordSuggestionFeedback(tagId, status){
+  const log = getSuggestionFeedback();
+  log.push({ tagId, status, timestamp: Date.now() });
+  try{ localStorage.setItem(SUGGESTION_FEEDBACK_KEY, JSON.stringify(log.slice(-100))); } catch(e){ /* ignore */ }
+}
+// A gentle nudge, not a rewrite: +3 per "tried" and -1 per "skipped",
+// capped so a long history can shift which of two close tags wins but
+// can never override what the actual personality signature says.
+function tagAffinityBonus(tagId){
+  const log = getSuggestionFeedback();
+  const bonus = log.reduce((s, e) => s + (e.tagId === tagId ? (e.status === "tried" ? 3 : -1) : 0), 0);
+  return Math.max(-10, Math.min(10, bonus));
+}
+
+// high-energy-ambitious sums to a signature weight of 6 while every other
+// tag sums to 5 (by |w|, since a negative-weight dim's max contribution is
+// the same magnitude as a positive one), giving it a permanently higher
+// ceiling in a raw comparison — the same issue fixed for archetypes/souls
+// above, via the same fix: scale by maxWeight/itsOwnWeight first.
+const RECOMMENDATION_TAG_MAX_WEIGHT = signatureMaxWeight(RECOMMENDATION_TAGS.map(t => ({
+  signature: t.signature.map(s => ({ dim: s.dim, w: Math.abs(s.w) })),
+})));
+const RECOMMENDATION_UNUSED_DIMS = DIMENSIONS.filter(d =>
+  !RECOMMENDATION_TAGS.some(t => t.signature.some(s => s.dim === d))
+);
+function computeRecommendationProfile(normDims){
+  const ranked = RECOMMENDATION_TAGS.map(item => {
+    const totalWeight = item.signature.reduce((sum, s) => sum + Math.abs(s.w), 0);
+    const raw = item.signature.reduce((sum, s) => sum + (normDims[s.dim] || 0) * s.w, 0);
+    const score = raw * (RECOMMENDATION_TAG_MAX_WEIGHT / totalWeight);
+    return { item, score };
+  })
+    .map(r => ({ ...r, score: r.score + tagAffinityBonus(r.item.id) }))
+    .sort((a,b) => b.score - a.score);
+  const primary = ranked[0].item, secondary = ranked[1].item;
+  // Two people can land on the identical primary+secondary tag pair while
+  // still being different people underneath — right now that meant byte-
+  // identical suggestions for both, since blend() always sliced from the
+  // start of each tag's fixed lists. RECOMMENDATION_UNUSED_DIMS are the
+  // dims no tag signature reads (so they never affected which tag won),
+  // used here as a real, if secondary, personality signal to rotate which
+  // items from that same pool come up first, instead of the same books
+  // and films every time two people share a tag pair.
+  const seed = RECOMMENDATION_UNUSED_DIMS.reduce((s, d) => s + (normDims[d] || 0), 0);
+  const rotate = (arr, offset, count) => {
+    if (!arr.length) return [];
+    const n = ((offset % arr.length) + arr.length) % arr.length;
+    return Array.from({ length: Math.min(count, arr.length) }, (_, i) => arr[(n + i) % arr.length]);
+  };
+  const blend = (key, primaryCount, secondaryCount) => [
+    ...rotate(primary.content[key], seed, primaryCount),
+    ...rotate(secondary.content[key], seed + 1, secondaryCount),
+  ];
+  return {
+    primary, secondary,
+    books: blend("books", 2, 1),
+    films: blend("films", 2, 1),
+    music: blend("music", 2, 1),
+    podcasts: blend("podcasts", 1, 1),
+    habits: blend("habits", 2, 1),
+    socialActions: blend("socialActions", 1, 1),
+    reflectionPrompts: blend("reflectionPrompts", 1, 1),
+  };
+}
+
+/* Check-in cadence: after CHECK_IN_DAYS since the last check-in (or since
+   the profile's own last result if none yet), the Improve page offers a
+   lightweight "how did that go?" retake prompt instead of showing it every
+   single visit. */
+const CHECK_IN_DAYS = 4;
+function getImproveCheckInState(){
+  let state;
+  try{ state = JSON.parse(localStorage.getItem("pf_improve_checkin") || "null"); } catch(e){ state = null; }
+  const profile = getLocalProfile();
+  const since = (state && state.lastSeenAt) || (profile && profile.updatedAt) || Date.now();
+  const daysSince = (Date.now() - since) / (1000 * 60 * 60 * 24);
+  return { daysSince, dueForCheckIn: daysSince >= CHECK_IN_DAYS };
+}
+function markImproveCheckInSeen(){
+  try{ localStorage.setItem("pf_improve_checkin", JSON.stringify({ lastSeenAt: Date.now() })); } catch(e){ /* ignore */ }
+}
+
+/* ---------------- IMPORT SANITIZATION --------------------------------
+   A .pf file is untrusted input the moment it isn't one Forge itself
+   just exported — someone can hand-edit one, or share a crafted one.
+   Several fields from it (ids, hex colors, an avatar data URL) end up
+   interpolated straight into rendered HTML/attributes elsewhere
+   (journal/group ids in an inline onclick, soulHex in a style attribute,
+   avatarImage in an <img src>), so importProfile() validates each one
+   against a strict allowlist pattern before it's ever written to
+   localStorage, rather than trusting it because it merely parsed as
+   JSON. Anything that fails validation is dropped, not fixed up. */
+function isSafeId(id){ return typeof id === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(id); }
+function isSafeHexColor(hex){ return typeof hex === "string" && /^#[0-9a-fA-F]{3,8}$/.test(hex); }
+function isSafeAvatarDataUrl(url){ return typeof url === "string" && url.length <= 300000 && /^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/]+=*$/.test(url); }
+function sanitizeImportedJournal(entries){
+  if (!Array.isArray(entries)) return [];
+  return entries.filter(e => e && isSafeId(e.id) && typeof e.timestamp === "number").map(e => ({
+    id: e.id,
+    timestamp: e.timestamp,
+    mood: Math.max(1, Math.min(5, Number(e.mood) || 3)),
+    text: typeof e.text === "string" ? e.text.slice(0, 600) : "",
+    prompt: typeof e.prompt === "string" ? e.prompt.slice(0, 300) : null,
+  }));
+}
+const VALID_RECOMMENDATION_TAG_IDS = new Set(["calm-reflective","high-energy-ambitious","compassionate-connector","visionary-creative","structured-builder","curious-explorer"]);
+function sanitizeImportedSuggestionFeedback(log){
+  if (!Array.isArray(log)) return [];
+  return log.filter(e => e && VALID_RECOMMENDATION_TAG_IDS.has(e.tagId) && (e.status === "tried" || e.status === "skipped") && typeof e.timestamp === "number").slice(-100);
+}
+function sanitizeImportedGroups(groups){
+  if (!Array.isArray(groups)) return [];
+  return groups.filter(g => g && isSafeId(g.id)).map(g => ({
+    id: g.id,
+    name: typeof g.name === "string" ? g.name.slice(0, 40) : "Unnamed Group",
+    codes: Array.isArray(g.codes) ? g.codes.filter(c => typeof c === "string").slice(0, 5) : [],
+    createdAt: typeof g.createdAt === "number" ? g.createdAt : Date.now(),
+  }));
+}
+function sanitizeImportedLocalProfile(p){
+  if (!p || typeof p !== "object") return null;
+  return {
+    createdAt: typeof p.createdAt === "number" ? p.createdAt : Date.now(),
+    updatedAt: typeof p.updatedAt === "number" ? p.updatedAt : Date.now(),
+    name: typeof p.name === "string" ? p.name.slice(0, 20) : "",
+    nameIsCustom: !!p.nameIsCustom,
+    avatarImage: isSafeAvatarDataUrl(p.avatarImage) ? p.avatarImage : null,
+    code: typeof p.code === "string" ? p.code : undefined,
+    archetypeId: typeof p.archetypeId === "string" ? p.archetypeId : undefined,
+    archetypeName: typeof p.archetypeName === "string" ? p.archetypeName : undefined,
+    archetypeIcon: typeof p.archetypeIcon === "string" ? p.archetypeIcon.slice(0, 8) : undefined,
+    soul: typeof p.soul === "string" ? p.soul.slice(0, 30) : undefined,
+    soulHex: isSafeHexColor(p.soulHex) ? p.soulHex : undefined,
+    confidencePct: typeof p.confidencePct === "number" ? p.confidencePct : null,
+  };
+}
+
+/* ---------------- JOURNAL --------------------------------------------
+   A daily mood + short-text check-in, entirely local (see the Journal
+   page). Each entry gets a stable id via crypto.randomUUID() rather than
+   an array index or timestamp-as-id — the local-first behavior doesn't
+   change today, but a stable id is what a future optional-sync layer
+   would need to merge records across devices without collisions, so
+   this is written that way from the start rather than retrofitted later. */
+const JOURNAL_KEY = "pf_journal_entries";
+function getJournalEntries(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(JOURNAL_KEY) || "[]");
+    return Array.isArray(raw) ? raw.sort((a,b) => a.timestamp - b.timestamp) : [];
+  } catch(e){ return []; }
+}
+function saveJournalEntries(entries){
+  try{ localStorage.setItem(JOURNAL_KEY, JSON.stringify(entries)); } catch(e){ /* storage unavailable, skip silently */ }
+}
+function addJournalEntry({ mood, text, prompt }){
+  const entries = getJournalEntries();
+  const entry = {
+    id: (crypto.randomUUID ? crypto.randomUUID() : `j_${Date.now()}_${Math.random().toString(36).slice(2)}`),
+    timestamp: Date.now(),
+    mood: Math.max(1, Math.min(5, mood || 3)),
+    text: (text || "").slice(0, 600),
+    prompt: prompt || null,
+  };
+  entries.push(entry);
+  saveJournalEntries(entries);
+  return entry;
+}
+function deleteJournalEntry(id){
+  saveJournalEntries(getJournalEntries().filter(e => e.id !== id));
+}
+function localDateKey(ts){
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function getTodaysJournalEntry(){
+  const todayKey = localDateKey(Date.now());
+  const entries = getJournalEntries();
+  return entries.find(e => localDateKey(e.timestamp) === todayKey) || null;
+}
+// Consecutive-day streak, counting today or yesterday as the anchor (a
+// streak isn't "broken" just because today's entry hasn't happened yet)
+// and walking backward one calendar day at a time through however many
+// unique days in a row have at least one entry.
+function computeJournalStreak(){
+  const entries = getJournalEntries();
+  if (!entries.length) return { current: 0, longest: 0, totalEntries: 0 };
+  const days = new Set(entries.map(e => localDateKey(e.timestamp)));
+  const oneDay = 24 * 60 * 60 * 1000;
+  let cursor = Date.now();
+  if (!days.has(localDateKey(cursor)) && !days.has(localDateKey(cursor - oneDay))){
+    return { current: 0, longest: computeLongestJournalStreak(days), totalEntries: entries.length };
+  }
+  if (!days.has(localDateKey(cursor))) cursor -= oneDay;
+  let current = 0;
+  while (days.has(localDateKey(cursor))){ current++; cursor -= oneDay; }
+  return { current, longest: Math.max(current, computeLongestJournalStreak(days)), totalEntries: entries.length };
+}
+function computeLongestJournalStreak(daySet){
+  const oneDay = 24 * 60 * 60 * 1000;
+  const dayNums = [...daySet].map(k => {
+    const [y,m,d] = k.split("-").map(Number);
+    return Math.floor(new Date(y, m, d).getTime() / oneDay);
+  }).sort((a,b) => a-b);
+  let longest = 0, run = 0, prev = null;
+  dayNums.forEach(n => {
+    run = (prev !== null && n === prev + 1) ? run + 1 : 1;
+    longest = Math.max(longest, run);
+    prev = n;
+  });
+  return longest;
+}
+
+/* ---------------- PROGRESS / LEVEL (gamification) --------------------
+   A light XP/level layer over activity Forge already tracks (retakes,
+   journal entries, the trait-based ACHIEVEMENTS a result unlocks) —
+   not a new subsystem to maintain, just a score over three things that
+   already exist. Deliberately simple thresholds rather than a fancy
+   curve: this is meant to feel encouraging, not like a min-maxed game. */
+const PROGRESS_LEVELS = [
+  { level: 1, minXp: 0, title: "Newcomer" },
+  { level: 2, minXp: 60, title: "Newcomer" },
+  { level: 3, minXp: 140, title: "Explorer" },
+  { level: 4, minXp: 240, title: "Explorer" },
+  { level: 5, minXp: 360, title: "Adept" },
+  { level: 6, minXp: 500, title: "Adept" },
+  { level: 7, minXp: 660, title: "Grounded" },
+  { level: 8, minXp: 840, title: "Grounded" },
+  { level: 9, minXp: 1040, title: "Forge Veteran" },
+  { level: 10, minXp: 1260, title: "Forge Veteran" },
+];
+function computeProgress(normDims){
+  const retakeCount = getFullTimeline().length;
+  const journalCount = getJournalEntries().length;
+  const achievementCount = normDims ? computeAchievements(normDims).length : 0;
+  const xp = retakeCount * 30 + journalCount * 8 + achievementCount * 15;
+  let tier = PROGRESS_LEVELS[0];
+  for (const t of PROGRESS_LEVELS){ if (xp >= t.minXp) tier = t; }
+  const nextTier = PROGRESS_LEVELS.find(t => t.minXp > xp);
+  return {
+    xp, level: tier.level, title: tier.title,
+    nextLevelXp: nextTier ? nextTier.minXp : null,
+    progressToNext: nextTier ? Math.round(((xp - tier.minXp) / (nextTier.minXp - tier.minXp)) * 100) : 100,
+    retakeCount, journalCount, achievementCount,
+  };
+}
+
+/* ---------------- GROUPS (saved party rosters) ------------------------
+   Party Compare already accepts 3-5 pasted codes per visit; this just
+   lets a person name and save that exact roster so re-visiting "Book
+   Club" or "The Roommates" doesn't mean re-pasting every code again.
+   Entries again use a stable id for the same future-sync reason as the
+   journal above. */
+const GROUPS_KEY = "pf_groups";
+function getSavedGroups(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(GROUPS_KEY) || "[]");
+    return Array.isArray(raw) ? raw : [];
+  } catch(e){ return []; }
+}
+function saveGroup(name, codes){
+  const groups = getSavedGroups();
+  const group = {
+    id: (crypto.randomUUID ? crypto.randomUUID() : `g_${Date.now()}_${Math.random().toString(36).slice(2)}`),
+    name: (name || "Unnamed Group").slice(0, 40),
+    codes: codes.slice(0, 5),
+    createdAt: Date.now(),
+  };
+  groups.unshift(group);
+  try{ localStorage.setItem(GROUPS_KEY, JSON.stringify(groups.slice(0, 20))); } catch(e){ /* ignore */ }
+  return group;
+}
+function deleteSavedGroup(id){
+  const groups = getSavedGroups().filter(g => g.id !== id);
+  try{ localStorage.setItem(GROUPS_KEY, JSON.stringify(groups)); } catch(e){ /* ignore */ }
 }
 
 /* ---------------- TIMELINE -----------------------------------
@@ -4054,6 +4489,9 @@ function saveToTimeline(result){
       code: result.code,
       name: result.name,
       archetype: result.archetype.name,
+      archetypeId: result.archetype.id,
+      soul: result.soul ? result.soul.name : null,
+      confidencePct: result.confidence ? result.confidence.confidencePct : null,
       normDims: result.normDims,
       traits: result.traits,
       timestamp: Date.now(),
@@ -4069,24 +4507,268 @@ function getPreviousTimelineEntry(){
     return history.length >= 2 ? history[history.length - 2] : null;
   } catch(e){ return null; }
 }
+function getFullTimeline(){
+  try{ return JSON.parse(localStorage.getItem("pf_history") || "[]"); }
+  catch(e){ return []; }
+}
+
+// Without a live session, computeAssessmentConfidence() falls back to a
+// coarser formula (no consistency/tie-breaker terms), which produces a
+// visibly different number than the one the person actually saw on their
+// Results page for that same run. Every place that rebuilds a result from
+// a bare code (this device's own timeline, a decoded ?code=/reload, an
+// export with no live lastResult) has the exact same problem and the exact
+// same fix: if a local timeline entry for this code exists, its
+// confidencePct is that original, session-aware number, so reuse it
+// instead of letting Home/Growth/Improve/Journal/Frameworks/Profile/the
+// Results page/an exported .pf file each show a different confidence for
+// what is supposed to be one result. Was three separate copies of this
+// lookup-and-override; centralized here so there's exactly one version to
+// keep correct.
+function applyStoredConfidence(extras, code){
+  const entry = getFullTimeline().find(h => h.code === code);
+  if (entry && typeof entry.confidencePct === "number"){
+    extras.confidence = { ...extras.confidence, confidencePct: entry.confidencePct, overall: entry.confidencePct };
+  }
+  return extras;
+}
+
+// Reconstructs a full result-shaped object (normDims + every computed
+// extra) from the timeline's own last entry — used by every page that
+// needs "the latest result" without a live quiz session to draw one
+// from (Growth, Improve, Journal, Frameworks, Home's dashboard). Was
+// copy-pasted into each of those files with a per-page suffix; centralized
+// here so there's exactly one version to keep correct.
+function buildResultFromLatestTimeline(){
+  const history = getFullTimeline();
+  if (!history.length) return null;
+  const entry = history[history.length - 1];
+  const decoded = decodeCode(entry.code);
+  if (!decoded) return null;
+  const match = matchArchetype(decoded.normDims);
+  const extras = applyStoredConfidence(
+    buildProfileExtras(decoded.normDims, match.primary, match.ranked, null, decoded.upgraded),
+    entry.code
+  );
+  return { name: decoded.name, meta: {}, normDims: decoded.normDims, archetype: match.primary, ...extras };
+}
+
+// "Growth-coded" dims: the ones that read as genuine development rather
+// than just personal style (e.g. more/less humor isn't "growth" the way
+// more resilience or self-awareness is) — used to separate "Improved
+// Tendencies" from the neutral before/after list.
+const GROWTH_CODED_DIMS = ["resilience","confidence","discipline","optimism","selfAwareness","persistence","emotionalStability","responsibility"];
+
+function computeGrowthTimeline(result){
+  const history = getFullTimeline();
+  const retakeCount = history.length;
+  const previous = getPreviousTimelineEntry();
+  const entries = history.map(h => ({ ...h, dateLabel: new Date(h.timestamp).toLocaleDateString() }));
+
+  const base = { retakeCount, entries, previous, hasPrevious: !!previous,
+    majorChanges: [], unchangedTraits: [], improvedTendencies: [],
+    archetypeChange: { changed: false }, soulChange: { changed: false },
+    confidenceTrend: { direction: "unknown", from: null, to: result.confidence ? result.confidence.confidencePct : null },
+    badges: [] };
+
+  if (!previous){
+    base.badges.push("First Assessment");
+    return base;
+  }
+
+  const prevDims = previous.normDims || {};
+  const deltas = DIMENSIONS.map(d => ({ d, before: pct(prevDims[d]||0), after: pct(result.normDims[d]||0) }))
+    .map(x => ({ ...x, delta: x.after - x.before }));
+
+  base.majorChanges = deltas.filter(x => Math.abs(x.delta) >= 12).sort((a,b) => Math.abs(b.delta) - Math.abs(a.delta)).slice(0,5)
+    .map(x => ({ label: DIM_LABELS[x.d], before: x.before, after: x.after, delta: x.delta }));
+  base.unchangedTraits = deltas.filter(x => Math.abs(x.delta) <= 3).map(x => DIM_LABELS[x.d]).slice(0,6);
+  base.improvedTendencies = deltas.filter(x => GROWTH_CODED_DIMS.includes(x.d) && x.delta >= 6)
+    .sort((a,b) => b.delta - a.delta).map(x => ({ label: DIM_LABELS[x.d], delta: x.delta }));
+
+  // A changed archetype/soul between two LOW-confidence reads is often just
+  // ordinary answer noise landing on the other side of a close tie, not a
+  // real shift in who someone is. Only trust the change enough to badge it
+  // when both the earlier and the current read were confident readings in
+  // their own right -- otherwise it's reported as unchanged rather than as
+  // a shift that didn't actually happen.
+  const NOISE_GUARD_CONFIDENCE = 50;
+  const prevConfidentEnough = typeof previous.confidencePct !== "number" || previous.confidencePct >= NOISE_GUARD_CONFIDENCE;
+  const currentConfidentEnough = !result.confidence || result.confidence.confidencePct >= NOISE_GUARD_CONFIDENCE;
+  const shiftIsTrustworthy = prevConfidentEnough && currentConfidentEnough;
+
+  const prevArchetypeId = previous.archetypeId || (ARCHETYPES.find(a => a.name === previous.archetype) || {}).id;
+  if (prevArchetypeId && prevArchetypeId !== result.archetype.id && shiftIsTrustworthy){
+    base.archetypeChange = { changed: true, from: previous.archetype, to: result.archetype.name };
+    base.badges.push("Archetype Shift");
+  }
+  const prevSoulName = previous.soul || (previous.normDims ? computeSoulType(previous.normDims).name : null);
+  const currentSoulName = result.soul ? result.soul.name : computeSoulType(result.normDims).name;
+  if (prevSoulName && prevSoulName !== currentSoulName && shiftIsTrustworthy){
+    base.soulChange = { changed: true, from: prevSoulName, to: currentSoulName };
+    base.badges.push("Soul Shift");
+  }
+
+  if (typeof previous.confidencePct === "number" && result.confidence){
+    const diff = result.confidence.confidencePct - previous.confidencePct;
+    base.confidenceTrend = { direction: diff > 3 ? "up" : diff < -3 ? "down" : "flat", from: previous.confidencePct, to: result.confidence.confidencePct };
+    if (diff > 3) base.badges.push("Rising Confidence");
+  }
+
+  if (retakeCount >= 3) base.badges.push(`${retakeCount} Retakes`);
+  if (base.improvedTendencies.length >= 2) base.badges.push("Consistent Growth");
+  if (base.majorChanges.length === 0 && base.unchangedTraits.length >= 15) base.badges.push("Steady & Consistent");
+
+  return base;
+}
+
+/* ---------------- LIVING NOTES (Home dashboard) --------------------------
+   Short, human-sounding observations built entirely from computeGrowthTimeline's
+   own numbers — "You're still mostly X, but calmer lately" reads like Forge
+   noticed something, but every word traces back to a real delta, nothing
+   is invented or randomized. Capped at 3 short lines so Home stays a
+   dashboard, not another wall of cards. */
+const DIM_TREND_PHRASES = {
+  patience: { up: "more patient", down: "quicker to react" },
+  emotionalStability: { up: "calmer", down: "more reactive" },
+  socialEnergy: { up: "more outgoing", down: "more reserved" },
+  confidence: { up: "more assured", down: "less sure of yourself" },
+  drive: { up: "more driven", down: "more laid-back" },
+  risk: { up: "bolder", down: "more careful" },
+  creativity: { up: "more exploratory", down: "more practical-minded" },
+  discipline: { up: "more structured", down: "more improvised" },
+  empathy: { up: "more attuned to others", down: "more self-focused" },
+  optimism: { up: "more optimistic", down: "more guarded" },
+  independence: { up: "more independent", down: "more collaborative" },
+};
+function computeLivingNotes(result, growth){
+  const notes = [];
+  if (!growth || !growth.hasPrevious){
+    notes.push("This is your first read on this device, everything from here is a comparison point.");
+    return notes;
+  }
+
+  // Note 1: archetype/soul continuity + the single biggest recent shift,
+  // phrased with the curated trend map when it's one of those dims.
+  if (growth.archetypeChange.changed){
+    notes.push(`Your read shifted from ${growth.archetypeChange.from} to ${growth.archetypeChange.to} recently, worth a proper look on Growth.`);
+  } else {
+    const trendDim = growth.majorChanges.find(c => DIM_TREND_PHRASES[Object.keys(DIM_LABELS).find(k => DIM_LABELS[k] === c.label)]);
+    const dimKey = trendDim ? Object.keys(DIM_LABELS).find(k => DIM_LABELS[k] === trendDim.label) : null;
+    const phrase = dimKey ? DIM_TREND_PHRASES[dimKey][trendDim.delta > 0 ? "up" : "down"] : null;
+    notes.push(phrase
+      ? `You're still mostly ${result.archetype.name.replace(/^The /, "")}, but your last few reads look ${phrase}.`
+      : `You're still mostly ${result.archetype.name.replace(/^The /, "")}, holding fairly steady since your last read.`);
+  }
+
+  // Note 2: confidence trend, straight from computeGrowthTimeline.
+  if (growth.confidenceTrend.direction === "up"){
+    notes.push(`Confidence has risen across your recent runs, ${growth.confidenceTrend.from}% to ${growth.confidenceTrend.to}%.`);
+  } else if (growth.confidenceTrend.direction === "down"){
+    notes.push(`Confidence has softened a little lately, ${growth.confidenceTrend.from}% to ${growth.confidenceTrend.to}%, often just means you're between two real types right now.`);
+  } else if (growth.confidenceTrend.direction === "flat"){
+    notes.push("Confidence has stayed stable across your recent assessments.");
+  }
+
+  // Note 3: the clearest single improvement, if there is one.
+  if (growth.improvedTendencies.length){
+    notes.push(`Your ${growth.improvedTendencies[0].label.toLowerCase()} has grown a little since your last check-in.`);
+  }
+
+  return notes.slice(0, 3);
+}
+
+/* ---------------- WEEKLY PERSONA SNAPSHOT --------------------------------
+   A named, curated subset of the same before/after deltas Growth already
+   computes, framed by real elapsed time rather than an assumed weekly
+   cadence (retakes are irregular) — "Since your last check-in, 4 days
+   ago" instead of pretending everyone retakes on a schedule. */
+// Labeled "Self-Confidence" (not "Confidence") specifically because this
+// card sits right next to Growth's "Confidence Trend", which is a
+// completely different number — how sure the assessment itself is about
+// which archetype fits you, not the personality trait. Same underlying
+// dimension/calculation either way, this only changes the label.
+const SNAPSHOT_DIMS = [
+  { key: "confidence", label: "Self-Confidence" },
+  { key: "patience", label: "Patience" },
+  { key: "emotionalStability", label: "Stress", invert: true },
+  { key: "socialEnergy", label: "Social Energy" },
+];
+function computeWeeklySnapshot(result, growth){
+  if (!growth || !growth.hasPrevious) return null;
+  const daysSince = Math.max(0, Math.round((Date.now() - growth.previous.timestamp) / 86400000));
+  const prevDims = growth.previous.normDims || {};
+  const deltas = SNAPSHOT_DIMS.map(({ key, label, invert }) => {
+    const before = pct(prevDims[key] || 0), after = pct(result.normDims[key] || 0);
+    const delta = invert ? before - after : after - before;
+    return { label, delta };
+  });
+  return { daysSince, deltas, hasNotableChange: deltas.some(d => Math.abs(d.delta) >= 5) };
+}
+
+/* ---------------- SMART RETAKE NUDGE -------------------------------------
+   Replaces a flat "Retake Assessment" everywhere with a line that
+   actually reflects whether a retake seems worth it right now, using
+   only signals Forge already has (days since last read, journal
+   engagement, improve check-in state) — never a hard sell, always
+   framed as "might," never "must." */
+function computeRetakeNudge(growth, journalStreak){
+  if (!growth || !growth.hasPrevious){
+    return "Curious how you'd read today? There's no baseline yet, so this first one sets it.";
+  }
+  const daysSince = Math.max(0, Math.round((Date.now() - growth.previous.timestamp) / 86400000));
+  const engaged = (journalStreak && journalStreak.current >= 3) || growth.improvedTendencies.length >= 2;
+  if (engaged){
+    return "Your recent check-ins suggest real movement, a retake could reveal a new pattern.";
+  }
+  if (daysSince >= 21){
+    return "It's been a while since your last read, you may have changed enough for a new one.";
+  }
+  if (daysSince >= 10){
+    return "A retake could reveal whether anything's actually shifted since last time.";
+  }
+  return "The most honest way to check where you land is to just take it again.";
+}
 
 function buildResultFromDecoded(decoded, code){
   const normDims = decoded.normDims;
+  // decoded.archetype is whatever archIdx was baked into the code string at
+  // encode time -- correct then, but a stale second source of truth the
+  // moment matchArchetype's own scoring changes (e.g. a later engine
+  // update), since everything below it (ranked, runnerUp, subProfile,
+  // buildProfileExtras) already recomputes fresh from normDims. Using
+  // match.primary here instead means the archetype header and the Full
+  // Ranking list can never disagree about who's #1, on any page that
+  // reaches a result this way (reloading/bookmarking your own result,
+  // viewing someone else's shared code) -- same single source already used
+  // by computeResult() and buildResultFromLatestTimeline().
   const match = matchArchetype(normDims);
+  // applyStoredConfidence: decodeCode() has no confidence field to fall
+  // back on (it isn't part of the code string), but this device's own
+  // timeline does, if this code happens to be one of this device's own
+  // past results -- reload/bookmark/?code= all reach a result this way,
+  // and all three are really "look at MY result again," not a fresh
+  // computation. A code with no matching local entry (e.g. someone else's
+  // shared code) has nothing to borrow from, so it keeps the session-less
+  // estimate, same as before.
+  const extras = applyStoredConfidence(
+    buildProfileExtras(normDims, match.primary, match.ranked, null, !!decoded.upgraded),
+    code
+  );
   return {
     name: decoded.name || "",
     meta: {},
     normDims,
-    archetype: decoded.archetype,
+    archetype: match.primary,
     runnerUp: match.runnerUp,
     ranked: match.ranked,
-    subProfile: computeSubProfile(normDims, decoded.archetype),
+    subProfile: computeSubProfile(normDims, match.primary),
     code,
     careers: computeCareers(normDims),
     relationships: computeRelationshipStyles(normDims),
     traits: computeMeasuredTraits(normDims),
     consistency: null,
-    ...buildProfileExtras(normDims, decoded.archetype, match.ranked, null, !!decoded.upgraded),
+    ...extras,
     upgradedFromV1: !!decoded.upgraded,
     decodedProfile: decoded,
   };

@@ -139,15 +139,14 @@ function soulHeart(hex, size){
 // ---- Secondary Archetype expansion card: the closing-insight sentence --
 // Composes a short, natural-reading observation from three independently
 // computed lenses (Soul Type, dominant Sin(s), dominant Virtue(s)) rather
-// than authoring one sentence per soul/sin/virtue combination (7x7x7 —
+// than authoring one sentence per soul/sin/virtue combination (6x7x7 —
 // unmaintainable). Each map below is a short clause fragment; SOUL_INSIGHT_PULL is what the soul
 // leans toward, SIN_INSIGHT_BEHAVIOR/VIRTUE_INSIGHT_BEHAVIOR describe how
 // that sin/virtue tends to show up. Composed together they read as one
 // observation, not three definitions stapled end to end.
 const SOUL_INSIGHT_PULL = {
-  Red: "raw determination", Orange: "courage", Yellow: "fairness",
-  Green: "compassion", Blue: "quiet integrity", Purple: "endurance",
-  "Light Blue": "calm patience",
+  Crimson: "raw passion", Ember: "steady growth", Dawn: "quiet hope",
+  Verdant: "compassion", Azure: "quiet wisdom", Astral: "far-off vision",
 };
 const SIN_INSIGHT_BEHAVIOR = {
   Pride: "pushes you to go it alone rather than ask for help",
@@ -167,6 +166,43 @@ const VIRTUE_INSIGHT_BEHAVIOR = {
   Temperance: "helps you know exactly where the line is",
   Diligence: "carries you through once the initial spark fades",
 };
+// A single blended paragraph that reads across archetype + soul + a
+// hidden (off-signature) trait + a standout fun stat + confidence + (if
+// there's a previous run) real growth — instead of each of those living
+// in its own separate card with its own separate sentence. Every fact
+// used here already exists elsewhere on the page; this just says them
+// together, the way a person would actually describe someone rather
+// than reciting five independent stat sheets.
+function buildBlendedInsight(r, a, growth){
+  const parts = [];
+  const confidencePct = r.confidence.confidencePct;
+  parts.push(confidencePct >= 65
+    ? `This read comes through clearly, ${a.name.toLowerCase().startsWith("the") ? a.name : "the " + a.name} isn't just your closest match, it's a distinct one.`
+    : `This leans ${a.name.toLowerCase().startsWith("the") ? a.name : "toward the " + a.name}, though a couple of nearby types were close enough that it's worth reading as a strong direction rather than a locked verdict.`);
+
+  const hiddenTop = r.hidden && r.hidden.hiddenStrengths && r.hidden.hiddenStrengths[0];
+  if (hiddenTop){
+    parts.push(`Underneath that, your quieter edge is ${hiddenTop.toLowerCase()}, a trait that never made it into the archetype's own headline but shows up anyway once you look past it.`);
+  }
+
+  const funEntries = Object.entries(r.funStats || {}).sort((x,y) => y[1]-x[1]);
+  if (funEntries.length){
+    const [funLabel, funVal] = funEntries[0];
+    parts.push(`Even the just-for-fun read agrees: ${funLabel} is the stat people would probably notice first, at ${funVal}%.`);
+  }
+
+  if (growth && growth.hasPrevious){
+    if (growth.improvedTendencies.length){
+      parts.push(`And this isn't a static read either, your ${growth.improvedTendencies[0].label.toLowerCase()} has genuinely grown since your last run on this device, not just drifted.`);
+    } else if (growth.archetypeChange.changed){
+      parts.push(`Worth noting: you've actually shifted archetypes since last time, from ${growth.archetypeChange.from} to ${growth.archetypeChange.to}, a real change, not noise.`);
+    } else {
+      parts.push(`Compared with your last run here, most of this has held steady, which is its own kind of answer.`);
+    }
+  }
+  return parts.join(" ");
+}
+
 function buildSoulInsight(soul, dominantSins, dominantVirtues){
   const sinNames = dominantSins.map(ax => ax.sinLabel);
   const virtueNames = dominantVirtues.map(ax => ax.virtueLabel);
@@ -400,6 +436,7 @@ function renderResult(){
   setPageTitle(r.name || "Your Result");
   const topCareers = careersExpanded ? r.careers : r.careers.slice(0, 8);
   const previousTimeline = getPreviousTimelineEntry();
+  const growth = computeGrowthTimeline(r);
   const topDims = Object.entries(r.normDims).sort((x, y) => y[1] - x[1]).slice(0, 5).map(([k]) => RADAR_LABELS[k] || k);
   const topTrait = Object.entries(r.traits).sort((x, y) => y[1] - x[1])[0];
   const topValues = r.humanValues.slice(0, 3);
@@ -440,6 +477,7 @@ function renderResult(){
             <h2 class="ingot-name">${a.name}</h2>
             <div class="ingot-title">${a.title}</div>
             <p class="ingot-desc">${a.description}</p>
+            <p class="ingot-desc" style="margin-top:10px;color:var(--text-muted);font-size:14px">${buildBlendedInsight(r, a, growth)}</p>
             <div class="extras-row" style="justify-content:flex-start">
               <span class="tag">${r.extras.animal}</span>
               <span class="tag">${r.extras.element}</span>
@@ -527,7 +565,7 @@ function renderResult(){
           ...dominantVirtues.map(ax => `&#128519; ${ax.virtueLabel}`),
         ],
         `
-        <p>Your primary archetype is the clearest single match, but personality rarely fits in one label. This reading looks past that match to what's underneath: a core color, and the pull between instinct and restraint that shapes how it actually comes out in you.</p>
+        <p>Your primary archetype is the clearest single match, but personality is layered, not one label. Archetype is your core personality layer: the pattern your answers matched closest. Soul type is the layer underneath it, not what you do, but what's actually pulling you to do it.</p>
 
         <div class="expansion-divider"></div>
 
@@ -537,7 +575,7 @@ function renderResult(){
         <div class="expansion-divider"></div>
 
         <div class="bento-head" style="margin-bottom:2px">${resultIcon("drama", "coral")}<h3 style="font-size:16px">Sins &amp; Virtues</h3></div>
-        <p class="center-note" style="text-align:left;margin-top:0">A playful, dramatic reading of the same evidence, not a real assessment. Flip the card to see the other side.</p>
+        <p class="center-note" style="text-align:left;margin-top:0">Not a moral report card, everyone carries all seven of each, just in different amounts. This is a playful, dramatic read of where yours currently lean, not a real assessment. Flip the card to see the other side.</p>
         <div class="sinvirtue-wrap">
           <canvas id="sinVirtueRadar"></canvas>
           <button class="sinvirtue-flip" id="sinVirtueFlipBtn" onclick="flipSinVirtue()" aria-label="Flip between Sins and Virtues">Flip</button>
@@ -677,7 +715,16 @@ function renderResult(){
         previousTimeline ? `Compared with your run on ${new Date(previousTimeline.timestamp).toLocaleDateString()}.` : "Your development over time.",
         previousTimeline ? [] : ["Retake later to start tracking"],
         previousTimeline ? `
-        <p class="center-note" style="text-align:left;margin-top:0">Compared with your previous run on this device, ${new Date(previousTimeline.timestamp).toLocaleDateString()}.</p>
+        <p class="center-note" style="text-align:left;margin-top:0">Compared with your previous run on this device, ${new Date(previousTimeline.timestamp).toLocaleDateString()}. This is retake #${growth.retakeCount}.</p>
+
+        ${growth.badges.length ? `<div class="tag-list" style="margin-top:10px">${growth.badges.map(b => `<span class="tag">${b}</span>`).join("")}</div>` : ""}
+
+        ${growth.archetypeChange.changed || growth.soulChange.changed ? `
+        <div class="card" style="margin-top:12px">
+          ${growth.archetypeChange.changed ? `<div class="relationship-row"><span class="r-label">Archetype</span><span style="font-family:var(--font-mono);font-size:13px;color:var(--text-muted)">${growth.archetypeChange.from} &rarr; ${growth.archetypeChange.to}</span></div>` : ""}
+          ${growth.soulChange.changed ? `<div class="relationship-row"><span class="r-label">Soul Type</span><span style="font-family:var(--font-mono);font-size:13px;color:var(--text-muted)">${growth.soulChange.from} &rarr; ${growth.soulChange.to}</span></div>` : ""}
+        </div>` : ""}
+
         <div class="card" style="margin-top:12px">
           ${["confidence","leadership","creativity","socialEnergy","resilience"].map(dim => {
             const before = pct(previousTimeline.normDims ? previousTimeline.normDims[dim] : 0);
@@ -689,6 +736,12 @@ function renderResult(){
             </div>`;
           }).join("")}
         </div>
+
+        ${growth.majorChanges.length ? `
+        <p style="margin-top:12px;font-size:13px;color:var(--text-muted)">Major changes: ${growth.majorChanges.map(c => `${c.label} (${c.delta > 0 ? "+" : ""}${c.delta})`).join(", ")}.</p>` : ""}
+        ${growth.improvedTendencies.length ? `<p style="margin-top:8px;font-size:13px;color:var(--text-muted)">Improved: ${growth.improvedTendencies.map(c => c.label).join(", ")}.</p>` : ""}
+        ${growth.unchangedTraits.length ? `<p style="margin-top:8px;font-size:13px;color:var(--text-dim)">Steady, barely moved: ${growth.unchangedTraits.slice(0,4).join(", ")}.</p>` : ""}
+        ${growth.confidenceTrend.direction !== "unknown" ? `<p style="margin-top:8px;font-size:13px;color:var(--text-muted)">Confidence ${growth.confidenceTrend.direction === "up" ? "rose" : growth.confidenceTrend.direction === "down" ? "dropped" : "held steady"}: ${growth.confidenceTrend.from}% &rarr; ${growth.confidenceTrend.to}%.</p>` : ""}
         ` : `
         <p>Everything above reflects this one run. Retake the assessment later (same device) and this card fills in with exactly how your traits shifted between attempts, no guessing, just the real before/after.</p>
         `,
@@ -881,10 +934,10 @@ function renderResult(){
         `,
         {})}
 
-      ${resultDetailCard("ranking", "listOrdered", "Full Ranking", "How you scored against all 30 archetypes.",
+      ${resultDetailCard("ranking", "listOrdered", "Full Ranking", "How you scored against all 12 archetypes.",
         [r.consistency ? `${r.consistency.pct}% consistent` : null, `${r.achievements.length} achievements`].filter(Boolean),
         `
-        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 30 archetypes, not just the one you matched.</p>
+        <p class="center-note" style="text-align:left;margin-top:0">This is how you scored against all 12 archetypes, not just the one you matched.</p>
         <div class="card" style="margin-top:12px">
           ${r.ranked.map((row, i) => {
             const maxScore = r.ranked[0].score || 1;
@@ -1029,7 +1082,7 @@ function compareThisResult(){
 
 function runInlineCompare(){
   const codeStr = document.getElementById("inlineCompareCode").value;
-  const other = decodeCode(codeStr);
+  const other = freshenDecoded(decodeCode(codeStr));
   const out = document.getElementById("inlineCompareOut");
   if (!other){
     out.innerHTML = `<p class="center-note" style="text-align:left">That code doesn't look right. Check for typos and try again.</p>`;
@@ -1042,10 +1095,7 @@ function runInlineCompare(){
   // text (explanations/funFacts/who-comparisons) never see raw HTML.
   compareState = { profileA: mine, archA: lastResult.archetype, nameA: obEsc(lastResult.name), profileB: other, archB: other.archetype, nameB: obEsc(other.name), target: "inlineCompareOut" };
   click(420);
-  showCompatibilityLoading(out, () => {
-    out.innerHTML = renderCompareResult();
-    initCountUps(out);
-  });
+  showCompatibilityLoading(out, () => mountCompareResult(out));
 }
 
 /* ---------------- Radar chart (canvas, no library) ---------------------*/

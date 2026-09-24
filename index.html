@@ -23,7 +23,13 @@
 <link rel="icon" type="image/png" href="assets/Icon_black_192.png" />
 <link rel="apple-touch-icon" href="assets/Icon_white_512.png" />
 <link rel="manifest" href="manifest.json" />
-<link rel="preload" as="image" href="assets/Logo_white.svg" />
+<!-- Logo_white.svg's own preload was dropped: it's tiny, isn't the LCP
+     element, and (per a verification pass) the Service Worker's fetch
+     interception was preventing Chrome from ever actually reusing the
+     preloaded response, so it bought nothing but a console warning and
+     a wasted fetch. Hero_Home.jpg keeps its preload — it *is* the LCP
+     image, and that's a real enough win to keep despite the same known
+     SW-interception warning existing for it too. -->
 <link rel="preload" as="image" href="assets/Hero_Home.jpg" fetchpriority="high" />
 <link rel="preload" as="audio" href="assets/BG.mp3" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
